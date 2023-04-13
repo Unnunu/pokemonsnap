@@ -9,7 +9,8 @@
     },
     "files.associations": {
         "common.h": "c",
-        "ultra64.h": "c"
+        "ultra64.h": "c",
+        "macros.h": "c"
     },
 
 }
