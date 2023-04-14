@@ -117,5 +117,9 @@ void func_800BF44C_5C2EC(u8*);
 void func_8036D1A4(s32, s32);
 s32 func_8036D4F0(u8*);
 void func_8036D344(s32);
+void func_8000AFFC(void);
+void func_8000ADA0(void);
+void func_800A1A50(void);
+void func_80004860(void);
 
 #endif

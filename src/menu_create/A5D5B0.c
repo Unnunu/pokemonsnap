@@ -12,6 +12,8 @@ typedef struct {
     u8 string[15];
 } String15;
 
+// BSS
+extern s32 D_80118068;
 extern s32 D_80118110;
 extern s32 D_80118114;
 extern s32 D_80168120;
@@ -24,12 +26,6 @@ extern u8 D_80168143;
 extern u8 D_80168144;
 extern Struct_8000C37C* D_80168148;
 extern u8 D_8016814C;
-extern s32 D_80118068;
-
-extern String3 D_800E3C90;
-extern String9 D_800E3C94;
-extern String15 D_800E3CA0;
-extern String3 D_800E3CB0;
 
 void func_800E2800_A5DBB0(void);
 void func_800E2758_A5DB08(void);
@@ -195,12 +191,11 @@ void func_800E270C_A5DABC(void) {
 }
 
 void func_800E2758_A5DB08(void) {
-    u8 length = D_80168143;    
-    String3 sp24 = D_800E3C90;
+    char sp24[] = "　";
 
-    if (length < 14) {
-        u8* src = sp24.string;
-        u8* dst = &D_80168130[length];
+    if (D_80168143 < 14) {
+        u8* src = sp24;
+        u8* dst = &D_80168130[D_80168143];        
         
         func_800228E4(66);
        
@@ -229,16 +224,14 @@ void func_800E2800_A5DBB0(void) {
 }
 
 void func_800E28C0_A5DC70(void) {
-    String9 sp44;
-    String15 sp34;
+    char sp44[] = "Ｔｏｄｄ";
+    char sp34[] = "　　　　　　　";
     u8* sp30;
     u8* sp2C;
     u8* sp28;
 
-    sp44 = D_800E3C94;
-    sp34 = D_800E3CA0;
-    sp30 = sp44.string;
-    sp28 = sp34.string;
+    sp30 = sp44;
+    sp28 = sp34;
     sp2C = D_80168130;
     D_8016814C = 0;
     func_8000BCA8(1);
@@ -271,10 +264,10 @@ void func_800E28C0_A5DC70(void) {
 
 s32 func_800E2A24_A5DDD4(u8* arg0) {
     u8 i = 0;
-    String3 sp4 = D_800E3CB0;
+    char sp4[] = "　";
 
     while (i < 3) {
-        if (sp4.string[i++] != *arg0++) {
+        if (sp4[i++] != *arg0++) {
             return 0;
         }
     }

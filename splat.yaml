@@ -494,15 +494,17 @@ segments:
     - [0xA0D4D0, asm]
     - [0xA0E190, asm]
   - [0xA0F660, bin]
-  - name: unk_level_end_10
+  - name: menu_create
+    dir: menu_create
     type: code
     start: 0xA5CC50
     vram: 0x800E18A0
     exclusive_ram_id: level
     subsegments:
     - [0xA5CC50, c, A5CC50]
-    - [0xA5D5B0, c]
-  - [0xA5E3A0, bin]
+    - [0xA5D5B0, c, A5D5B0]
+    - [0xA5E3A0, .data, A5CC50]
+  - [0xA5F070, bin] # part of menu_start section
   - name: unk_level_end_11
     type: code
     start: 0xA93460
