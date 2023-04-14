@@ -501,7 +501,7 @@ segments:
     exclusive_ram_id: level
     subsegments:
     - [0xA5CC50, c, A5CC50]
-    - [0xA5D5B0, asm]
+    - [0xA5D5B0, c]
   - [0xA5E3A0, bin]
   - name: unk_level_end_11
     type: code

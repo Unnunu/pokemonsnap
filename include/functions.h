@@ -3,6 +3,7 @@
 
 #include "ultra64.h"
 #include "common_structs.h"
+#include "unknown_structs.h"
 
 void loadCompressedData(u32 rom, u32 ram);
 
@@ -59,5 +60,62 @@ GObj* addAnimalAtGeo(GObj* obj, u16 AnimalID, animalDef* def);
 roomGFX* setNodePosToNegRoom(GObj*);
 void animalPathLoop(GObj* obj, f32 start, f32 end, f32 dt, f32 yawStep, u32 flags);
 void spawnAnimalUsingDeltaHeight(s32 gObjID, u16 id, roomGFX* roomA, roomGFX* roomB, objectSpawn* spawn, animalInitData* initData);
+
+Struct_8000C37C* func_8000C37C(s32, void*, s32, s32, void*, s32, s32, s32, s32*, s32, s32, s32);
+Struct_8000C37C* func_8000C3FC(s32, void*, s32, s32, void*, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_8000BC84(void);
+void func_8000BCA8(s32);
+void func_80017768(void);
+s32 func_8036F78C(void);
+void func_8036F684(s32, s32);
+void func_8036F738(s32, ColorRGB*);
+void func_8036F1F4(s32, s32, s32);
+void func_8036F0DC(s32, s32);
+void func_8036F0A0(s32, s32);
+void func_8036FE54(s32, s32);
+s32 func_8036AC6C(s32 posX, s32 posY, s32 width, s32 height, s32);
+void func_8036B870(s32, s32, s32, s32, s32, s32);
+void func_8036B734(s32);
+void func_8036B9EC(s32, s32, s32);
+void func_8036D448(s32);
+void func_8036D3E8(s32, s32);
+void func_8036CB58(s32, s32);
+void func_8036C898(s32, u8*);
+void func_8036D4A0(s32);
+void func_8036A8E4(s32);
+void func_8036D4B4(s32, s32);
+void func_80370428(void);
+void func_803700A4(s32);
+void func_80370038(s32, s32);
+void func_8036FFE0(s32, s32);
+void func_80370134(void);
+void func_80022454(s32, s32);
+void func_80022374(s32, s32);
+void func_800224DC(s32, s32, s32);
+void func_800A7470(s32, s32, s32);
+void func_800A7860(s32, f32);
+void func_800BFC18_5CAB8(s32, s32);
+void func_80007A34(s16, s16, s16, s16);
+void func_800067DC(void);
+void func_8036A3F8(s32*, s32);
+void func_800AAE28(void);
+void func_800AA85C(s32, s32);
+void func_800AA870(s32);
+void func_8036EB98(void);
+void func_8000C4B0(s32, s32, s32, s32, s32);
+void func_8001977C(void);
+void func_800A7F68(s32, s32);
+GObj* func_8000A410(s32, s32, s32, s32);
+void func_80007BC4(s32*);
+void func_80005448(s32);
+void func_800073AC(s32*);
+void func_800BFEBC_5CD5C(s32, s32);
+void func_800228E4(s32);
+void func_80022A58(s32, s32, s32, f32, s32);
+void func_8036CBA0(s32, s32, s32);
+void func_800BF44C_5C2EC(u8*);
+void func_8036D1A4(s32, s32);
+s32 func_8036D4F0(u8*);
+void func_8036D344(s32);
 
 #endif

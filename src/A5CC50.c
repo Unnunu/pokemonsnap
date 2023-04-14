@@ -1,12 +1,6 @@
 #include "common.h"
 #include "unknown_structs.h"
 
-typedef struct ColorRGB {
-    /* 0x00 */ u8 r;
-    /* 0x01 */ u8 g;
-    /* 0x02 */ u8 b;
-} ColorRGB; // size = 0x03
-
 // data
 extern s32* D_800E33EC[5]; // unknown type
 extern s32* D_800E356C[4];
@@ -30,58 +24,9 @@ extern s32 D_80118118;
 
 void func_800E2ED0_A5E280(void);
 
-
+// TODO: use header
 extern u8 D_80369F80;
 extern u8 D_8016A010;
-Struct_8000C37C* func_8000C37C(s32, void*, s32, s32, void*, s32, s32, s32, s32*, s32, s32, s32);
-Struct_8000C37C* func_8000C3FC(s32, void*, s32, s32, void*, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_8000BC84(void);
-void func_80017768(void);
-s32 func_8036F78C(void);
-void func_8036F684(s32, s32);
-void func_8036F738(s32, ColorRGB*);
-void func_8036F1F4(s32, s32, s32);
-void func_8036F0DC(s32, s32);
-void func_8036F0A0(s32, s32);
-void func_8036FE54(s32, s32);
-s32 func_8036AC6C(s32 posX, s32 posY, s32 width, s32 height, s32);
-void func_8036B870(s32, s32, s32, s32, s32, s32);
-void func_8036B734(s32);
-void func_8036B9EC(s32, s32, s32);
-void func_8036D448(s32);
-void func_8036D3E8(s32, s32);
-void func_8036CB58(s32, s32);
-void func_8036C898(s32, s32*);
-void func_8036D4A0(s32);
-void func_8036A8E4(s32);
-void func_8036D4B4(s32, s32);
-void func_80370428(void);
-void func_803700A4(s32);
-void func_80370038(s32, s32);
-void func_8036FFE0(s32, s32);
-void func_80370134(void);
-void func_8000BCA8(s32);
-void func_80022454(s32, s32);
-void func_80022374(s32, s32);
-void func_800224DC(s32, s32, s32);
-void func_800A7470(s32, s32, s32);
-void func_800A7860(s32, f32);
-void func_800BFC18_5CAB8(s32, s32);
-void func_80007A34(s16, s16, s16, s16);
-void func_800067DC(void);
-void func_8036A3F8(s32*, s32);
-void func_800AAE28(void);
-void func_800AA85C(s32, s32);
-void func_800AA870(s32);
-void func_8036EB98(void);
-void func_8000C4B0(s32, s32, s32, s32, s32);
-void func_8001977C(void);
-void func_800A7F68(s32, s32);
-GObj* func_8000A410(s32, s32, s32, s32);
-void func_80007BC4(s32*);
-void func_80005448(s32);
-void func_800073AC(s32*);
-void func_800BFEBC_5CD5C(s32, s32);
 
 void func_800E18A0_A5CC50(Struct_8000C37C_Sub24* arg0, u8 arg1) {
     arg0->unk_28 = arg1;
@@ -89,7 +34,7 @@ void func_800E18A0_A5CC50(Struct_8000C37C_Sub24* arg0, u8 arg1) {
     arg0->unk_2A = arg1;
 }
 
-s32** func_800E18B4_A5CC64(s32 arg0) {
+u8** func_800E18B4_A5CC64(s32 arg0) {
     return D_800E33EC;
 }
 
@@ -105,20 +50,14 @@ void func_800E18CC_A5CC7C(void) {
     unk_48->unk_24 = 0x201;
 }
 
-#ifdef NON_MATCHING
 void func_800E1950_A5CD00(void) {
     Struct_8000C37C_Sub24* unk_48;
 
     D_801180B8 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &D_80117F98, 0, 0, 1);
     unk_48 = D_801180B8->unk_48; 
-    unk_48->unk_12 = 21;
-    unk_48->unk_10 = 96;
+    unk_48->unk_10 = 96; unk_48->unk_12 = 21;
     unk_48->unk_24 = 0x201;
 }
-#else
-#pragma GLOBAL_ASM("asm/nonmatchings/A5CC50/func_800E1950_A5CD00.s")
-void func_800E1950_A5CD00(void);
-#endif
 
 void func_800E19E4_A5CD94(void) {
     func_800E18CC_A5CC7C();
@@ -192,7 +131,7 @@ void func_800E1CF8_A5D0A8(s8 arg0) {
     s16 j;
     s32 temp_s2;
     s16 temp_s1;
-    s32** temp_s4 = func_800E18B4_A5CC64(arg0);
+    u8** temp_s4 = func_800E18B4_A5CC64(arg0);
 
     for (i = 0; i < 20; i++) {
         func_8036A8E4(D_801180C0[i]);
@@ -283,7 +222,6 @@ void func_800E2078_A5D428(void) {
     runGObjProcess(func_8000A410(0xE, 0, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
 }
 
-//#pragma GLOBAL_ASM("asm/nonmatchings/A5CC50/func_800E218C_A5D53C.s")
 s32 func_800E218C_A5D53C(s32 arg0) {
     func_80007BC4(&D_800E357C);
     D_800E3618 = &D_80369F80 - &D_8016A010;

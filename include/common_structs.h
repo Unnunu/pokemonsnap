@@ -529,4 +529,10 @@ typedef struct {
     /* 0x0C */ void* kill;
 } animalDef; // size = 0x10
 
+typedef struct {
+    /* 0x00 */ u8 r;
+    /* 0x01 */ u8 g;
+    /* 0x02 */ u8 b;
+} ColorRGB; // size = 0x03
+
 #endif
