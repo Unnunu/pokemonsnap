@@ -1,17 +1,5 @@
 #include "common.h"
 
-typedef struct {
-    u8 string[3];
-} String3;
-
-typedef struct {
-    u8 string[9];
-} String9;
-
-typedef struct {
-    u8 string[15];
-} String15;
-
 // BSS
 extern s32 D_80118068;
 extern s32 D_80118110;
@@ -20,7 +8,7 @@ extern s32 D_80168120;
 extern s32 D_80168124;
 extern s32 D_80168128;
 extern s8 D_8016812C;
-extern u8 D_80168130[8];
+extern u8 D_80168130[16];
 extern u8 D_80168140[3];
 extern u8 D_80168143;
 extern u8 D_80168144;
@@ -191,7 +179,7 @@ void func_800E270C_A5DABC(void) {
 }
 
 void func_800E2758_A5DB08(void) {
-    char sp24[] = "　";
+    u8 sp24[] = "　";
 
     if (D_80168143 < 14) {
         u8* src = sp24;
@@ -224,8 +212,8 @@ void func_800E2800_A5DBB0(void) {
 }
 
 void func_800E28C0_A5DC70(void) {
-    char sp44[] = "Ｔｏｄｄ";
-    char sp34[] = "　　　　　　　";
+    u8 sp44[] = "Ｔｏｄｄ";
+    u8 sp34[] = "　　　　　　　";
     u8* sp30;
     u8* sp2C;
     u8* sp28;
@@ -262,7 +250,7 @@ void func_800E28C0_A5DC70(void) {
     func_800228E4(66);
 }
 
-s32 func_800E2A24_A5DDD4(u8* arg0) {
+s32 func_800E2A24_A5DDD4(char* arg0) {
     u8 i = 0;
     char sp4[] = "　";
 
@@ -274,7 +262,7 @@ s32 func_800E2A24_A5DDD4(u8* arg0) {
     return 1;
 }
 
-void func_800E2A84_A5DE34(u8* arg0) {
+void func_800E2A84_A5DE34(char* arg0) {
     u8** temp_v0;
     s16 sp1A;    
     Struct_8000C37C_Sub24* unk_48;

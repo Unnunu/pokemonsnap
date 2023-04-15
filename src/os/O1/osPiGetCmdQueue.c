@@ -1,6 +1,6 @@
 #include "common.h"
 
-s32 func_80038DB0(void) {
+s32 osPiGetCmdQueue(void) {
     if (D_80042D10 == 0) {
         return 0;
     } 

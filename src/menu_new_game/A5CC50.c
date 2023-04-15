@@ -59,7 +59,7 @@ char* D_800E2FF0[] = {
 char* D_800E356C[] = { "←", "→", "　", "End" };
 
 // TODO: STRUCT
-u32 D_800E357C_A5E92C[] = {
+s32 D_800E357C_A5E92C[] = {
     0x803B5000,
     0x803DA800,
     0x00000000,
@@ -87,7 +87,6 @@ Gfx D_800E35B0[] = {
 extern Struct_8000C37C* D_801180B0;
 extern Struct_8000C37C* D_801180B4;
 extern Struct_8000C37C* D_801180B8;
-extern s32 D_801180BC; // padding?
 extern s32 D_801180C0[20];
 extern s32 D_80118110;
 extern s32 D_80118114;
@@ -101,7 +100,7 @@ void func_800E18A0_A5CC50(Struct_8000C37C_Sub24* arg0, u8 arg1) {
     arg0->unk_2A = arg1;
 }
 
-u8** func_800E18B4_A5CC64(s32 arg0) {
+char** func_800E18B4_A5CC64(s32 arg0) {
     return &D_800E2FF0[255];
 }
 
@@ -200,7 +199,7 @@ void func_800E1CF8_A5D0A8(s8 arg0) {
     s16 j;
     s32 temp_s2;
     s16 temp_s1;
-    u8** temp_s4 = func_800E18B4_A5CC64(arg0);
+    char** temp_s4 = func_800E18B4_A5CC64(arg0);
 
     for (i = 0; i < 20; i++) {
         func_8036A8E4(D_801180C0[i]);
@@ -291,8 +290,7 @@ void func_800E2078_A5D428(void) {
     runGObjProcess(func_8000A410(0xE, 0, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
 }
 
-// TODO: STRUCT
-u32 D_800E3608[] = {
+Struct_800073AC D_800E3608 = {
     0x00000000,
     func_8000AFFC,
     func_8000ADA0,
@@ -335,9 +333,9 @@ u32 D_800E3608[] = {
 
 s32 func_800E218C_A5D53C(s32 arg0) {
     func_80007BC4(D_800E357C_A5E92C);
-    D_800E3608[4] = &D_80369F80 - &D_8016A010;
+    D_800E3608.unk_10 = &D_80369F80 - &D_8016A010;
     func_80005448(1);
-    func_800073AC(D_800E3608);
+    func_800073AC(&D_800E3608);
     func_800BFEBC_5CD5C(0x10, 1);
     return 11;
 }

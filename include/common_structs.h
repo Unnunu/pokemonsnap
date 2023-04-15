@@ -434,11 +434,11 @@ typedef struct {
     /* 0x04C */ Vec3f collisionOffset;
     /* 0x058 */ f32 collisionRadius;
     /* 0x05C */ animalAnimationSetup* animSetup; /* Created by retype action */
-    /* 0x060 */ struct GObj* s32eractionProc; /* Created by retype action */
+    /* 0x060 */ struct GObj* interactionProc; /* Created by retype action */
     /* 0x064 */ struct GObj* apple;
-    /* 0x068 */ f32 s32eractionDist;
+    /* 0x068 */ f32 interactionDist;
     /* 0x06C */ f32 playerDist;
-    /* 0x070 */ struct GObj* s32eractionTarget;
+    /* 0x070 */ struct GObj* interactionTarget;
     /* 0x074 */ roomGFX* someRoom;
     /* 0x078 */ char unk_78[0x8];
     /* 0x080 */ uvState** animators; /* Created by retype action */

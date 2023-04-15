@@ -83,13 +83,13 @@ segments:
     - [0x33380, c, os/O1/osStopThread]
     - [0x33440, c, os/O1/osRecvMesg]
     - [0x33580, asm]
-    - [0x33AD0, asm]
+    - [0x33AD0, c, os/O1/thread/destroythread]
     - [0x33BE0, hasm]
     - [0x347A0, asm]
     - [0x347E0, asm, os/bzero]
     - [0x34880, asm]
     - [0x34E30, asm]
-    - [0x35600, asm]
+    - [0x35600, c, os/O1/thread/createthread]
     - [0x35750, asm]
     - [0x35930, asm]
     - [0x359B0, asm, os/writebackdcache]
@@ -103,7 +103,11 @@ segments:
     - [0x36210, asm]
     - [0x36260, asm]
     - [0x363B0, asm]
-    - [0x36470, asm]
+    - [0x36470, c, os/O1/pi/pimgr]
+    - [0x365E0, asm, os/O1/pi/piacs]
+    - [0x366A0, asm, os/O1/pi/devmgr]
+    - [0x36B30, asm, os/O1/pi/pirawdma]
+    - [0x36C10, asm]
     - [0x36C20, asm]
     - [0x36C90, c, os/sqrtf]
     - [0x36CA0, asm]
@@ -113,29 +117,33 @@ segments:
     - [0x37290, asm]
     - [0x37F50, asm]
     - [0x38130, asm]
-    - [0x38180, asm]
+    - [0x38180, c, os/O1/osEPiStartDma]
     - [0x38260, asm]
     - [0x38300, asm]
     - [0x38330, asm, os/invalicache]
     - [0x383B0, asm, os/invaldcache]
     - [0x38460, asm]
     - [0x38490, asm]
-    - [0x384C0, asm]
+    - [0x384C0, c, os/O1/message/osJamMesg]
     - [0x38610, c, os/O1/osSetThreadPri]
     - [0x386F0, c, os/O1/osGetThreadPri]
     - [0x38710, asm]
+    - [0x38760, c, os/O1/pi/epirawdma]
+    - [0x38940, asm]
+    - [0x389C0, asm]
     - [0x38AE0, asm]
-    - [0x38B70, asm]
+    - [0x38B70, c, os/O1/time/timerintr]
+    - [0x38F70, asm]
     - [0x38FC0, asm]
     - [0x39110, asm]
     - [0x391A0, hasm, os/__osSetCompare]
-    - [0x391B0, asm]
+    - [0x391B0, c, os/O1/thread/getactivequeue]
     - [0x391C0, asm]
     - [0x394D0, asm]
-    - [0x39530, asm]
-    - [0x39670, asm]
+    - [0x39530, c, os/O1/vi/vi]
+    - [0x39670, c, os/O1/vi/viswapcontext]
     - [0x39970, hasm]
-    - [0x399B0, c, os/O1/func_80038DB0]
+    - [0x399B0, c, os/O1/osPiGetCmdQueue]
     - [0x399E0, asm]
     - [0x39B50, asm]
     - [0x39BA0, asm]
@@ -147,13 +155,13 @@ segments:
     - [0x3A250, asm]
     - [0x3ADD0, asm]
     - [0x3B1F0, asm]
-    - [0x3BF20, asm]
+    - [0x3BF20, c, os/O1/pi/epirawread]
     - [0x3C080, asm]
     - [0x3C0E0, c, os/O1/osYieldThread]
     - [0x3C130, asm]
     - [0x3C380, asm]
     - [0x3C5B0, asm]
-    - [0x3C720, asm]
+    - [0x3C720, c, os/O1/pi/epirawwrite]
     - [0x3C880, asm]
     - [0x3C960, asm]
     - [0x3D420, asm]
@@ -163,7 +171,7 @@ segments:
     - [0x3D950, asm]
     - [0x3D980, asm]
     - [0x3D990, asm]
-    - [0x3D9A0, asm]
+    - [0x3D9A0, c, os/O1/vi/vimgr]
     - [0x3DCB0, asm]
     - [0x3DCC0, asm]
     - [0x3DCF0, c, os/O1/osStartThread]
@@ -475,13 +483,14 @@ segments:
     - [0x9FD510, asm]
     - [0x9FEC10, asm]
   - [0x9FF2E0, bin]
-  - name: unk_end_level_8
+  - name: menu_main
+    dir: menu_main
     type: code
     start: 0xA084B0
     vram: 0x800E1970
     exclusive_ram_id: level
     subsegments:
-    - [0xA084B0, asm]
+    - [0xA084B0, c]
   - [0xA08D10, bin]
   - name: unk_level_end_9
     type: code
@@ -494,8 +503,8 @@ segments:
     - [0xA0D4D0, asm]
     - [0xA0E190, asm]
   - [0xA0F660, bin]
-  - name: menu_create
-    dir: menu_create
+  - name: menu_new_game
+    dir: menu_new_game
     type: code
     start: 0xA5CC50
     vram: 0x800E18A0
@@ -504,7 +513,7 @@ segments:
     - [0xA5CC50, c, A5CC50]
     - [0xA5D5B0, c, A5D5B0]
     - [0xA5E3A0, .data, A5CC50]
-  - [0xA5F070, bin] # part of menu_start section
+  - [0xA5F070, bin] # part of menu_new_game section
   - name: unk_level_end_11
     type: code
     start: 0xA93460
