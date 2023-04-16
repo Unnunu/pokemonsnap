@@ -1,5 +1,10 @@
 #include "common.h"
 
+extern s32 D_8004888C;
+extern OSPiHandle* D_800488A0;
+extern OSMesg D_800488A4;
+extern OSMesgQueue D_800488A8;
+
 void func_80000920(void) {
 }
 
@@ -59,11 +64,9 @@ void func_80000920(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800029D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800029E0.s")
-
-extern s32 D_8004888C;
-extern OSMesgQueue D_800488A8;
-extern OSPiHandle* D_800488A0;
+void func_800029E0(void) {
+    osCreateMesgQueue(&D_800488A8, &D_800488A4, 1);
+}
 
 void func_80002A10(OSPiHandle *piHandle, u32 devAddr, u32 dramAddr, u32 numBytes, u8 direction) {
     OSIoMesg mb;

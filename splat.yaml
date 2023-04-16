@@ -26,10 +26,10 @@ segments:
     - [0x1060, asm]
     - [0x1520, c]
     - [0x4680, asm]
-    - [0x5FF0, asm]
+    - [0x5FF0, c]
     - [0x8450, asm]
-    - [0x8820, asm]
-    - [0x8A80, asm]
+    - [0x8820, c]
+    - [0x8A80, c]
     - [0xC2F0, asm]
     - [0xC5B0, asm]
     - [0xD150, asm]
@@ -406,8 +406,8 @@ segments:
     vram: 0x80369F80
     exclusive_ram_id: level
     subsegments:
-    - [0x83D730, asm]
-    - [0x83DC30, asm]
+    - [0x83D730, c]
+    - [0x83DC30, c]
     - [0x840A50, asm]
     - [0x842390, asm]
     - [0x842850, asm]
