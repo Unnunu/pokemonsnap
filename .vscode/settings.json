@@ -11,7 +11,9 @@
         "common.h": "c",
         "ultra64.h": "c",
         "macros.h": "c",
-        "common_structs.h": "c"
+        "common_structs.h": "c",
+        "om.h": "c",
+        "crash.h": "c"
     },
 
 }

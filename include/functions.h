@@ -4,8 +4,14 @@
 #include "ultra64.h"
 #include "common_structs.h"
 #include "unknown_structs.h"
+#include "sys/om.h"
 
 void loadCompressedData(u32 rom, u32 ram);
+
+GObjThread *get_obj_thread(void);
+void return_obj_thread(GObjThread*);
+ThreadStackNode* get_stack_of_size(u32);
+ThreadStackNode *get_default_stack(void);
 
 GObj* runGObjProcess(GObj*, gfxFunc func, s8 kind, u32 priority);
 void endGObjProcess(GObj*);

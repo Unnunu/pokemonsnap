@@ -1,14 +1,14 @@
 #include "common.h"
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80007E80.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/get_obj_thread.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80007EF8.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/return_obj_thread.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80007F24.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/get_stack_of_size.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80008000.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/get_default_stack.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80008024.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/free_stack_node.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_800080A0.s")
 
@@ -50,7 +50,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_800087AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_80008814.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/8A80/get_om_mtx.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/8A80/func_8000888C.s")
 

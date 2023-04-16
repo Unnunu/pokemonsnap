@@ -59,20 +59,6 @@ typedef struct {
     /* 0x114 */ f32 fregs[32];
 } OSThreadContext; // size = 0x194
 
-struct OSThread {
-    /* 0x000 */ OSThread* next;
-    /* 0x004 */ s32 priority;
-    /* 0x008 */ OSThread** queue;
-    /* 0x00C */ OSThread* tlnext;
-    /* 0x010 */ u16 state;
-    /* 0x012 */ u16 flags;
-    /* 0x014 */ s32 id;
-    /* 0x018 */ s32 fp;
-    /* 0x01C */ OSThreadContext context;
-    /* 0x1B0 */ char unk_1B0[0x8];
-    /* 0x1B8 */ void* stackInfo;
-};
-
 typedef struct { /* OMMtx */
     /* 0x00 */ char unk_00[0x4];
     /* 0x04 */ geoPayloadType type;

@@ -63,7 +63,7 @@ void func_80005470(s32 arg0, s32 size) {
     func_800078C4(&D_8004A8C8, 0x10000, arg0, size);
 }
 
-void func_800054A0(s32 arg0, s32 arg1) {
+void hal_alloc(s32 arg0, s32 arg1) {
     func_8000785C(&D_8004A8C8, arg0, arg1);
 }
 

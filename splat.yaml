@@ -22,10 +22,11 @@ segments:
     vram: 0x80000400
     symbol_name_format: $VRAM
     subsegments:
-    - [0x1000, asm]
-    - [0x1060, asm]
+    - [0x1000, hasm, entry]
+    - [0x1060, c, sys/main]
+    - [0x1510, hasm, padding]
     - [0x1520, c]
-    - [0x4680, asm]
+    - [0x4680, c]
     - [0x5FF0, c]
     - [0x8450, asm]
     - [0x8820, c]
@@ -180,7 +181,11 @@ segments:
     - [0x3E0B0, asm]
     - [0x3E3F0, asm]
     - [0x3E4A0, data]
+    - [0x418C0, .data, sys/main]
+    - [0x418F0, data]
     - [0x43B40, rodata]
+    - [0x43BA0, .rodata, sys/main]
+    - [0x43BC0, rodata]
   - name: app_render
     type: code
     start: 0x46270
