@@ -25,7 +25,8 @@ segments:
     - [0x1000, hasm, entry]
     - [0x1060, c, sys/main]
     - [0x1510, hasm, padding]
-    - [0x1520, c]
+    - [0x1520, c, sys/sched]
+    - [0x35E0, c]
     - [0x4680, c]
     - [0x5FF0, c]
     - [0x8450, asm]
@@ -185,7 +186,8 @@ segments:
     - [0x418F0, data]
     - [0x43B40, rodata]
     - [0x43BA0, .rodata, sys/main]
-    - [0x43BC0, rodata]
+    - [0x43BC0, .rodata, sys/sched]
+    - [0x43C20, rodata]
   - name: app_render
     type: code
     start: 0x46270

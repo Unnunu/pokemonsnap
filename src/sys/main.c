@@ -9,7 +9,7 @@
 #include <PR/ultratypes.h>
 
 // TODO: includes
-void thread3_scheduler(void *arg);
+void scMain(void *arg);
 void thread4_audio(void *arg);
 void thread6_controllers(void *arg);
 void func_800076F0(void);
@@ -123,7 +123,7 @@ void thread5_main(UNUSED void *arg) {
     check_sp_dmem();
     osCreateMesgQueue(&gThreadingQueue, sBlockMsg, ARRAY_COUNT(sBlockMsg));
 
-    osCreateThread(&sThread3, 3, &thread3_scheduler, NULL, sThread3Stack + THREAD3_STACK_SIZE, THREAD3_PRI);
+    osCreateThread(&sThread3, 3, &scMain, NULL, sThread3Stack + THREAD3_STACK_SIZE, THREAD3_PRI);
     sThread3Stack[0] = STACK_PROBE_MAGIC; osStartThread(&sThread3);
     osRecvMesg(&gThreadingQueue, NULL, OS_MESG_BLOCK);
 

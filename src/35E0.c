@@ -5,65 +5,6 @@ extern OSPiHandle* gRomPiHandle;
 extern OSMesg D_800488A4;
 extern OSMesgQueue D_800488A8;
 
-void func_80000920(void) {
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000928.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800009A0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000A08.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000A64.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000B84.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000C74.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000D04.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000D54.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000DE4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000E34.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000E6C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000EBC.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80000F40.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800016E8.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001810.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001898.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001930.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001D94.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001F24.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001F8C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80001FE4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80002254.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800024E4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/thread3_scheduler.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80002954.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800029BC.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800029C8.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800029D4.s")
-
 void create_dma_mq(void) {
     osCreateMesgQueue(&D_800488A8, &D_800488A4, 1);
 }
@@ -143,14 +84,14 @@ void func_80002C5C(u32 dramAddr, u32 devAddr, u32 numBytes) {
     func_80002A10(gRomPiHandle, devAddr, dramAddr, numBytes, OS_WRITE);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80002C94.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/func_80002C94.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_8000345C.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/func_8000345C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80003478.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/func_80003478.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_800034C4.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/func_800034C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/loadCompressedData.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/loadCompressedData.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1520/func_80003530.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/35E0/func_80003530.s")

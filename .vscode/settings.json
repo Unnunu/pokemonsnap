@@ -13,7 +13,15 @@
         "macros.h": "c",
         "common_structs.h": "c",
         "om.h": "c",
-        "crash.h": "c"
+        "crash.h": "c",
+        "sched.h": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "cmath": "c",
+        "concepts": "c",
+        "limits": "c",
+        "new": "c",
+        "typeinfo": "c"
     },
 
 }
