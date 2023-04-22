@@ -19,8 +19,8 @@ typedef struct {
 } ViSettings;
 
 // TODO: use header
-void func_80004A04(s32);
-void func_800049E4(s32);
+void contRumbleInit(s32);
+void contRumbleStop(s32);
 
 SCClient* scClientList;
 // priority queue, all tasks added from scEnqueueTask are put into this queue
@@ -1123,8 +1123,8 @@ void scPreNMIDefault(void) {
     osViBlack(TRUE);
 
     for (i = 0; i < 4; i++) {
-        func_80004A04(i);
-        func_800049E4(i);
+        contRumbleInit(i);
+        contRumbleStop(i);
     }
 
 }

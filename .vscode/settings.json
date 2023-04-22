@@ -21,7 +21,10 @@
         "concepts": "c",
         "limits": "c",
         "new": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "controller.h": "c",
+        "os_gbpak.h": "c",
+        "controller_gbpak.h": "c"
     },
 
 }

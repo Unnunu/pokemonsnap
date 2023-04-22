@@ -9,20 +9,20 @@
 typedef struct Overlay {
     u32 romStart;
     u32 romEnd;
-    u32 ramLoadStart;
-    void* ramTextStart;
-    void* ramTextEnd;
-    void* ramDataStart;
-    void* ramDataEnd;
-    void* ramNoloadStart;
-    void* ramNoloadEnd;
+    u32 vramStart;
+    u32 textVramStart;
+    u32 textVramEnd;
+    u32 dataVramStart; // Probably rodata too
+    u32 dataVramEnd;
+    u32 bssVramStart;
+    u32 bssVramEnd;
 } Overlay; // size == 0x24
 
 extern OSPiHandle *gRomPiHandle;
 
 extern void create_dma_mq(void);
 extern void dma_copy(OSPiHandle *handle, u32 physAddr, uintptr_t vAddr, u32 size, u8 direction);
-extern void load_overlay(struct Overlay *ovl);
+extern void load_overlay(Overlay *ovl);
 extern void dma_rom_read(u32 romSrc, void *ramDst, u32 nbytes);
 extern void dma_rom_write(void *ramSrc, u32 romDst, u32 nbytes);
 extern OSPiHandle *sram_pi_init(void);

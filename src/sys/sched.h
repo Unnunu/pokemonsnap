@@ -100,4 +100,8 @@ typedef struct {
     /* 0x24 */ OSMesgQueue* unk24;
 } SCTaskType9; // size >= 0x28
 
+extern s32 scBeforeReset;
+
+void scAddClient(SCClient* client, OSMesgQueue* mq, OSMesg* msg, u32 count);
+
 #endif

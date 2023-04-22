@@ -11,7 +11,7 @@
 // TODO: includes
 void scMain(void *arg);
 void thread4_audio(void *arg);
-void thread6_controllers(void *arg);
+void contMain(void *arg);
 void func_800076F0(void);
 
 #define STACK_PROBE_MAGIC 0xFEDCBA98
@@ -131,7 +131,7 @@ void thread5_main(UNUSED void *arg) {
     sThread4Stack[0] = STACK_PROBE_MAGIC; osStartThread(&sThread4);
     osRecvMesg(&gThreadingQueue, NULL, OS_MESG_BLOCK);
 
-    osCreateThread(&sThread6, 6, thread6_controllers, NULL, sThread6Stack + THREAD6_STACK_SIZE, THREAD6_PRI);
+    osCreateThread(&sThread6, 6, contMain, NULL, sThread6Stack + THREAD6_STACK_SIZE, THREAD6_PRI);
     sThread6Stack[0] = STACK_PROBE_MAGIC; osStartThread(&sThread6);
     osRecvMesg(&gThreadingQueue, NULL, OS_MESG_BLOCK);
 

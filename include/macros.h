@@ -16,4 +16,12 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 
+#ifndef MIN
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#endif
+
 #endif
