@@ -15,7 +15,7 @@ enum ControllerEventTypes {
     CONT_EVENT_RUMBLE_PAK = 5,
     CONT_EVENT_DETECT_INTERVAL = 6,
     CONT_EVENT_GB_PAK = 7,
-    CONT_EVENT_UNK_PAK = 8
+    CONT_EVENT_PRINTER = 8
 };
 
 enum ControllerDeviceTypes {
@@ -23,7 +23,7 @@ enum ControllerDeviceTypes {
     CONT_DEV_TYPE_CONTROLLER_PAK = 1,
     CONT_DEV_TYPE_RUMBLE_PAK = 3,
     CONT_DEV_TYPE_GAME_BOY_PAK = 4,
-    CONT_DEV_TYPE_UNKNOWN_PAK = 5
+    CONT_DEV_TYPE_PRINTER = 5
 };
 
 enum RumbleCommands {
@@ -137,7 +137,7 @@ typedef struct {
     /* 0x0C */ s32 contNo;
     /* 0x10 */ s32 direction;
     /* 0x14 */ s32 value;
-} ControllerEventUnknownDevice; // size >= 0x14
+} ControllerEventPrinter; // size = 0x14
 
 typedef struct {
     /* 0x00 */ s32 busy;
@@ -151,8 +151,8 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ s32 busy;
-    /* 0x04 */ ControllerEventUnknownDevice event;
-} ControllerEventUnknownDeviceWrapper;
+    /* 0x04 */ ControllerEventPrinter event;
+} ControllerEventPrinterWrapper;
 
 OSMesgQueue contSIEvtQueue;
 OSMesg contSIEvtQueueMessages[1];
@@ -180,13 +180,13 @@ s32 sUpdateEveryTickEnabled;
 s32 contDetectInterval;
 s32 contDetectCounter;
 ControllerEventRumbleWrapper sContEventRumble[MAXCONTROLLERS];
-u8 padding4[0x60];
+u8 cont_padding1[0x60];
 ControllerEventGbpakWrapper sContEventGameBoy[MAXCONTROLLERS];
-ControllerEventUnknownDeviceWrapper sContEventUnknownPak;
+ControllerEventPrinterWrapper sContEventPrinter;
 OSPfs contPfs[MAXCONTROLLERS];
 OSPfsState contPfsGameNotes[MAXCONTROLLERS][16];
 GbpakInfo contGameBoyPakInfo[MAXCONTROLLERS];
-u8 padding5[0x10];
+u8 cont_padding2[0x10];
 u8 contRamDataBlock[BLOCKSIZE];
 u16 gContInputCurrentButtons;
 u16 gContInputPressedButtons;
@@ -260,7 +260,7 @@ void contDetectDevices(void) {
 
                 ret =  __osContRamRead(&contSIEvtQueue, i, PFS_BANK_ADDR, contRamDataBlock);
                 if (ret == 0 && contRamDataBlock[0x1F] == 0x85) {
-                    sContDeviceTypes[i] = CONT_DEV_TYPE_UNKNOWN_PAK;
+                    sContDeviceTypes[i] = CONT_DEV_TYPE_PRINTER;
                     if (contUnknownPakQueue.msg == NULL) {
                         osCreateMesgQueue(&contUnknownPakQueue, contUnknownPakMessages, ARRAY_COUNT(contUnknownPakMessages));
                     }
@@ -394,7 +394,7 @@ void contInitialize(void) {
                 sContDeviceTypes[i] = CONT_DEV_TYPE_NONE;
             } else {
                 for (j = 0; j < BLOCKSIZE; j++) {
-                    contRamDataBlock[j] = 0x85; // what does 0x85 mean?
+                    contRamDataBlock[j] = 0x85;
                 }
                 ret =  __osContRamWrite(&contSIEvtQueue, i, PFS_BANK_ADDR, contRamDataBlock, 0);
                 if (ret == PFS_ERR_NEW_PACK) {
@@ -406,7 +406,7 @@ void contInitialize(void) {
 
                 ret =  __osContRamRead(&contSIEvtQueue, i, PFS_BANK_ADDR, contRamDataBlock);
                 if (ret == 0 && contRamDataBlock[0x1F] == 0x85) {
-                    sContDeviceTypes[i] = CONT_DEV_TYPE_UNKNOWN_PAK;
+                    sContDeviceTypes[i] = CONT_DEV_TYPE_PRINTER;
                     osCreateMesgQueue(&contUnknownPakQueue, contUnknownPakMessages, ARRAY_COUNT(contUnknownPakMessages));
                 } else if (osGbpakInit(&contSIEvtQueue, &contPfs[i], i) == 0) {
                     sContDeviceTypes[i] = CONT_DEV_TYPE_GAME_BOY_PAK;
@@ -442,10 +442,10 @@ void contInitialize(void) {
         sContEventGameBoy[i].event.base.cbQueue = &contGameBoyPakQueue;
     }
 
-    sContEventUnknownPak.busy = FALSE;
-    sContEventUnknownPak.event.base.type = CONT_EVENT_UNK_PAK;
-    sContEventUnknownPak.event.base.mesg = (OSMesg)0;
-    sContEventUnknownPak.event.base.cbQueue = &contUnknownPakQueue;
+    sContEventPrinter.busy = FALSE;
+    sContEventPrinter.event.base.type = CONT_EVENT_PRINTER;
+    sContEventPrinter.event.base.mesg = (OSMesg)0;
+    sContEventPrinter.event.base.cbQueue = &contUnknownPakQueue;
 
     for (i = 0; i < MAXCONTROLLERS; i++) {
         sContInfo[i].buttons = sContInfo[i].pressedButtons = sContInfo[i].heldButtons = contPadData[i].button = 0;
@@ -624,14 +624,14 @@ void contGbpakReadWrite(ControllerEventGbpak* arg0) {
     osGbpakPower(&contPfs[arg0->contNo], OS_GBPAK_POWER_OFF);
 }
 
-void contUnknownDeviceExecute(s32 contNo, u16 direction, u16 value) {
-    sContEventUnknownPak.event.contNo = contNo;
-    sContEventUnknownPak.event.direction = direction;
-    sContEventUnknownPak.event.value = value;
-    osSendMesg(&contEventQueue, &sContEventUnknownPak.event, 0);
+void contPrinterExecute(s32 contNo, u16 direction, u16 value) {
+    sContEventPrinter.event.contNo = contNo;
+    sContEventPrinter.event.direction = direction;
+    sContEventPrinter.event.value = value;
+    osSendMesg(&contEventQueue, &sContEventPrinter.event, 0);
 }
 
-void contUnknownDeviceReadWrite(ControllerEventUnknownDevice* arg0) {
+void contPrinterReadWrite(ControllerEventPrinter* arg0) {
     switch (arg0->direction) {
         case OS_READ:
             __osContRamRead(&contSIEvtQueue, arg0->contNo, (0xC000/BLOCKSIZE), contRamDataBlock);
@@ -644,27 +644,27 @@ void contUnknownDeviceReadWrite(ControllerEventUnknownDevice* arg0) {
     }
 }
 
-s32 contIsUnknownDeviceInserted(void) {
+s32 contIsPrinterAvailable(void) {
     // check if it's inserted into the last slot
-    if (sContDeviceTypes[3] == CONT_DEV_TYPE_UNKNOWN_PAK) {
+    if (sContDeviceTypes[3] == CONT_DEV_TYPE_PRINTER) {
         return TRUE;
     } else {
         return FALSE;
     }
 }
 
-u8 contUnknownDeviceRead(void) {
+u8 contPrinterGetStatus(void) {
     OSMesg mesg;
 
-    contUnknownDeviceExecute(3, OS_READ, 0);
+    contPrinterExecute(3, OS_READ, 0);
     osRecvMesg(&contUnknownPakQueue, &mesg, OS_MESG_BLOCK);
-    return sContEventUnknownPak.event.value;
+    return sContEventPrinter.event.value;
 }
 
-void contUnknownDeviceWrite(u8 value) {
+void contPrinterSendCommand(u8 value) {
     OSMesg mesg;
 
-    contUnknownDeviceExecute(3, OS_WRITE, value);
+    contPrinterExecute(3, OS_WRITE, value);
     osRecvMesg(&contUnknownPakQueue, &mesg, OS_MESG_BLOCK);
 }
 
@@ -760,11 +760,11 @@ void contHandleEvent(ControllerEvent *evt) {
                 }
                 break;
             }
-        case CONT_EVENT_UNK_PAK:
+        case CONT_EVENT_PRINTER:
             {
-                ControllerEventUnknownDevice* evtUnkDev = (ControllerEventUnknownDevice*)evt;
-                if (!sContInfo[evtUnkDev->contNo].errno && (sContInfo[evtUnkDev->contNo].status & CONT_CARD_ON)) {
-                    contUnknownDeviceReadWrite(evtUnkDev);
+                ControllerEventPrinter* evtPrinter = (ControllerEventPrinter*)evt;
+                if (!sContInfo[evtPrinter->contNo].errno && (sContInfo[evtPrinter->contNo].status & CONT_CARD_ON)) {
+                    contPrinterReadWrite(evtPrinter);
                 }
                 if (evt->cbQueue != NULL) {
                     osSendMesg(evt->cbQueue, evt->mesg, OS_MESG_NOBLOCK);
@@ -801,7 +801,7 @@ void contMain(UNUSED void *arg) {
             if (sEventUpdateGlobals == NULL) {
                 continue;
             }
-            // received CONT_EVENT_UPDATE_GLOBALS
+            // when received CONT_EVENT_UPDATE_GLOBALS
             contUpdateGlobals();
             if (sEventUpdateGlobals->cbQueue != NULL) {
                 osSendMesg(sEventUpdateGlobals->cbQueue, sEventUpdateGlobals->mesg, OS_MESG_NOBLOCK);

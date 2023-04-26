@@ -86,7 +86,7 @@ IINC           := -I include -I $(BUILD_DIR)/include -I src
 
 ASFLAGS        := -G 0 -I include -EB -mtune=vr4300 -march=vr4300
 CFLAGS         := -G 0 -non_shared -fullwarn -verbose -Xcpluscomm -nostdinc -Wab,-r4300_mul
-CPPFLAGS       := $(IINC) -DF3DEX_GBI_2 -D_LANGUAGE_C
+CPPFLAGS       := $(IINC) -DF3DEX_GBI_2 -DF3DEX_GBI -D_LANGUAGE_C
 LDFLAGS        := -T undefined_syms.txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt -T undefined_funcs.txt -T $(LD_SCRIPT) -Map $(LD_MAP) --no-check-sections
 
 # Add -woff + numbers here to disable IDO warnings

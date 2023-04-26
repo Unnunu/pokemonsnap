@@ -1,0 +1,1095 @@
+#include "ultra64.h"
+#include "sys/crash.h"
+#include "sys/sched.h"
+#include "sys/main.h"
+#include "sys/cont.h"
+#include "sys/om.h"
+#include "types.h"
+#include "macros.h"
+
+extern u64 UcodeText1[];
+extern u64 UcodeData1[];
+extern u64 UcodeText2[];
+extern u64 UcodeData2[];
+
+enum GtlStates {
+    GTL_STATE_0 = 0,
+    GTL_STATE_1 = 1,
+    GTL_STATE_2 = 2
+};
+
+enum UcodeTypes {
+    UCODE_F3DEX2_FIFO = 0,
+    UCODE_F3DEX2_XBUS = 1,
+    UCODE_F3DEX2_NON_FIFO = 2,
+    UCODE_F3DEX2_NON_XBUS = 3,
+    UCODE_F3DEX2_REJ_FIFO = 4,
+    UCODE_F3DEX2_REJ_XBUS = 5,
+    UCODE_F3DLX2_REJ_FIFO = 6,
+    UCODE_F3DLX2_REJ_XBUS = 7,
+    UCODE_L3DEX2_FIFO = 8,
+    UCODE_L3DEX2_XBUS = 9,
+    UCODE_S2DEX2_FIFO = 10,
+    UCODE_S2DEX2_XBUS = 11
+};
+
+typedef struct {
+    /* 0x00 */ u16 unk00;
+    /* 0x04 */ void (*fn04)(void);
+    /* 0x08 */ void (*fn08)(void);
+    /* 0x0C */ void* heapBase;
+    /* 0x10 */ u32 heapSize;
+    /* 0x14 */ u32 unk14; // count?
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u32 dlBufferSize0;
+    /* 0x20 */ u32 dlBufferSize1;
+    /* 0x24 */ u32 dlBufferSize2;
+    /* 0x28 */ u32 dlBufferSize3;
+    /* 0x2C */ u32 unk2C;
+    /* 0x30 */ u16 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ void (*fn38)(Gfx**); // scissor callback?
+    /* 0x3C */ void (*fn3C)(void);  // controller read callback?
+} BufferSetup;                      // size == 0x40
+
+typedef struct {
+    /* 0x00 */ BufferSetup setup;
+    /* 0x40 */ u32 numOMThreads;
+    /* 0x44 */ u32 omThreadStackSize;
+    /* 0x48 */ u32 numOMStacks;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ u32 numOMProcesses;
+    /* 0x54 */ u32 numOMCommons;
+    /* 0x58 */ u32 omCommonSize;
+    /* 0x5C */ u32 numOMMtx;
+    /* 0x60 */ void* unk60;
+    /* 0x64 */ void* unk64; // fn pointer void(*)(struct DObjDynamicStore *)
+    /* 0x68 */ u32 numOMAobjs;
+    /* 0x6C */ u32 numOMMobjs;
+    /* 0x70 */ u32 numOMDobjs;
+    /* 0x74 */ u32 omDobjSize;
+    /* 0x78 */ u32 numOMSobjs;
+    /* 0x7C */ u32 omSobjSize;
+    /* 0x80 */ u32 numOMCameras;
+    /* 0x84 */ u32 omCameraSize;
+    /* 0x88 */ void (*unk88)(void);
+} Wrapper683C; // size >= 0x8C
+
+typedef struct {
+    /* 0x00 */ u64* text;
+    /* 0x04 */ u64* data;
+} UcodeInfo;
+
+typedef struct {
+    /* 0x00 */ s32 id;
+    /* 0x04 */ s32 start;
+    /* 0x08 */ s32 end;
+    /* 0x0C */ s32 ptr;
+} DynamicBuffer; // size = 0x10
+
+typedef struct {
+    /* 0x00 */ Gfx* start;
+    /* 0x04 */ s32 length;
+} DLBuffer; // size = 0x08
+
+typedef struct FnBundle {
+    /* 0x00 */ u16 unk00;
+    /* 0x04 */ void (*fn04)(void);
+    /* 0x08 */ void (*fnDrawFrame)(struct FnBundle*);
+    /* 0x0C */ void (*fn0C)(void);
+    /* 0x10 */ void (*fn10)(struct FnBundle*);
+} FnBundle; // size == 0x14
+
+// data
+s32 gtlD_80040CF0 = 0;
+u32 gtlFrameCounter = 0;
+s32 gtlD_80040CF8 = 0;
+UcodeInfo gtlD_80040CFC[] = {
+    { NULL, NULL }, { NULL, NULL }, { UcodeText1, UcodeData1 }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL },
+    { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 }, { NULL, NULL },
+};
+
+// BSS
+u8 gtl_padding[0x10];
+OSMesg gtlGameTickQueueMsgs[4];
+OSMesgQueue gtlGameTickQueue;
+u16 gtlDrawFrameInterval;
+u16 gtlD_8004979A;
+s32 gtlD_8004979C;
+OSMesg gtlD_800497A0[1];
+OSMesgQueue gtlD_800497A8;
+SCClient gtlSCClient;
+u32* gftlSegmentFBasePtr;
+OSMesg gtlD_800497D0[3];
+OSMesgQueue gtlD_800497E0;
+OSMesg gtlResetQueueMsgs[1];
+OSMesgQueue gtlResetQueue;
+u64 gtlDramStack[SP_DRAM_STACK_SIZE64 + 1];
+u64 gtlYieldData[OS_YIELD_DATA_SIZE / sizeof(u64) + 1];
+SCTaskGfx* gtlGfxTasksBufferStart[2];
+SCTaskGfx* gtlGfxTasksBufferPtr[2];
+SCTaskGfx* gtlGfxTasksBufferEnd[2];
+SCTaskGfxEnd* gtlGfxEndTasks[2];
+SCTaskVi* gtlVideoSettingsTasks[2];
+DLBuffer gtlDLBuffers[2][4];
+Gfx* gMainGfxPos[4];
+Gfx* gSavedGfxPos[4];
+s32 gtlState;
+s32 gtlD_8004A8B4;
+DynamicBuffer gtlCurrentGfxHeap;
+DynamicBuffer sGeneralHeap;
+FnBundle gtlD_8004A8D8;
+s32 gtlD_8004A8EC;
+s32 gtlD_8004A8F0;
+s32 gtlD_8004A8F4;
+void* gtlRPDOutputBuffer;
+u32 gtlRPDOutputBufferSize;
+s32 gtlNoNearclipping;
+u16 gtlD_8004A904;
+u16 gtlD_8004A906;
+u16 gtlD_8004A908;
+Gfx* gtlResetRDPDlist;
+s32 gtlContextId;
+s32 gtlD_8004A918[2];
+s32 gtlNumContexts;
+DynamicBuffer gtlGfxHeaps[2];
+void (*gtlD_8004A948)(void);
+void* gtlD_8004A94C;
+
+void func_80000A64(void*);
+
+void reset_bump_alloc(DynamicBuffer*);
+void* bump_alloc(DynamicBuffer*, s32, s32);
+void init_bump_alloc(DynamicBuffer*, s32, s32, s32);
+
+void func_80007D08(Gfx**);
+void func_80007D14(Gfx**);
+void func_8000B0F8(OMSetup*);
+
+void func_800053F0(void* arg0) {
+    if (arg0 != NULL) {
+        gtlD_8004A94C = arg0;
+        return;
+    } else {
+        gtlD_8004A94C = func_80000A64;
+    }
+}
+
+void gtl_set_segment_F(Gfx** gfxPtr) {
+    gftlSegmentFBasePtr = (u32*)&(*gfxPtr)->dma.addr;
+    gSPSegment((*gfxPtr)++, 0x0F, 0x00000000);
+}
+
+void func_80005448(s32 arg0) {
+    gtlNoNearclipping = arg0;
+}
+
+void func_80005454(u16 arg0, u16 arg1) {
+    gtlD_8004A904 = arg0;
+    gtlD_8004A906 = arg1;
+}
+
+void init_hal_alloc(s32 arg0, s32 size) {
+    init_bump_alloc(&sGeneralHeap, 0x10000, arg0, size);
+}
+
+void* hal_alloc(s32 size, s32 alignment) {
+    return bump_alloc(&sGeneralHeap, size, alignment);
+}
+
+void gtl_reset_heap(void) {
+    gtlCurrentGfxHeap.id = gtlGfxHeaps[gtlContextId].id;
+    gtlCurrentGfxHeap.start = gtlGfxHeaps[gtlContextId].start;
+    gtlCurrentGfxHeap.end = gtlGfxHeaps[gtlContextId].end;
+    gtlCurrentGfxHeap.ptr = gtlGfxHeaps[gtlContextId].ptr;
+    reset_bump_alloc(&gtlCurrentGfxHeap);
+}
+
+void gtl_set_dl_buffers(DLBuffer (*arg0)[4]) {
+    s32 i, j;
+
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 4; j++) {
+            gtlDLBuffers[i][j] = arg0[i][j];
+        }
+    }
+}
+
+void gtl_init_display_lists(void) {
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        gMainGfxPos[i] = gSavedGfxPos[i] = gtlDLBuffers[gtlContextId][i].start;
+    }
+
+    for (i = 0; i < 4; i++) {
+        if (gtlDLBuffers[gtlContextId][i].length != 0) {
+            // load "reset rdp" display list in the beginning and use reference to it every time we reload ucode
+            gtlResetRDPDlist = gMainGfxPos[i];
+            func_80007D14(&gMainGfxPos[i]);
+            gSPEndDisplayList(gMainGfxPos[i]++);
+            gSavedGfxPos[i] = gMainGfxPos[i];
+            break;
+        }
+    }
+
+    gtlD_8004A908 = FALSE;
+}
+
+void gtl_check_buffers(void) {
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (gtlDLBuffers[gtlContextId][i].length + (uintptr_t)gtlDLBuffers[gtlContextId][i].start <
+            (uintptr_t)gMainGfxPos[i]) {
+            fatal_printf("gtl : DLBuffer over flow !  kind = %d  vol = %d byte\n", i,
+                         (uintptr_t)gMainGfxPos[i] - (uintptr_t)gtlDLBuffers[gtlContextId][i].start);
+            while (TRUE) {}
+        }
+    }
+
+    if ((uintptr_t)gtlCurrentGfxHeap.end < (uintptr_t)gtlCurrentGfxHeap.ptr) {
+        fatal_printf("gtl : DynamicBuffer over flow !  %d byte\n",
+                     (uintptr_t)gtlCurrentGfxHeap.ptr - (uintptr_t)gtlCurrentGfxHeap.start);
+        while (TRUE) {}
+    }
+}
+
+void gtl_set_rdp_output(void* buffer, s32 size) {
+    SCTaskType8 task;
+
+    task.info.type = SC_TASK_TYPE_8;
+    task.info.priority = 50;
+    task.unk24 = buffer;
+    task.unk28 = size;
+    sc_execute_blocking(&task.info);
+    if ((s32)&scUnknownU64 & 7) {
+        fatal_printf("bad addr sc_rdp_output_len = %x\n", &scUnknownU64);
+        while (TRUE) {}
+    }
+}
+
+void gtl_set_rdp_output_settings(s32 type, void* buffer, u32 size) {
+    gtlD_80040CF0 = type;
+    gtlRPDOutputBuffer = buffer;
+    gtlRPDOutputBufferSize = size;
+
+    if (type == 2 || type == 1) {
+        if (size == 0) {
+            fatal_printf("gtl : Buffer size for RDP is zero !!\n");
+            while (TRUE) {}
+        }
+    }
+
+    if (type == 1) {
+        gtl_set_rdp_output(buffer, size);
+    }
+}
+
+SCTaskGfx* gtl_get_task_gfx(void) {
+    SCTaskGfx* task;
+
+    if (gtlGfxTasksBufferStart[gtlContextId] == NULL) {
+        fatal_printf("gtl : not defined SCTaskGfx\n");
+        while (TRUE) {}
+    }
+
+    if (gtlGfxTasksBufferPtr[gtlContextId] == gtlGfxTasksBufferEnd[gtlContextId]) {
+        fatal_printf("gtl : couldn\'t get SCTaskGfx\n");
+        while (TRUE) {}
+    }
+    task = gtlGfxTasksBufferPtr[gtlContextId]++;
+    return task;
+}
+
+void gtl_init_task_buffers(SCTaskGfx *gfxTasks, s32 taskBufferSize, SCTaskGfxEnd *gfxEndTasks, SCTaskVi *viTasks) {
+    s32 i;
+    for (i = 0; i < gtlNumContexts; i++) {
+        gtlGfxTasksBufferStart[i] = (uintptr_t)(gfxTasks) + taskBufferSize * sizeof(SCTaskGfx) * i;
+        gtlGfxTasksBufferPtr[i] = (uintptr_t)(gfxTasks) + taskBufferSize * sizeof(SCTaskGfx) * i;
+        gtlGfxTasksBufferEnd[i] = (uintptr_t)(gfxTasks) + taskBufferSize * sizeof(SCTaskGfx) * (i + 1);
+        gtlGfxEndTasks[i] = &gfxEndTasks[i];
+        gtlVideoSettingsTasks[i] = &viTasks[i];
+    }
+}
+
+void gtl_schedule_gfx_end(SCTaskGfxEnd* task, void* fb, s32 arg2, OSMesgQueue* mq) {
+    task->info.type = SC_TASK_TYPE_GFX_END;
+    task->info.priority = 100;
+    task->info.fnCheck = NULL;
+    task->info.mq = mq;
+    task->info.retVal = arg2;
+    task->fb = fb;
+    task->taskId = gtlContextId;
+
+    osSendMesg(&scTaskQueue, (OSMesg)task, OS_MESG_NOBLOCK);
+}
+
+void gtl_cancel_current_gfx_task(void) {
+    s32 retVal;
+    SCTaskGfxEnd* task = gtlGfxEndTasks[gtlContextId];
+
+    if (task == NULL) {
+        fatal_printf("gtl : not defined SCTaskGfxEnd\n");
+        while (TRUE) {}
+    }
+
+    retVal = gtlContextId;
+    gtl_schedule_gfx_end(task, (void*)-1, retVal, &gtlD_800497E0);
+    gtlGfxTasksBufferPtr[gtlContextId] = gtlGfxTasksBufferStart[gtlContextId];
+}
+
+void gtl_reset(void) {
+    OSMesg recv;
+    s32 retVal;
+    SCTaskGfxEnd* task = gtlGfxEndTasks[gtlContextId];
+
+    if (task == NULL) {
+        fatal_printf("gtl : not defined SCTaskGfxEnd\n");
+        while (TRUE) {}
+    }
+
+    retVal = gtlContextId;
+    gtl_schedule_gfx_end(task, NULL, retVal, &gtlResetQueue);
+    osRecvMesg(&gtlResetQueue, &recv, OS_MESG_BLOCK);
+    gtlGfxTasksBufferPtr[gtlContextId] = gtlGfxTasksBufferStart[gtlContextId];
+    gtl_reset_heap();
+    gtl_init_display_lists();
+}
+
+void gtl_schedule_gfx(SCTaskGfx* t, s32* fb, u32 ucodeIdx, s32 contextId, u64* dlist, u64* outputBuff, u32 outputBuffSize) {
+    UcodeInfo* ucode;
+
+    t->info.type = SC_TASK_TYPE_GFX;
+    t->info.priority = 50;
+    if (gftlSegmentFBasePtr != NULL) {
+        t->info.fnCheck = gtlD_8004A94C;
+        t->unk68 = (void*)gftlSegmentFBasePtr;
+        gftlSegmentFBasePtr = NULL;
+    } else {
+        t->info.fnCheck = NULL;
+        t->unk68 = NULL;
+    }
+    t->fb = fb;
+    t->fbIdx = gtlD_8004A8B4;
+    if (fb != 0) {
+        t->info.mq = &gtlD_800497E0;
+        t->info.retVal = contextId;
+    } else {
+        t->info.mq = NULL;
+    }
+    t->info.unk18 = 2;
+    t->taskId = gtlContextId;
+    t->unk7C = 0;
+
+    t->task.t.type = M_GFXTASK;
+    t->task.t.flags = OS_TASK_LOADABLE;
+    t->task.t.ucode_boot = gRspBootCode;
+    t->task.t.ucode_boot_size = sizeof(gRspBootCode);
+
+    ucode = &gtlD_80040CFC[ucodeIdx];
+    if (ucode->text == NULL) {
+        fatal_printf("gtl : ucode isn\'t included  kind = %d\n", ucodeIdx);
+        while (TRUE) {}
+    }
+    t->task.t.ucode = ucode->text;
+    t->task.t.ucode_data = ucode->data;
+    t->task.t.ucode_size = SP_UCODE_SIZE;
+    t->task.t.ucode_data_size = SP_UCODE_DATA_SIZE;
+    t->task.t.dram_stack = OS_DCACHE_ROUNDUP_ADDR(&gtlDramStack);
+    t->task.t.dram_stack_size = SP_DRAM_STACK_SIZE8;
+
+    switch (ucodeIdx) {
+        case UCODE_F3DEX2_FIFO:
+        case UCODE_F3DEX2_NON_FIFO:
+        case UCODE_F3DEX2_REJ_FIFO:
+        case UCODE_F3DLX2_REJ_FIFO:
+        case UCODE_L3DEX2_FIFO:
+            // FIFO microcodes..?
+            t->task.t.output_buff = outputBuff;
+            t->task.t.output_buff_size = (u64*)((uintptr_t)outputBuff + outputBuffSize);
+            t->unk74 = 2;
+            break;
+        case UCODE_F3DEX2_XBUS:
+        case UCODE_F3DEX2_NON_XBUS:
+        case UCODE_F3DEX2_REJ_XBUS:
+        case UCODE_F3DLX2_REJ_XBUS:
+        case UCODE_L3DEX2_XBUS:
+            t->task.t.output_buff = NULL;
+            t->task.t.output_buff_size = NULL;
+            t->unk74 = 0;
+            break;
+    }
+    t->task.t.data_ptr = dlist;
+    t->task.t.data_size = 0;
+    t->task.t.yield_data_ptr = OS_DCACHE_ROUNDUP_ADDR(&gtlYieldData);
+    t->task.t.yield_data_size = OS_YIELD_DATA_SIZE;
+    osWritebackDCacheAll();
+    osSendMesg(&scTaskQueue, (OSMesg)t, OS_MESG_NOBLOCK);
+}
+
+u32 gtl_get_line_ucode(void) {
+    u32 o = gtlD_8004A908 ? gtlD_8004A906 : gtlD_8004A904;
+
+    switch (o) {
+        case UCODE_F3DEX2_XBUS:
+        case UCODE_F3DEX2_NON_XBUS:
+        case UCODE_F3DEX2_REJ_XBUS:
+        case UCODE_F3DLX2_REJ_XBUS:
+        case UCODE_L3DEX2_XBUS:
+            o = UCODE_L3DEX2_XBUS;
+            break;
+        default:
+            o = UCODE_L3DEX2_FIFO;
+            break;
+    }
+
+    return o;
+}
+
+void func_80005D60(s32 arg0, u64* dlist) {
+    s32 uidx;
+
+    if (!arg0) {
+        uidx = gtlD_8004A904;
+        if (gtlNoNearclipping == TRUE) {
+            switch (uidx) {
+                case UCODE_F3DEX2_FIFO:
+                    uidx = UCODE_F3DEX2_NON_FIFO;
+                    break;
+                case UCODE_F3DEX2_XBUS:
+                    uidx = UCODE_F3DEX2_NON_XBUS;
+                    break;
+            }
+        }
+    } else {
+        uidx = gtl_get_line_ucode();
+    }
+
+    switch (uidx) {
+        case UCODE_F3DEX2_XBUS:
+        case UCODE_F3DEX2_NON_XBUS:
+        case UCODE_F3DEX2_REJ_XBUS:
+        case UCODE_F3DLX2_REJ_XBUS:
+        case UCODE_L3DEX2_XBUS:
+            gtl_schedule_gfx(gtl_get_task_gfx(), 0, uidx, gtlContextId, dlist, NULL, 0);
+            break;
+        case UCODE_F3DEX2_FIFO:
+        case UCODE_F3DEX2_NON_FIFO:
+        case UCODE_F3DEX2_REJ_FIFO:
+        case UCODE_F3DLX2_REJ_FIFO:
+        case UCODE_L3DEX2_FIFO:
+            gtl_schedule_gfx(gtl_get_task_gfx(), 0, uidx, gtlContextId, dlist, gtlRPDOutputBuffer, gtlRPDOutputBufferSize);
+            break;
+    }
+}
+
+void gtl_load_ucode(Gfx** dlist, u32 ucodeIdx) {
+    // TODO: use gSPLoadUcodeL
+    switch (ucodeIdx) {
+        case 0:
+        case 1:
+        case 2:
+            gSPLoadUcode((*dlist)++, OS_K0_TO_PHYSICAL(&UcodeText1), OS_K0_TO_PHYSICAL(&UcodeData1));
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            gSPLoadUcode((*dlist)++, OS_K0_TO_PHYSICAL(&UcodeText2), OS_K0_TO_PHYSICAL(&UcodeData2));
+            break;
+        case 9:
+            break;
+    }
+    gSPDisplayList((*dlist)++, gtlResetRDPDlist);
+}
+
+void gtl_process_all_dlists(void) {
+    s32 needLineUcode;
+    s32 diffs;
+    s32 i;
+    s32 firstDlIdx;
+    Gfx* cmdPtr;
+
+    // calculate bitset of differences
+    // bit 1 -> 0
+    // 2 -> 1
+    // 4 -> 2
+    // 8 -> 3
+    diffs = 0;
+    for (i = 0; i < 4; i++) {
+        diffs >>= 1;
+        if (gMainGfxPos[i] != gSavedGfxPos[i]) {
+            diffs |= 8;
+        }
+    }
+
+    // combine 4 display lists into one
+    // order: 0 -> 2 -> 1 -> 3
+    // load line ucode before 2 and 3
+    if (diffs != 0) {
+        if (diffs & 1) {
+            if (diffs & 4) {
+                // 0 -> 2
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[2]);
+            } else if (diffs & 2) {
+                // 0 -> 1
+                if (gtlD_8004A908) {
+                    gtl_load_ucode(&gMainGfxPos[0], gtlD_8004A904);
+                }
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[1]);
+            } else if (diffs & 8) {
+                // 0 -> 3
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[3]);
+            } else {
+                // 0
+                gDPFullSync(gMainGfxPos[0]++);
+                gSPEndDisplayList(gMainGfxPos[0]++);
+            }
+        }
+        if (diffs & 4) {
+            if (diffs & 2) {
+                // 2 -> 1
+                gtl_load_ucode(&gMainGfxPos[2], gtlD_8004A904);
+                gSPBranchList(gMainGfxPos[2]++, gSavedGfxPos[1]);
+            } else if (diffs & 8) {
+                // 2 -> 3
+                gSPBranchList(gMainGfxPos[2]++, gSavedGfxPos[3]);
+            } else {
+                // 2
+                gDPFullSync(gMainGfxPos[2]++);
+                gSPEndDisplayList(gMainGfxPos[2]++);
+            }
+        }
+        if (diffs & 2) {
+            if (diffs & 8) {
+                // 1 -> 3
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[1]++, gSavedGfxPos[3]);
+            } else {
+                // 1
+                gDPFullSync(gMainGfxPos[1]++);
+                gSPEndDisplayList(gMainGfxPos[1]++);
+            }
+        }
+        if (diffs & 8) {
+            // 3
+            gDPFullSync(gMainGfxPos[3]++);
+            gSPEndDisplayList(gMainGfxPos[3]++);
+        }
+
+        if (diffs & 1) {
+            firstDlIdx = 0;
+            needLineUcode = FALSE;
+        } else if (diffs & 4) {
+            firstDlIdx = 2;
+            needLineUcode = TRUE;
+        } else if (diffs & 2) {
+            firstDlIdx = 1;
+            needLineUcode = FALSE;
+        } else {
+            firstDlIdx = 3;
+            needLineUcode = TRUE;
+        }
+
+        cmdPtr = gMainGfxPos[firstDlIdx];
+        // after end ??
+        gSPDisplayList(gMainGfxPos[firstDlIdx]++, gtlResetRDPDlist);
+        gSPBranchList(gMainGfxPos[firstDlIdx]++, gSavedGfxPos[firstDlIdx]);
+        func_80005D60(needLineUcode, (u64*)cmdPtr);
+
+        gSavedGfxPos[0] = gMainGfxPos[0];
+        gSavedGfxPos[2] = gMainGfxPos[2];
+        gSavedGfxPos[1] = gMainGfxPos[1];
+        gSavedGfxPos[3] = gMainGfxPos[3];
+    }
+
+    gtl_check_buffers();
+}
+
+void gtl_combine_all_dlists(void) {
+    s32 i;
+    s32 diffs;
+
+    gtl_check_buffers();
+    diffs = 0;
+    for (i = 0; i < 4; i++) {
+        diffs >>= 1;
+        if (gMainGfxPos[i] != gSavedGfxPos[i]) {
+            diffs |= 8;
+        }
+    }
+
+    if (diffs != 0) {
+        if (diffs & 1) {
+            if (diffs & 4) {
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[2]);
+            } else if (diffs & 2) {
+                if (gtlD_8004A908) {
+                    gtl_load_ucode(&gMainGfxPos[0], gtlD_8004A904);
+                }
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[1]);
+            } else if (diffs & 8) {
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[0]++, gSavedGfxPos[3]);
+            }
+        }
+
+        if (diffs & 4) {
+            if (diffs & 2) {
+                gtl_load_ucode(&gMainGfxPos[2], gtlD_8004A904);
+                gSPBranchList(gMainGfxPos[2]++, gSavedGfxPos[1]);
+            } else if (diffs & 8) {
+                gSPBranchList(gMainGfxPos[2]++, gSavedGfxPos[3]);
+            } else {
+                gtl_load_ucode(&gMainGfxPos[2], gtlD_8004A904);
+                gSPBranchList(gMainGfxPos[2]++, gMainGfxPos[0]);
+            }
+            gSavedGfxPos[2] = gMainGfxPos[2];
+        }
+
+        if (diffs & 2) {
+            if (diffs & 8) {
+                gtl_load_ucode(&gMainGfxPos[0], gtl_get_line_ucode());
+                gSPBranchList(gMainGfxPos[1]++, gSavedGfxPos[3]);
+            } else {
+                if (gtlD_8004A908) {
+                    gtl_load_ucode(&gMainGfxPos[1], gtlD_8004A904);
+                }
+                gSPBranchList(gMainGfxPos[1]++, gMainGfxPos[0]);
+            }
+            gSavedGfxPos[1] = gMainGfxPos[1];
+        }
+
+        if (diffs & 8) {
+            gtl_load_ucode(&gMainGfxPos[3], gtlD_8004A904);
+            gSPBranchList(gMainGfxPos[3]++, gMainGfxPos[0]);
+            gSavedGfxPos[3] = gMainGfxPos[3];
+        }
+    }
+
+    gtlD_8004A908 = FALSE;
+    gtl_check_buffers();
+}
+
+u32 gtl_switch_context(s32 arg0) {
+    s32 msg;
+    s32 i;
+
+    while (osRecvMesg(&gtlD_800497E0, (OSMesg*)&msg, OS_MESG_NOBLOCK) != -1) {
+        gtlD_8004A918[msg] = 0;
+    }
+
+    do {
+        for (i = 0; i < gtlNumContexts; i++) {
+            if (gtlD_8004A918[i] == 0) {
+                gtlContextId = i;
+                gtlD_8004A918[i] = 1;
+                return 1;
+            }
+        }
+        if (!arg0) {
+            osRecvMesg(&gtlD_800497E0, (OSMesg*)&msg, OS_MESG_BLOCK);
+            gtlD_8004A918[msg] = 0;
+        }
+    } while (!arg0);
+
+    return 0;
+}
+
+void gtl_wait_all_gfx_tasks_done(void) {
+    struct SCTaskInfo task;
+    OSMesg msgs[1];
+    OSMesgQueue mq;
+
+    task.type = SC_TASK_TYPE_NOP;
+    task.priority = 50;
+    osCreateMesgQueue(&mq, msgs, ARRAY_COUNT(msgs));
+    task.fnCheck = func_80000B84;
+    task.retVal = 1;
+    task.mq = &mq;
+
+    osSendMesg(&scTaskQueue, (OSMesg)&task, OS_MESG_NOBLOCK);
+    osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
+}
+
+void func_800067DC(void) {
+    gtlState = GTL_STATE_1;
+}
+
+void func_800067EC(s32 arg0) {
+    gtlState = GTL_STATE_2;
+    gtlD_8004A8B4 = arg0;
+}
+
+s32 gtl_check_exit_main_loop(void) {
+    SCTaskInfo task;
+
+    switch (gtlState) {
+        case GTL_STATE_1:
+            return 1;
+        case GTL_STATE_2:
+            if (scUnknownInt != 0) {
+                task.type = SC_TASK_TYPE_11;
+                task.priority = 100;
+                sc_execute_blocking(&task);
+                return 1;
+            } else {
+                return 0;
+            }
+        default:
+            return 0;
+    }
+}
+
+void func_80006878(void) {
+    if (gtlD_8004979C == 1) {
+        gtlD_8004979C = 2;
+        while (osRecvMesg(&gtlD_800497A8, NULL, OS_MESG_NOBLOCK) != -1) {}
+
+        osRecvMesg(&gtlD_800497A8, NULL, OS_MESG_BLOCK);
+        gtlD_8004979C = 0;
+    }
+}
+
+void gtl_main(FnBundle* arg0) {
+    s32 i;
+
+    gtlD_8004979C = 0;
+
+    while (osRecvMesg(&gtlD_800497E0, NULL, OS_MESG_NOBLOCK) != -1) {}
+    while (osRecvMesg(&gtlResetQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+    while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+
+    gtlState = GTL_STATE_0;
+    gtlD_8004A8B4 = -1;
+    gtlContextId = 1;
+    scUnknownInt = 0;
+
+    for (i = 0; i < ARRAY_COUNT(gtlD_8004A918); i++) {
+        gtlD_8004A918[i] = 0;
+    }
+
+    if (arg0->unk00 & 1) {
+        while (TRUE) {
+            func_80006878();
+            check_stack_probes();
+            for (i = 0; i < gtlDrawFrameInterval; i++) {
+                osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_BLOCK);
+            }
+            while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+
+            gtlD_8004A8EC = osGetCount();
+            arg0->fnDrawFrame(arg0);
+            gtlFrameCounter += 1;
+            gtlD_8004A8F0 = (osGetCount() - gtlD_8004A8EC) / 2971;
+            if (gtl_check_exit_main_loop()) {
+                break;
+            }
+
+            if (gtlFrameCounter % gtlD_8004979A == 0) {
+                gtl_switch_context(0);
+                gtlD_8004A8EC = osGetCount();
+                arg0->fn10(arg0);
+                gtlD_80040CF8 += 1;
+                gtlD_8004A8F4 = (osGetCount() - gtlD_8004A8EC) / 2971;
+
+                if (gtl_check_exit_main_loop()) {
+                    break;
+                }
+            }
+        }
+    } else {
+        while (TRUE) {
+            func_80006878();
+            check_stack_probes();
+            for (i = 0; i < gtlDrawFrameInterval; i++) {
+                osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_BLOCK);
+            }
+            while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+
+            gtlD_8004A8EC = osGetCount();
+            arg0->fnDrawFrame(arg0);
+            gtlFrameCounter += 1;
+            gtlD_8004A8F0 = (osGetCount() - gtlD_8004A8EC) / 2971;
+            if (gtl_check_exit_main_loop()) {
+                break;
+            }
+
+            if (gtlFrameCounter % gtlD_8004979A == 0 && gtl_switch_context(1)) {
+                gtlD_8004A8EC = osGetCount();
+                arg0->fn10(arg0);
+                gtlD_80040CF8 += 1;
+                gtlD_8004A8F4 = (osGetCount() - gtlD_8004A8EC) / 2971;
+                if (gtl_check_exit_main_loop()) {
+                    break;
+                }
+            }
+        }
+    }
+
+    gtl_wait_all_gfx_tasks_done();
+    while (osRecvMesg(&gtlD_800497E0, NULL, OS_MESG_NOBLOCK) != -1) {}
+    while (osRecvMesg(&gtlResetQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+    while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
+    func_80007D08(NULL);
+    func_800029D4();
+    gtlD_8004979C = 2;
+}
+
+void func_80006E24(FnBundle* arg0) {
+    gtlD_8004A948();
+    arg0->fn04();
+}
+
+void func_80006E5C(FnBundle* self) {
+    gtl_reset_heap();
+    gtl_init_display_lists();
+    self->fn0C();
+    gtl_process_all_dlists();
+    func_80007AFC(gtlVideoSettingsTasks[gtlContextId]);
+    gtl_cancel_current_gfx_task();
+}
+
+void func_80006EC0(FnBundle* self) {
+    gtlD_8004A948();
+    self->fn04();
+    if (gtl_check_exit_main_loop()) {
+        func_8000C274();
+    }
+}
+
+void func_80006F10(FnBundle* self) {
+    gtl_reset_heap();
+    gtl_init_display_lists();
+    self->fn0C();
+    gtl_process_all_dlists();
+    func_80007AFC(gtlVideoSettingsTasks[gtlContextId]);
+    gtl_cancel_current_gfx_task();
+    if (gtl_check_exit_main_loop()) {
+        func_8000C274();
+    }
+}
+
+struct Temp8000641C {
+    /* 0x00 */ u8 unk00[0x2C];
+    /* 0x2C */ void (*fn2C)(struct Temp8000641C*);
+}; // size >= 0x2C
+
+void func_80006F8C(struct Temp8000641C* arg0) {
+    s32 idx;
+    s32 tmp;
+    SCTaskGfxEnd* task;
+
+    gtl_switch_context(0);
+    gtl_reset_heap();
+    gtl_init_display_lists();
+    arg0->fn2C(arg0);
+    gtl_process_all_dlists();
+    task = gtlGfxEndTasks[gtlContextId];
+    if (task == NULL) {
+        fatal_printf("gtl : not defined SCTaskGfxEnd\n");
+        while (TRUE) {}
+    }
+    tmp = gtlContextId;
+    gtl_schedule_gfx_end(task, NULL, tmp, &gtlD_800497E0);
+    gtlGfxTasksBufferPtr[gtlContextId] = gtlGfxTasksBufferStart[gtlContextId];
+    do {
+        osRecvMesg(&gtlD_800497E0, (OSMesg*)&idx, OS_MESG_BLOCK);
+        gtlD_8004A918[idx] = 0;
+    } while (gtlD_8004A918[gtlContextId] != 0);
+
+    gtlD_80040CF8 += 1;
+}
+
+void func_800070B8(BufferSetup* arg0, void (*arg1)(void)) {
+    s32 i;
+    DLBuffer dlBuffers[2][4];
+    s32 tmp;
+
+    gtlNumContexts = arg0->unk18;
+    gtlD_8004A8D8.unk00 = arg0->unk00;
+    gtlD_8004A8D8.fn04 = arg0->fn04;
+    gtlD_8004A8D8.fn0C = arg0->fn08;
+
+    gtl_init_task_buffers(hal_alloc(arg0->unk14 * sizeof(SCTaskGfx) * gtlNumContexts, 8),
+                          arg0->unk14,
+                          hal_alloc(sizeof(SCTaskGfxEnd) * gtlNumContexts, 8),
+                          hal_alloc(sizeof(SCTaskVi) * gtlNumContexts, 8));
+
+    for (i = 0; i < gtlNumContexts; i++) {
+        dlBuffers[i][0].start = hal_alloc(arg0->dlBufferSize0, 8);
+        dlBuffers[i][0].length = arg0->dlBufferSize0;
+        dlBuffers[i][1].start = hal_alloc(arg0->dlBufferSize1, 8);
+        dlBuffers[i][1].length = arg0->dlBufferSize1;
+        dlBuffers[i][2].start = hal_alloc(arg0->dlBufferSize2, 8);
+        dlBuffers[i][2].length = arg0->dlBufferSize2;
+        dlBuffers[i][3].start = hal_alloc(arg0->dlBufferSize3, 8);
+        dlBuffers[i][3].length = arg0->dlBufferSize3;
+    }
+    gtl_set_dl_buffers(dlBuffers);
+
+    for (i = 0; i < gtlNumContexts; i++) {
+        init_bump_alloc(&gtlCurrentGfxHeap, 0x10002, hal_alloc(arg0->unk2C, 8), arg0->unk2C);
+        gtlGfxHeaps[i].id = gtlCurrentGfxHeap.id;
+        gtlGfxHeaps[i].start = gtlCurrentGfxHeap.start;
+        gtlGfxHeaps[i].end = gtlCurrentGfxHeap.end;
+        gtlGfxHeaps[i].ptr = gtlCurrentGfxHeap.ptr;
+    }
+
+    arg0->unk30 = 2;
+    if (arg0->unk34 == 0) {
+        arg0->unk34 = 0x1000;
+    }
+
+    tmp = arg0->unk34;
+    gtl_set_rdp_output_settings(arg0->unk30, hal_alloc(tmp, 16), arg0->unk34);
+    func_80007D08(arg0->fn38);
+    gtlD_8004A948 = arg0->fn3C;
+    contSetUpdateEveryTick((uintptr_t)contReadAndUpdate != (uintptr_t)gtlD_8004A948 ? TRUE : FALSE);
+
+    gtlFrameCounter = gtlD_80040CF8 = 0;
+    if (arg1 != NULL) {
+        arg1();
+    }
+
+    gtl_main(&gtlD_8004A8D8);
+}
+
+void func_80007354(BufferSetup* arg) {
+    init_hal_alloc(arg->heapBase, arg->heapSize);
+    gtlD_8004A8D8.fnDrawFrame = func_80006E24;
+    gtlD_8004A8D8.fn10 = func_80006E5C;
+    func_800070B8(arg, NULL);
+}
+
+void func_800073AC(Wrapper683C* arg) {
+    OMSetup omSetup;
+
+    init_hal_alloc(arg->setup.heapBase, arg->setup.heapSize);
+
+    omSetup.threads = hal_alloc(sizeof(GObjThread) * arg->numOMThreads, 8);
+    omSetup.numThreads = arg->numOMThreads;
+    omSetup.threadStackSize = arg->omThreadStackSize;
+    if (arg->omThreadStackSize != 0) {
+        omSetup.stacks =
+            hal_alloc((arg->omThreadStackSize + 0x8 /*offsetof(ThreadStackNode, stack)*/) * arg->numOMStacks, 8);
+    } else {
+        omSetup.stacks = NULL;
+    }
+
+    omSetup.numStacks = arg->numOMStacks;
+    omSetup.unk14 = arg->unk4C;
+
+    omSetup.processes = hal_alloc(sizeof(GObjProcess) * arg->numOMProcesses, 4);
+    omSetup.numProcesses = arg->numOMProcesses;
+
+    omSetup.commons = hal_alloc(arg->omCommonSize * arg->numOMCommons, 8);
+    omSetup.numCommons = arg->numOMCommons;
+    omSetup.commonSize = arg->omCommonSize;
+
+    omSetup.matrices = hal_alloc(sizeof(OMMtx) * arg->numOMMtx, 8);
+    omSetup.numMatrices = arg->numOMMtx;
+
+    func_80011254(arg->unk60);
+    omSetup.cleanupFn = arg->unk64;
+
+    omSetup.aobjs = hal_alloc(sizeof(AObj) * arg->numOMAobjs, 4);
+    omSetup.numAObjs = arg->numOMAobjs;
+
+    omSetup.mobjs = hal_alloc(sizeof(MObj) * arg->numOMMobjs, 4);
+    omSetup.numMObjs = arg->numOMMobjs;
+
+    omSetup.dobjs = hal_alloc(arg->omDobjSize * arg->numOMDobjs, 8);
+    omSetup.numDObjs = arg->numOMDobjs;
+    omSetup.dobjSize = arg->omDobjSize;
+
+    omSetup.sobjs = hal_alloc(arg->omSobjSize * arg->numOMSobjs, 8);
+    omSetup.numSObjs = arg->numOMSobjs;
+    omSetup.sobjSize = arg->omSobjSize;
+
+    omSetup.cameras = hal_alloc(arg->omCameraSize * arg->numOMCameras, 8);
+    omSetup.numCameras = arg->numOMCameras;
+    omSetup.cameraSize = arg->omCameraSize;
+
+    func_8000B0F8(&omSetup);
+    gtlD_8004A8D8.fnDrawFrame = func_80006EC0;
+    gtlD_8004A8D8.fn10 = func_80006F10;
+    func_800070B8(&arg->setup, arg->unk88);
+}
+
+void func_800075FC(u16 arg0, u16 arg1) {
+    gtlDrawFrameInterval = arg0;
+    gtlD_8004979A = arg1;
+}
+
+void func_80007618(void) {
+    if (gtlD_8004979C != 2) {
+        gtlD_8004979C = 1;
+    }
+}
+
+s32 func_80007640(void) {
+    if (gtlD_8004979C == 2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void func_80007668(void) {
+    osSendMesg(&gtlD_800497A8, NULL, OS_MESG_NOBLOCK);
+}
+
+void func_80007694(s32 arg0) {
+    if (arg0 == 1 || arg0 == 2) {
+        gtlContextId = arg0;
+    }
+}
+
+s32 func_800076B4(s32 arg0) {
+    if (arg0 == 1 || arg0 == 2) {
+        if (gtlD_8004A918[arg0 - 1] == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void gtl_init(void) {
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 2; i++) {
+        gtlGfxTasksBufferEnd[i] = NULL;
+        gtlGfxTasksBufferPtr[i] = NULL;
+        gtlGfxTasksBufferStart[i] = NULL;
+        gtlGfxEndTasks[i] = NULL;
+    }
+
+    gtlNoNearclipping = 0;
+    gtlD_8004A904 = gtlD_8004A906 = 0;
+
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 4; j++) {
+            gtlDLBuffers[i][j].start = NULL;
+            gtlDLBuffers[i][j].length = 0;
+        }
+    }
+
+    gftlSegmentFBasePtr = NULL;
+    func_800053F0(NULL);
+
+    scAddClient(&gtlSCClient, &gtlGameTickQueue, gtlGameTickQueueMsgs, ARRAY_COUNT(gtlGameTickQueueMsgs));
+    osCreateMesgQueue(&gtlD_800497E0, gtlD_800497D0, ARRAY_COUNT(gtlD_800497D0));
+    osCreateMesgQueue(&gtlResetQueue, gtlResetQueueMsgs, ARRAY_COUNT(gtlResetQueueMsgs));
+    gtlDrawFrameInterval = gtlD_8004979A = 1;
+    osCreateMesgQueue(&gtlD_800497A8, gtlD_800497A0, ARRAY_COUNT(gtlD_800497A0));
+    gtlD_8004979C = 2;
+}

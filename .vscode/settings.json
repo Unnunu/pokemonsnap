@@ -24,7 +24,11 @@
         "typeinfo": "c",
         "controller.h": "c",
         "os_gbpak.h": "c",
-        "controller_gbpak.h": "c"
+        "controller_gbpak.h": "c",
+        "ultratypes.h": "c",
+        "main.h": "c",
+        "cont.h": "c",
+        "mbi.h": "c"
     },
 
 }

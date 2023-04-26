@@ -12,7 +12,7 @@
 void scMain(void *arg);
 void thread4_audio(void *arg);
 void contMain(void *arg);
-void func_800076F0(void);
+void gtl_init(void);
 
 #define STACK_PROBE_MAGIC 0xFEDCBA98
 // size of stack in double words (u64, 8 bytes)
@@ -62,7 +62,7 @@ u64 sThread5Stack[THREAD5_STACK_SIZE];
 OSThread sThread6;
 u8 sUnkThread6[56];
 u64 sThread6Stack[THREAD6_STACK_SIZE];
-u64 gRspBootCode[0x20]; // IP3 font?
+u64 gRspBootCode[0x20];
 s8 gSPImemOkay;
 s8 gSPDmemOkay;
 OSMesg sBlockMsg[1];
@@ -135,7 +135,7 @@ void thread5_main(UNUSED void *arg) {
     sThread6Stack[0] = STACK_PROBE_MAGIC; osStartThread(&sThread6);
     osRecvMesg(&gThreadingQueue, NULL, OS_MESG_BLOCK);
 
-    func_800076F0();
+    gtl_init();
     load_overlay(&OverlayManager);
     start_scene_manager(0);
 }

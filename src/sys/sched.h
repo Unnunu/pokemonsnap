@@ -44,7 +44,7 @@ typedef struct SCTaskInfo {
     /* 0x08 */ s32 state; // SCTaskState 
     /* 0x0C */ struct SCTaskInfo* next;
     /* 0x10 */ struct SCTaskInfo* prev;
-    /* 0x14 */ SCTaskCallback fnCheck;
+    /* 0x14 */ SCTaskCallback fnCheck; // if set, the task is not executed until this function returns TRUE
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s32 retVal;
     /* 0x20 */ OSMesgQueue* mq;
@@ -60,6 +60,7 @@ typedef struct {
     /* 0x78 */ s32 rdpBufSize;
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ u32 taskId;
+    /* 0x84 */ s32 unk_84;
 } SCTaskGfx; // size = 0x84
 
 typedef struct {
@@ -85,7 +86,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ SCTaskInfo info;
-    /* 0x24 */ void* unk24;
+    /* 0x24 */ void* fb;
     /* 0x28 */ u32 taskId;
 } SCTaskGfxEnd; // size == 0x2C
 
@@ -101,7 +102,12 @@ typedef struct {
 } SCTaskType9; // size >= 0x28
 
 extern s32 scBeforeReset;
+extern u64 scUnknownU64;
+extern OSMesgQueue scTaskQueue;
+extern u32 scUnknownInt;
 
 void scAddClient(SCClient* client, OSMesgQueue* mq, OSMesg* msg, u32 count);
+void sc_execute_blocking(SCTaskInfo* task);
+s32 func_80000B84(SCTaskInfo* t);
 
 #endif

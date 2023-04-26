@@ -7,7 +7,7 @@ extern s32 D_8004A958;
 extern s32 D_8004A95C;
 extern s32 D_8004A980[];
 
-void func_80005418(Gfx**);
+void gtl_set_segment_F(Gfx**);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/8820/func_80007C20.s")
 
@@ -25,7 +25,7 @@ void func_80007D14(Gfx** arg0) {
     s32 y = 0;
 
     gSPSegment(sp34++, 0x00, 0x00000000);
-    func_80005418(&sp34);
+    gtl_set_segment_F(&sp34);
     gDPSetDepthImage(sp34++, D_8004A950);
     func_80007CBC(D_8004A980);
     gSPDisplayList(sp34++, D_80040DA8);

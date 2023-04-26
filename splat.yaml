@@ -28,7 +28,7 @@ segments:
     - [0x1520, c, sys/sched]
     - [0x35E0, c, sys/dma]
     - [0x4680, c, sys/cont]
-    - [0x5FF0, c]
+    - [0x5FF0, c, sys/gtl]
     - [0x8450, asm]
     - [0x8820, c]
     - [0x8A80, c]
@@ -183,12 +183,14 @@ segments:
     - [0x3E3F0, asm]
     - [0x3E4A0, data]
     - [0x418C0, .data, sys/main]
-    - [0x418F0, data]
+    - [0x418F0, .data, sys/gtl]
+    - [0x41950, data]
     - [0x43B40, rodata]
     - [0x43BA0, .rodata, sys/main]
     - [0x43BC0, .rodata, sys/sched]
     - [0x43C20, .rodata, sys/cont]
-    - [0x43C40, rodata]
+    - [0x43C40, .rodata, sys/gtl]
+    - [0x43E60, rodata]
   - name: app_render
     type: code
     start: 0x46270

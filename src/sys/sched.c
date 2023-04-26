@@ -23,7 +23,7 @@ void contRumbleInit(s32);
 void contRumbleStop(s32);
 
 SCClient* scClientList;
-// priority queue, all tasks added from scEnqueueTask are put into this queue
+// priority queue, all tasks added from sc_execute_blocking are put into this queue
 SCTaskInfo* scMainQueueHead;
 SCTaskInfo* scMainQueueTail;
 
@@ -75,7 +75,7 @@ void func_80000928(void) {
     }
 }
 
-void scEnqueueTask(SCTaskInfo* task) {
+void sc_execute_blocking(SCTaskInfo* task) {
     OSMesg msgs[1];
     OSMesgQueue mq;
 
@@ -97,7 +97,7 @@ void scAddClient(SCClient* client, OSMesgQueue* mq, OSMesg* msg, u32 count) {
     t.info.type = SC_TASK_TYPE_ADD_CLIENT;
     t.info.priority = 100;
     t.client = client;
-    scEnqueueTask(&t.info);
+    sc_execute_blocking(&t.info);
 }
 
 s32 func_80000A64(SCTaskGfx* t) {
@@ -108,10 +108,10 @@ s32 func_80000A64(SCTaskGfx* t) {
     void* fb;
 
     if (scNextFrameBuffer != NULL) {
-        return 1;
+        return TRUE;
     }
     if (scUnkFrameBuffer != NULL) {
-        return 0;
+        return FALSE;
     }
 
     nextFb = osViGetNextFramebuffer();
@@ -123,7 +123,7 @@ s32 func_80000A64(SCTaskGfx* t) {
             scUnkFrameBuffer = scNextFrameBuffer = fb;
             scUnknownInt2 = 0;
             scTimestampSetFb = osGetCount();
-            return 1;
+            return TRUE;
         }
     }
 
@@ -133,11 +133,11 @@ s32 func_80000A64(SCTaskGfx* t) {
             scNextFrameBuffer = fb;
             scUnknownInt2 = 0;
             scTimestampSetFb = osGetCount();
-            return 1;
+            return TRUE;
         }
     }
 
-    return 0;
+    return FALSE;
 }
 
 s32 func_80000B84(UNUSED SCTaskInfo* t) {
@@ -753,10 +753,10 @@ s32 scExecuteTask(SCTaskInfo* task) {
                 if (v1 != NULL) {
                     v1->info.retVal = t->info.retVal;
                     v1->info.mq = t->info.mq;
-                    v1->fb = t->unk24;
+                    v1->fb = t->fb;
                 } else {
-                    if (t->unk24 != NULL) {
-                        scSetFrameBuffer(t->unk24);
+                    if (t->fb != NULL) {
+                        scSetFrameBuffer(t->fb);
                     }
 
                     if (t->info.mq != NULL) {
@@ -931,7 +931,7 @@ void scHandleSPTaskDone(void) {
             osInvalDCache(&scUnknownU64, sizeof(scUnknownU64));
             scCurrentGfxTask->rdpBufSize = scUnknownU64;
             scUnknownInt2 += (s32)scUnknownU64;
-            scUnknownInt2 = ((u32)(scUnknownInt2 + 15)) >> 4 << 4;
+            scUnknownInt2 = OS_DCACHE_ROUNDUP_ADDR(scUnknownInt2);
             if (scUnknownInt2 < scUnknownU64) {
                 fatal_printf("rdp_output_buff over !! size = %d\n byte", scUnknownInt2);
                 while (TRUE) { }
