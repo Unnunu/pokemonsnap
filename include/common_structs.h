@@ -2,6 +2,7 @@
 #define _COMMON_STRUCTS_H
 
 #include "ultra64.h"
+#include "types.h"
 
 typedef f32 quartic[5];
 
@@ -30,10 +31,6 @@ typedef enum geoPayloadType {
     euler_translate_conjScale=54,
     xform_eulerTAB_trans_scale=63
 } geoPayloadType;
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f; // size = 0xC
 
 typedef struct {
     /* 0x000 */ s32 regs[50];

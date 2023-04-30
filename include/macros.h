@@ -24,4 +24,7 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
+#define FLOAT_MAX     3.4028235e38
+#define FLOAT_NEG_MAX -FLOAT_MAX
+
 #endif

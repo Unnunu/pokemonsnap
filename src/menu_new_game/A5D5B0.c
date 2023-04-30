@@ -350,7 +350,7 @@ void func_800E2D18_A5E0C8(Struct_8000C37C* arg0) {
 void func_800E2E00_A5E1B0(void) {
     Struct_8000C37C_Sub24* unk_48;
 
-    runGObjProcess(func_8000A410(0xE, 0, 0, 0x80000000), func_800E2C38_A5DFE8, 0, 1);
+    om_create_process(om_add_gobj(0xE, 0, 0, 0x80000000), func_800E2C38_A5DFE8, 0, 1);
     D_8016814C = 0;
     D_80168148 = func_8000C37C(0xE, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &D_80118068, 0, func_800E2D18_A5E0C8, 1);
     unk_48 = D_80168148->unk_48;

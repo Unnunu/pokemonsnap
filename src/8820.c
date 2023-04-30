@@ -1,40 +1,91 @@
-#include "common.h"
+#include "sys/vi.h"
+#include "PR/mbi.h"
 
-extern void (*D_80040D60)(Gfx**);
-extern Gfx D_80040DA8[];
-extern s16* D_8004A950;
-extern s32 D_8004A958;
-extern s32 D_8004A95C;
-extern s32 D_8004A980[];
+
+Vp sViewport;
+
+void (*funcD_80040D60)(Gfx**) = NULL;
+
+Mtx sIdentityMatrix = {{
+    /* Integer Portion */
+    {0x00010000, 0x00000000, 0x00000001, 0x00000000},
+    {0x00000000, 0x00010000, 0x00000000, 0x00000001},
+    /* Fractional Portion */
+    {0x00000000, 0x00000000, 0x00000000, 0x00000000},
+    {0x00000000, 0x00000000, 0x00000000, 0x00000000},
+}};
+
+Gfx sResetRdp[] = {
+    gsDPPipeSync(),
+    gsSPViewport(&sViewport),
+    gsSPClearGeometryMode(
+        G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN
+        | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH),
+    gsSPClipRatio(FRUSTRATIO_1),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH),
+    gsSPMatrix(&sIdentityMatrix, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION),
+    gsSPMatrix(&sIdentityMatrix, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPPipelineMode(G_PM_NPRIMITIVE),
+    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsDPSetTextureLOD(G_TL_TILE),
+    gsDPSetTextureLUT(G_TT_NONE),
+    gsDPSetTextureDetail(G_TD_CLAMP),
+    gsDPSetTexturePersp(G_TP_PERSP),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPSetTextureConvert(G_TC_FILT),
+    gsDPSetCombineKey(G_CK_NONE),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
+    gsDPSetColorDither(G_CD_MAGICSQ),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+};
 
 void gtl_set_segment_F(Gfx**);
 
+#ifdef NON_MATCHING
+void func_80007C20(Vp *vp, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    f32 temp1 = (arg1 + arg3) / 2.0f;
+    f32 temp2 = (arg2 + arg4) / 2.0f;
+    vp->vp.vscale[0] = (arg3 - temp1) * 4.0f;
+    vp->vp.vscale[1] = (arg4 - temp2) * 4.0f;
+    vp->vp.vtrans[0] = temp1 * 4.0f;
+    vp->vp.vtrans[1] = temp2 * 4.0f;
+    vp->vp.vscale[2] = vp->vp.vtrans[2] = G_MAXZ / 2;    
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/8820/func_80007C20.s")
+#endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/8820/func_80007CBC.s")
-void func_80007CBC(s32*);
+void func_80007CBC(Vp *vp) {
+    vp->vp.vscale[0] = vp->vp.vtrans[0] = viScreenWidth * 2;
+    vp->vp.vscale[1] = vp->vp.vtrans[1] = viScreenHeight * 2;
+    vp->vp.vscale[2] = vp->vp.vtrans[2] = G_MAXZ / 2;
+}
 
 void func_80007D08(void (*arg0)(Gfx**)) {
-    D_80040D60 = arg0;
+    funcD_80040D60 = arg0;
 }
 
 #ifdef NON_MATCHING
 void func_80007D14(Gfx** arg0) {
-    Gfx* sp34 = *arg0;
+    Gfx* gfxPtr = *arg0;
     s32 x = 0;
     s32 y = 0;
-
-    gSPSegment(sp34++, 0x00, 0x00000000);
-    gtl_set_segment_F(&sp34);
-    gDPSetDepthImage(sp34++, D_8004A950);
-    func_80007CBC(D_8004A980);
-    gSPDisplayList(sp34++, D_80040DA8);
-    gDPSetScissor(sp34++, G_SC_NON_INTERLACE, x, y, D_8004A958, D_8004A95C);
-    if (D_80040D60 != NULL) {
-        D_80040D60(&sp34);
+    gSPSegment(gfxPtr++, 0x00, 0x00000000);
+    gtl_set_segment_F(&gfxPtr);
+    gDPSetDepthImage(gfxPtr++, viZBuffer);
+    func_80007CBC(&sViewport);
+    gSPDisplayList(gfxPtr++, sResetRdp);
+    gDPSetScissor(gfxPtr++, G_SC_NON_INTERLACE, x, y, viScreenWidth, viScreenHeight);
+    if (funcD_80040D60 != NULL) {
+        funcD_80040D60(&gfxPtr);
     }
-    *arg0 = sp34;
+    *arg0 = gfxPtr;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/8820/func_80007D14.s")
+void func_80007D14(Gfx**);
 #endif

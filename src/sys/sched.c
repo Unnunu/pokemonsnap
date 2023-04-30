@@ -292,7 +292,7 @@ void func_80000EBC(void) {
 
 void func_80000F40(u32, u32, s32, s16, s16, s16, s16);
 #ifdef NON_MATCHING
-void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6) {
+void func_80000F40(u32 width, u32 height, s32 flags, s16 edgeOffsetLeft, s16 edgeOffsetRight, s16 edgeOffsetTop, s16 edgeOffsetBottom) {
     u32 phi_a0; // flag collector
     s32 phi_v1;
     s32 phi_t0;
@@ -303,7 +303,7 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     s32 sp1C;
     s32 sp20;
 
-    if (arg0 >= SCREEN_WIDTH || arg1 >= SCREEN_HEIGHT) {
+    if (width > SCREEN_WIDTH || height > SCREEN_HEIGHT) {
         phi_t2 = 0;
     } else {
         phi_t2 = 1;
@@ -312,79 +312,79 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     // phi_t2 = arg0 >= SCREEN_WIDTH && arg1 >= SCREEN_HEIGHT ? 0 : 1;
 
     // L80000F5C
-    if (arg2 & 0x00004) {
+    if (flags & 0x00004) {
         scViSettings.serrate = TRUE;
         scViModeNext.comRegs.ctrl |= VI_CTRL_SERRATE_ON;
     }
     // L80000F8C
-    if (arg2 & 0x00008) {
+    if (flags & 0x00008) {
         scViSettings.serrate = FALSE;
         scViModeNext.comRegs.ctrl &= ~VI_CTRL_SERRATE_ON;
     }
     // L80000FC0
-    if (arg2 & 0x00010) {
+    if (flags & 0x00010) {
         scViSettings.pixelSize32 = FALSE;
         scViModeNext.comRegs.ctrl &= ~(VI_CTRL_TYPE_32 | VI_CTRL_TYPE_16);
         scViModeNext.comRegs.ctrl |= VI_CTRL_TYPE_16;
     }
     // L80000FF4
-    if (arg2 & 0x00020) {
+    if (flags & 0x00020) {
         scViSettings.pixelSize32 = TRUE;
         scViModeNext.comRegs.ctrl &= ~(VI_CTRL_TYPE_32 | VI_CTRL_TYPE_16);
         scViModeNext.comRegs.ctrl |= VI_CTRL_TYPE_32;
     }
     // L80001024
-    if (arg2 & 0x00040) {
+    if (flags & 0x00040) {
         scViSettings.gamma = TRUE;
         scViModeNext.comRegs.ctrl |= VI_CTRL_GAMMA_ON;
     }
     // L80001048
-    if (arg2 & 0x00080) {
+    if (flags & 0x00080) {
         scViSettings.gamma = FALSE;
         scViModeNext.comRegs.ctrl &= ~VI_CTRL_GAMMA_ON;
     }
     // L80001070
-    if (arg2 & 0x01000) {
+    if (flags & 0x01000) {
         scViSettings.gammaDither = TRUE;
         scViModeNext.comRegs.ctrl |= VI_CTRL_GAMMA_DITHER_ON;
     }
     // L80001094
-    if (arg2 & 0x02000) {
+    if (flags & 0x02000) {
         scViSettings.gammaDither = FALSE;
         scViModeNext.comRegs.ctrl &= ~VI_CTRL_GAMMA_DITHER_ON;
     }
     // L800010BC
-    if (arg2 & 0x04000) {
+    if (flags & 0x04000) {
         scViSettings.ditherFilter = TRUE;
         scViModeNext.comRegs.ctrl |= VI_CTRL_DITHER_FILTER_ON;
     }
     // L800010E4
-    if (arg2 & 0x08000) {
+    if (flags & 0x08000) {
         scViSettings.ditherFilter = FALSE;
         scViModeNext.comRegs.ctrl &= ~VI_CTRL_DITHER_FILTER_ON;
     }
     // L80001110
-    if (arg2 & 0x10000) {
+    if (flags & 0x10000) {
         scViSettings.divot = TRUE;
         scViModeNext.comRegs.ctrl |= VI_CTRL_DIVOT_ON;
     }
     // L80001134
-    if (arg2 & 0x20000) {
+    if (flags & 0x20000) {
         scViSettings.divot = FALSE;
         scViModeNext.comRegs.ctrl &= ~VI_CTRL_DIVOT_ON;
     }
     // L8000115C
-    if (arg2 & 0x00100) { scViSettings.blackout = TRUE; }
+    if (flags & 0x00100) { scViSettings.blackout = TRUE; }
     // L80001174
-    if (arg2 & 0x00200) { scViSettings.blackout = FALSE; }
+    if (flags & 0x00200) { scViSettings.blackout = FALSE; }
     // L80001188
-    if (arg2 & 0x00400) { scViSettings.unk_b04 = TRUE; }
+    if (flags & 0x00400) { scViSettings.unk_b04 = TRUE; }
     // L800011A0
-    if (arg2 & 0x00800) { scViSettings.unk_b04 = FALSE; }
+    if (flags & 0x00800) { scViSettings.unk_b04 = FALSE; }
     // L800011B4
-    if (arg2 & 0x00001) { scViSettings.unk_b80 = TRUE; }
+    if (flags & 0x00001) { scViSettings.unk_b80 = TRUE; }
     // L800011D0
-    if (arg2 & 0x00002) { scViSettings.unk_b80 = FALSE; }
+    if (flags & 0x00002) { scViSettings.unk_b80 = FALSE; }
 
     // L800011E8D_80044F88
     scViModeNext.comRegs.ctrl &= ~VI_CTRL_ANTIALIAS_MASK;
@@ -429,8 +429,8 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     // L800012B0
     // temp_a1 = arg5 & 0xFFFE;
     // temp_a2 = arg6 & 0xFFFE;
-    arg5 &= ~1; // a1?
-    arg6 &= ~1; // a2?
+    edgeOffsetTop &= ~1; // a1?
+    edgeOffsetBottom &= ~1; // a2?
     if (!phi_t2 && !phi_v1) {
         sp14 = 2;
     } else {
@@ -452,14 +452,14 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     // t6 = t9 / phi_a0
     // t3 = t6 * t7
     // L80001348
-    phi_t3 = (((arg1 << 11) / ((arg6 - arg5) + 480)) / phi_a0) * (sp14);
+    phi_t3 = (((height << 11) / ((edgeOffsetBottom - edgeOffsetTop) + 480)) / phi_a0) * (sp14);
     if (!phi_t2 && phi_v1) {
         phi_a0 = 2;
     } else {
         phi_a0 = 1;
     }
     // L80001368
-    scViModeNext.comRegs.width = phi_a0 * arg0;
+    scViModeNext.comRegs.width = phi_a0 * width;
     // TODO: macros
     switch (osTvType) {
         case OS_TV_NTSC:
@@ -487,16 +487,16 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     sp20                         = scViModeNext.comRegs.hStart >> 16;
     sp1C                         = scViModeNext.comRegs.hStart & 0xFFFF;
 
-    if (sp20 + arg4 < 0) {
+    if (sp20 + edgeOffsetRight < 0) {
         sp20 = 0;
     } else {
-        sp20 = sp20 + arg4;
+        sp20 = sp20 + edgeOffsetRight;
     }
     // L80001458
-    if (sp1C + arg5 < 0) {
+    if (sp1C + edgeOffsetTop < 0) {
         sp1C = 0;
     } else {
-        sp1C = sp1C + arg5;
+        sp1C = sp1C + edgeOffsetTop;
     }
     // L80001470
     scViModeNext.comRegs.hStart = (sp20 << 16) | sp1C;
@@ -504,10 +504,10 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     sp20                      = sp00 >> 16;
     sp1C                      = sp00 & 0xFFFF;
 
-    sp20 = sp20 + arg5;
+    sp20 = sp20 + edgeOffsetTop;
     if (sp20 < 0) { sp20 = 0; }
     // L800014AC
-    sp1C = sp1C + arg6;
+    sp1C = sp1C + edgeOffsetBottom;
     if (sp1C < 0) { sp1C = 0; }
     // L800014C0
     scViModeNext.fldRegs[0].vStart = (sp20 << 16) | sp1C;
@@ -515,10 +515,10 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     sp20                         = sp00 >> 16;
     sp1C                         = sp00 & 0xFFFF;
 
-    sp20 = sp20 + arg5;
+    sp20 = sp20 + edgeOffsetTop;
     if (sp20 < 0) { sp20 = 0; }
     // L800014FC
-    sp1C = sp1C + arg6;
+    sp1C = sp1C + edgeOffsetBottom;
     if (sp1C < 0) { sp1C = 0; }
     // L80001510
     scViModeNext.fldRegs[1].vStart = (sp20 << 16) | sp1C;
@@ -536,9 +536,9 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     }
     // L800015C8
     scViModeNext.comRegs.vCurrent  = 0;
-    scViModeNext.comRegs.xScale    = (u32)(arg0 << 0xA) / (u32)((arg4 - arg3) + 0x280);
+    scViModeNext.comRegs.xScale    = (u32)(width << 0xA) / (u32)((edgeOffsetRight - edgeOffsetLeft) + 0x280);
     phi_a0                       = phi_t0 ? 2 : 1;
-    scViModeNext.fldRegs[0].origin = (phi_a0 * arg0 * 2);
+    scViModeNext.fldRegs[0].origin = (phi_a0 * width * 2);
 
     sp14 = phi_t0 ? 2 : 1;
     // L8000163C
@@ -546,9 +546,9 @@ void func_80000F40(u32 arg0, u32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s
     // L8000164C
     scViModeNext.fldRegs[0].yScale = phi_t3;
     scViModeNext.fldRegs[1].yScale = phi_t3;
-    scViModeNext.fldRegs[1].origin = (phi_a0 * arg0 * 2 * sp14);
+    scViModeNext.fldRegs[1].origin = (phi_a0 * width * 2 * sp14);
     if (scViSettings.unk_b04) {
-        if ((arg1 << 11) < 0xB4000U) {
+        if ((height << 11) < 0xB4000U) {
             scViModeNext.fldRegs[0].yScale = phi_t3 + 0x3000000;
             scViModeNext.fldRegs[1].yScale = phi_t3 + 0x1000000;
         } else {
@@ -678,7 +678,7 @@ s32 scExecuteTask(SCTaskInfo* task) {
             {
                 SCTaskVi* t = (void *)task;
 
-                func_80000F40(t->unk24, t->unk28, t->unk2C, t->unk30, t->unk32, t->unk34, t->unk36);
+                func_80000F40(t->width, t->height, t->flags, t->edgeOffsetLeft, t->edgeOffsetRight, t->edgeOffsetTop, t->edgeOffsetBottom);
 
                 if (t->info.mq != NULL) {
                     osSendMesg(t->info.mq, (OSMesg)t->info.retVal, OS_MESG_NOBLOCK);

@@ -8,13 +8,8 @@
 
 void loadCompressedData(u32 rom, u32 ram);
 
-GObjThread *get_obj_thread(void);
-void return_obj_thread(GObjThread*);
-ThreadStackNode* get_stack_of_size(u32);
-ThreadStackNode *get_default_stack(void);
-
-GObj* runGObjProcess(GObj*, gfxFunc func, s8 kind, u32 priority);
-void endGObjProcess(GObj*);
+GObj* om_create_process(GObj*, gfxFunc func, s8 kind, u32 priority);
+void om_end_process(GObj*);
 
 void sendSignalToLink(s32 llIndex, s32, GObj*);
 
@@ -71,10 +66,10 @@ void contUpdate(void);
 void func_80005448(s32);
 void func_800067DC(void);
 void func_800073AC(Struct_800073AC*);
-void func_80007A34(s16, s16, s16, s16);
-void func_80007BC4(s32*);
+void vi_set_screen_offsets(s16, s16, s16, s16);
+void vi_apply_screen_settings(s32*);
 
-GObj* func_8000A410(s32, s32, s32, s32);
+GObj* om_add_gobj(s32, s32, s32, s32);
 void func_8000ADA0(void);
 void func_8000AFFC(void);
 void func_8000BC84(void);

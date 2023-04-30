@@ -28,7 +28,10 @@
         "ultratypes.h": "c",
         "main.h": "c",
         "cont.h": "c",
-        "mbi.h": "c"
+        "mbi.h": "c",
+        "ml.h": "c",
+        "types.h": "c",
+        "sp.h": "c"
     },
 
 }

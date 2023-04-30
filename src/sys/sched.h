@@ -70,13 +70,13 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ SCTaskInfo info;
-    /* 0x24 */ s32 unk24; // screen width?
-    /* 0x28 */ s32 unk28; // screen height?
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
+    /* 0x24 */ s32 width;
+    /* 0x28 */ s32 height;
+    /* 0x2C */ s32 flags;
+    /* 0x30 */ s16 edgeOffsetLeft;
+    /* 0x32 */ s16 edgeOffsetRight;
+    /* 0x34 */ s16 edgeOffsetTop;
+    /* 0x36 */ s16 edgeOffsetBottom;
 } SCTaskVi; // size == 0x38
 
 typedef struct {

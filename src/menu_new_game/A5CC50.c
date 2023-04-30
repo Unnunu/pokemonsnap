@@ -266,7 +266,7 @@ void func_800E1F58_A5D308(GObj* arg0) {
         func_8000BCA8(1);
     }
     func_800BFC18_5CAB8(sp24, sp20);
-    func_80007A34(sp24, sp24, sp20, sp20);
+    vi_set_screen_offsets(sp24, sp24, sp20, sp20);
     func_800067DC();
     while (1) {
         func_8000BCA8(1);
@@ -287,7 +287,7 @@ void func_800E2078_A5D428(void) {
     D_801180B0 = func_8000C3FC(3, func_8000BC84, 0, 0x80000000, func_8001977C, 3, 2, -1, 1, 1, 0, 1, 1);
     D_801180B0->unk_48->unk_80 = 8;
     func_800A7F68(0, 0x101);
-    runGObjProcess(func_8000A410(0xE, 0, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
+    om_create_process(om_add_gobj(0xE, 0, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
 }
 
 Struct_800073AC D_800E3608 = {
@@ -332,7 +332,7 @@ Struct_800073AC D_800E3608 = {
 };
 
 s32 func_800E218C_A5D53C(s32 arg0) {
-    func_80007BC4(D_800E357C_A5E92C);
+    vi_apply_screen_settings(D_800E357C_A5E92C);
     D_800E3608.unk_10 = &D_80369F80 - &D_8016A010;
     func_80005448(1);
     func_800073AC(&D_800E3608);

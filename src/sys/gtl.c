@@ -4,6 +4,7 @@
 #include "sys/main.h"
 #include "sys/cont.h"
 #include "sys/om.h"
+#include "sys/ml.h"
 #include "types.h"
 #include "macros.h"
 
@@ -78,14 +79,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u64* text;
     /* 0x04 */ u64* data;
-} UcodeInfo;
-
-typedef struct {
-    /* 0x00 */ s32 id;
-    /* 0x04 */ s32 start;
-    /* 0x08 */ s32 end;
-    /* 0x0C */ s32 ptr;
-} DynamicBuffer; // size = 0x10
+} UcodeInfo; // size = 0x08
 
 typedef struct {
     /* 0x00 */ Gfx* start;
@@ -106,7 +100,7 @@ u32 gtlFrameCounter = 0;
 s32 gtlD_80040CF8 = 0;
 UcodeInfo gtlD_80040CFC[] = {
     { NULL, NULL }, { NULL, NULL }, { UcodeText1, UcodeData1 }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL },
-    { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 }, { NULL, NULL },
+    { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 }, { NULL, NULL }, { NULL, NULL }
 };
 
 // BSS
@@ -153,18 +147,14 @@ s32 gtlContextId;
 s32 gtlD_8004A918[2];
 s32 gtlNumContexts;
 DynamicBuffer gtlGfxHeaps[2];
-void (*gtlD_8004A948)(void);
+void (*gtlUpdateInputFunc)(void);
 void* gtlD_8004A94C;
 
 void func_80000A64(void*);
 
-void reset_bump_alloc(DynamicBuffer*);
-void* bump_alloc(DynamicBuffer*, s32, s32);
-void init_bump_alloc(DynamicBuffer*, s32, s32, s32);
-
 void func_80007D08(Gfx**);
 void func_80007D14(Gfx**);
-void func_8000B0F8(OMSetup*);
+void om_create_objects(OMSetup*);
 
 void func_800053F0(void* arg0) {
     if (arg0 != NULL) {
@@ -843,7 +833,7 @@ void gtl_main(FnBundle* arg0) {
 }
 
 void func_80006E24(FnBundle* arg0) {
-    gtlD_8004A948();
+    gtlUpdateInputFunc();
     arg0->fn04();
 }
 
@@ -852,12 +842,12 @@ void func_80006E5C(FnBundle* self) {
     gtl_init_display_lists();
     self->fn0C();
     gtl_process_all_dlists();
-    func_80007AFC(gtlVideoSettingsTasks[gtlContextId]);
+    vi_apply_settings_nonblocking(gtlVideoSettingsTasks[gtlContextId]);
     gtl_cancel_current_gfx_task();
 }
 
 void func_80006EC0(FnBundle* self) {
-    gtlD_8004A948();
+    gtlUpdateInputFunc();
     self->fn04();
     if (gtl_check_exit_main_loop()) {
         func_8000C274();
@@ -869,7 +859,7 @@ void func_80006F10(FnBundle* self) {
     gtl_init_display_lists();
     self->fn0C();
     gtl_process_all_dlists();
-    func_80007AFC(gtlVideoSettingsTasks[gtlContextId]);
+    vi_apply_settings_nonblocking(gtlVideoSettingsTasks[gtlContextId]);
     gtl_cancel_current_gfx_task();
     if (gtl_check_exit_main_loop()) {
         func_8000C274();
@@ -950,8 +940,8 @@ void func_800070B8(BufferSetup* arg0, void (*arg1)(void)) {
     tmp = arg0->unk34;
     gtl_set_rdp_output_settings(arg0->unk30, hal_alloc(tmp, 16), arg0->unk34);
     func_80007D08(arg0->fn38);
-    gtlD_8004A948 = arg0->fn3C;
-    contSetUpdateEveryTick((uintptr_t)contReadAndUpdate != (uintptr_t)gtlD_8004A948 ? TRUE : FALSE);
+    gtlUpdateInputFunc = arg0->fn3C;
+    contSetUpdateEveryTick((uintptr_t)contReadAndUpdate != (uintptr_t)gtlUpdateInputFunc ? TRUE : FALSE);
 
     gtlFrameCounter = gtlD_80040CF8 = 0;
     if (arg1 != NULL) {
@@ -1017,7 +1007,7 @@ void func_800073AC(Wrapper683C* arg) {
     omSetup.numCameras = arg->numOMCameras;
     omSetup.cameraSize = arg->omCameraSize;
 
-    func_8000B0F8(&omSetup);
+    om_create_objects(&omSetup);
     gtlD_8004A8D8.fnDrawFrame = func_80006EC0;
     gtlD_8004A8D8.fn10 = func_80006F10;
     func_800070B8(&arg->setup, arg->unk88);
