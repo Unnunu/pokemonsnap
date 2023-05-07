@@ -29,7 +29,7 @@ typedef struct GObjProcess {
     /* 0x08 */ struct GObjProcess* prevInPriorityList;
     /* 0x10 */ s32 priority;
     /* 0x14 */ u8 kind;
-    /* 0x15 */ u8 unk15;
+    /* 0x15 */ u8 frozen;
     /* 0x18 */ struct GObjCommon* object;
     // following two fields are typed via kind
     /* 0x1C */ union {
@@ -45,6 +45,20 @@ struct MaybeCommonLink {
 }; // size == 8
 
 struct DObj;
+struct Struct82F0;
+struct GObjCommon;
+
+typedef struct GObjCmd {
+    /* 0x00 */ struct GObjCmd* next;
+    /* 0x04 */ struct GObjCommon* obj;
+    /* 0x08 */ s32 cmd;
+} GObjCmd; // size = 0xC
+
+typedef struct GObj_Sub3CList {
+    /* 0x00 */ GObjCmd* head;
+    /* 0x04 */ GObjCmd* tail;
+    /* 0x08 */ s32 count;
+} GObj_Sub3CList; // size = 0xC
 
 typedef struct GObjCommon {
     /* 0x00 */ u32 id;
@@ -53,27 +67,25 @@ typedef struct GObjCommon {
     /* 0x0C */ u8 link;
     /* 0x0D */ u8 dlLink;
     /* 0x0E */ u8 unk0E;
-    /* 0x0F */ u8 unk0F; // ptr kind?
+    /* 0x0F */ u8 type; // ptr kind?
     /* 0x10 */ u32 priority;
-    /* 0x14 */ void (*unk14)(struct GObjCommon *); // takes a self?
+    /* 0x14 */ void (*fnUpdate)(struct GObjCommon *); // takes a self?
     /* 0x18 */ struct GObjProcess *processListHead;
     /* 0x1C */ struct GObjProcess *processListTail;
     /* 0x20 */ struct GObjCommon *nextDl;
     /* 0x24 */ struct GObjCommon *prevDl;
     /* 0x28 */ u32 dlPriority;
-    /* 0x2C */ void (*unk2C)(struct GObjCommon *);
+    /* 0x2C */ void (*render)(struct GObjCommon *);
     /* 0x30 */ s32 unk30;
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
-    /* 0x3C */ s32 pad3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
+    /* 0x3C */ GObj_Sub3CList sub3C;
     // typed based on unk0F?
     // 0 : NULL
     // 1 : DObj
     // 2 : SObj
     // 3 : OMCamera
-    /* 0x48 */ void *unk74;
+    /* 0x48 */ void *children;
 
     f32 unk_4C;
     u32 unk_50;
@@ -101,7 +113,7 @@ typedef struct GObjCommon {
 
 typedef struct OMMtx {
     /* 0x00 */ struct OMMtx* next;
-    /* 0x04 */ u8 unk04; // kind
+    /* 0x04 */ u8 kind; // kind
     /* 0x05 */ u8 unk05;
     /* 0x08 */ Mtx unk08;
     ///* 0x08 */ f32 unk08[4][4];
@@ -172,9 +184,9 @@ typedef struct DObj {
     // is this a union? WeirdBytewise...?
     /* 0x54 */ u8 unk54;
     /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
+    /* 0x56 */ u8 numMatrices;
     /* 0x57 */ u8 unk57;
-    /* 0x58 */ struct OMMtx *unk58[5];
+    /* 0x58 */ struct OMMtx *matrices[5];
     /* 0x6C */ struct AObj *aobjList;
     /* 0x70 */ union AnimCmd *unk70;
     // Vec3fi?
@@ -273,26 +285,26 @@ typedef struct MObj {
 } MObj; // size = 0xA8
 
 typedef struct SObj {
-    /* 0x00 */ struct SObj *next;
-    /* 0x04 */ struct GObjCommon *unk04;
-    /* 0x08 */ struct SObj *unk08;
-    /* 0x0C */ struct SObj *unk0C;
+    /* 0x00 */ struct SObj *nextFree;
+    /* 0x04 */ struct GObjCommon *parent;
+    /* 0x08 */ struct SObj *next;
+    /* 0x0C */ struct SObj *prev;
     /* 0x10 */ Sprite sp;
     /* 0x54 */ s32 unk54;
-} SObj; // size >= 0x58 (0x6C?)
+} SObj; // size >= 0x58
 
 typedef struct OMCamera {
-    /* 0x00 */ struct OMCamera *next;
-    /* 0x04 */ struct GObjCommon *unk04;
-    /* 0x08 */ Vp unk08;
+    /* 0x00 */ struct OMCamera *nextFree;
+    /* 0x04 */ struct GObjCommon *parent;
+    /* 0x08 */ Vp vp;
     /* 0x18 */ union {
         struct Mtx6Float f6;
         struct Mtx7Float f7;
     } unk18;
     /* 0x38 */ struct Mtx3x3Float unk38;
-    /* 0x60 */ s32 unk60; // len of unk64
-    /* 0x64 */ struct OMMtx *unk64[2];
-    /* 0x6C */ struct AObj *unk6C;
+    /* 0x60 */ s32 numMatrices; // len of unk64
+    /* 0x64 */ struct OMMtx *matrices[2];
+    /* 0x6C */ struct AObj *aobjs;
     /* 0x70 */ s32 unk70;
     /* 0x74 */ f32 unk74;
     /* 0x78 */ f32 unk78;
@@ -313,8 +325,8 @@ typedef struct {
     /* 0x18 */ GObjProcess* processes;
     /* 0x1C */ s32 numProcesses;
     /* 0x20 */ struct GObjCommon* commons;
-    /* 0x24 */ s32 numCommons;
-    /* 0x28 */ s32 commonSize;
+    /* 0x24 */ s32 numObjects;
+    /* 0x28 */ s32 objectSize;
     /* 0x2C */ OMMtx* matrices;
     /* 0x30 */ s32 numMatrices;
     /* 0x34 */ void* cleanupFn; // void(*)(struct DObjDynamicStore *)
@@ -333,6 +345,11 @@ typedef struct {
     /* 0x68 */ s32 cameraSize;
 } OMSetup; // size == 0x6C
 
-void func_8000BCA8(s32);
+void func_8000A52C(GObjCommon* obj);
+
+extern GObjCommon* omCurrentObject;
+extern GObjCommon* omGObjListHead[];
+extern OSMesgQueue omProcessWaitQueue;
+extern GObjProcess* omCurrentProcess;
 
 #endif /* SYS_OM_H */

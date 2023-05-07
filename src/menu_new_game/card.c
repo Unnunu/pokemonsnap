@@ -1,0 +1,1 @@
+#include "sprite/menu_new_game/card.png.inc.c"

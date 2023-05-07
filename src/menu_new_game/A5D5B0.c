@@ -1,19 +1,20 @@
 #include "common.h"
 
+extern Sprite sprite_menu_new_game_cursor;
+
 // BSS
-extern s32 D_80118068;
 extern s32 D_80118110;
 extern s32 D_80118114;
-extern s32 D_80168120;
-extern s32 D_80168124;
-extern s32 D_80168128;
-extern s8 D_8016812C;
-extern u8 D_80168130[16];
-extern u8 D_80168140[3];
-extern u8 D_80168143;
-extern u8 D_80168144;
-extern Struct_8000C37C* D_80168148;
-extern u8 D_8016814C;
+static s32 D_80168120;
+static s32 D_80168124;
+static s32 D_80168128;
+static s8 D_8016812C;
+static u8 D_80168130[16];
+static u8 D_80168140[3];
+static u8 D_80168143;
+static u8 D_80168144;
+static Struct_8000C37C* D_80168148;
+static u8 D_8016814C;
 
 void func_800E2800_A5DBB0(void);
 void func_800E2758_A5DB08(void);
@@ -352,7 +353,7 @@ void func_800E2E00_A5E1B0(void) {
 
     om_create_process(om_add_gobj(0xE, 0, 0, 0x80000000), func_800E2C38_A5DFE8, 0, 1);
     D_8016814C = 0;
-    D_80168148 = func_8000C37C(0xE, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &D_80118068, 0, func_800E2D18_A5E0C8, 1);
+    D_80168148 = func_8000C37C(0xE, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_cursor, 0, func_800E2D18_A5E0C8, 1);
     unk_48 = D_80168148->unk_48;
     unk_48->unk_24 = 0x201;
     unk_48->unk_10 = 203; unk_48->unk_12 = 64;

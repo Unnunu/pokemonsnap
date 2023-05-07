@@ -5,6 +5,6 @@
 
 void* hal_alloc(s32 size, s32 alignment);
 
-extern s32 gtlD_80040CF8;
+extern s32 gtlDrawnFrameCounter;
 
 #endif /* SYS_GTL_H */

@@ -36,21 +36,21 @@ enum UcodeTypes {
 
 typedef struct {
     /* 0x00 */ u16 unk00;
-    /* 0x04 */ void (*fn04)(void);
-    /* 0x08 */ void (*fn08)(void);
+    /* 0x04 */ void (*fnUpdate)(void);
+    /* 0x08 */ void (*fnDraw)(void);
     /* 0x0C */ void* heapBase;
     /* 0x10 */ u32 heapSize;
     /* 0x14 */ u32 unk14; // count?
-    /* 0x18 */ s32 unk18;
+    /* 0x18 */ s32 numContexts;
     /* 0x1C */ u32 dlBufferSize0;
     /* 0x20 */ u32 dlBufferSize1;
     /* 0x24 */ u32 dlBufferSize2;
     /* 0x28 */ u32 dlBufferSize3;
     /* 0x2C */ u32 unk2C;
     /* 0x30 */ u16 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ void (*fn38)(Gfx**); // scissor callback?
-    /* 0x3C */ void (*fn3C)(void);  // controller read callback?
+    /* 0x34 */ s32 rdpOutputBufferSize;
+    /* 0x38 */ void (*fnPreRender)(Gfx**); // scissor callback?
+    /* 0x3C */ void (*fnUpdateInput)(void);  // controller read callback?
 } BufferSetup;                      // size == 0x40
 
 typedef struct {
@@ -60,7 +60,7 @@ typedef struct {
     /* 0x48 */ u32 numOMStacks;
     /* 0x4C */ s32 unk4C;
     /* 0x50 */ u32 numOMProcesses;
-    /* 0x54 */ u32 numOMCommons;
+    /* 0x54 */ u32 numOMGobjs;
     /* 0x58 */ u32 omCommonSize;
     /* 0x5C */ u32 numOMMtx;
     /* 0x60 */ void* unk60;
@@ -73,7 +73,7 @@ typedef struct {
     /* 0x7C */ u32 omSobjSize;
     /* 0x80 */ u32 numOMCameras;
     /* 0x84 */ u32 omCameraSize;
-    /* 0x88 */ void (*unk88)(void);
+    /* 0x88 */ void (*postInitFunc)(void);
 } Wrapper683C; // size >= 0x8C
 
 typedef struct {
@@ -88,16 +88,16 @@ typedef struct {
 
 typedef struct FnBundle {
     /* 0x00 */ u16 unk00;
-    /* 0x04 */ void (*fn04)(void);
-    /* 0x08 */ void (*fnDrawFrame)(struct FnBundle*);
-    /* 0x0C */ void (*fn0C)(void);
-    /* 0x10 */ void (*fn10)(struct FnBundle*);
+    /* 0x04 */ void (*fnPrivUpdate)(void);
+    /* 0x08 */ void (*fnUpdate)(struct FnBundle*);
+    /* 0x0C */ void (*fnPrivDraw)(void);
+    /* 0x10 */ void (*fnDraw)(struct FnBundle*);
 } FnBundle; // size == 0x14
 
 // data
 s32 gtlD_80040CF0 = 0;
 u32 gtlFrameCounter = 0;
-s32 gtlD_80040CF8 = 0;
+s32 gtlDrawnFrameCounter = 0;
 UcodeInfo gtlD_80040CFC[] = {
     { NULL, NULL }, { NULL, NULL }, { UcodeText1, UcodeData1 }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL },
     { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 }, { NULL, NULL }, { NULL, NULL }
@@ -107,8 +107,8 @@ UcodeInfo gtlD_80040CFC[] = {
 u8 gtl_padding[0x10];
 OSMesg gtlGameTickQueueMsgs[4];
 OSMesgQueue gtlGameTickQueue;
+u16 gtlUpdateInterval;
 u16 gtlDrawFrameInterval;
-u16 gtlD_8004979A;
 s32 gtlD_8004979C;
 OSMesg gtlD_800497A0[1];
 OSMesgQueue gtlD_800497A8;
@@ -132,8 +132,8 @@ s32 gtlState;
 s32 gtlD_8004A8B4;
 DynamicBuffer gtlCurrentGfxHeap;
 DynamicBuffer sGeneralHeap;
-FnBundle gtlD_8004A8D8;
-s32 gtlD_8004A8EC;
+FnBundle gtlCallbackBundle;
+s32 gtlTimestamp;
 s32 gtlD_8004A8F0;
 s32 gtlD_8004A8F4;
 void* gtlRPDOutputBuffer;
@@ -155,6 +155,7 @@ void func_80000A64(void*);
 void func_80007D08(Gfx**);
 void func_80007D14(Gfx**);
 void om_create_objects(OMSetup*);
+void func_80011254(void*);
 
 void func_800053F0(void* arg0) {
     if (arg0 != NULL) {
@@ -769,25 +770,25 @@ void gtl_main(FnBundle* arg0) {
         while (TRUE) {
             func_80006878();
             check_stack_probes();
-            for (i = 0; i < gtlDrawFrameInterval; i++) {
+            for (i = 0; i < gtlUpdateInterval; i++) {
                 osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_BLOCK);
             }
             while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
 
-            gtlD_8004A8EC = osGetCount();
-            arg0->fnDrawFrame(arg0);
+            gtlTimestamp = osGetCount();
+            arg0->fnUpdate(arg0);
             gtlFrameCounter += 1;
-            gtlD_8004A8F0 = (osGetCount() - gtlD_8004A8EC) / 2971;
+            gtlD_8004A8F0 = (osGetCount() - gtlTimestamp) / 2971;
             if (gtl_check_exit_main_loop()) {
                 break;
             }
 
-            if (gtlFrameCounter % gtlD_8004979A == 0) {
+            if (gtlFrameCounter % gtlDrawFrameInterval == 0) {
                 gtl_switch_context(0);
-                gtlD_8004A8EC = osGetCount();
-                arg0->fn10(arg0);
-                gtlD_80040CF8 += 1;
-                gtlD_8004A8F4 = (osGetCount() - gtlD_8004A8EC) / 2971;
+                gtlTimestamp = osGetCount();
+                arg0->fnDraw(arg0);
+                gtlDrawnFrameCounter += 1;
+                gtlD_8004A8F4 = (osGetCount() - gtlTimestamp) / 2971;
 
                 if (gtl_check_exit_main_loop()) {
                     break;
@@ -798,24 +799,24 @@ void gtl_main(FnBundle* arg0) {
         while (TRUE) {
             func_80006878();
             check_stack_probes();
-            for (i = 0; i < gtlDrawFrameInterval; i++) {
+            for (i = 0; i < gtlUpdateInterval; i++) {
                 osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_BLOCK);
             }
             while (osRecvMesg(&gtlGameTickQueue, NULL, OS_MESG_NOBLOCK) != -1) {}
 
-            gtlD_8004A8EC = osGetCount();
-            arg0->fnDrawFrame(arg0);
+            gtlTimestamp = osGetCount();
+            arg0->fnUpdate(arg0);
             gtlFrameCounter += 1;
-            gtlD_8004A8F0 = (osGetCount() - gtlD_8004A8EC) / 2971;
+            gtlD_8004A8F0 = (osGetCount() - gtlTimestamp) / 2971;
             if (gtl_check_exit_main_loop()) {
                 break;
             }
 
-            if (gtlFrameCounter % gtlD_8004979A == 0 && gtl_switch_context(1)) {
-                gtlD_8004A8EC = osGetCount();
-                arg0->fn10(arg0);
-                gtlD_80040CF8 += 1;
-                gtlD_8004A8F4 = (osGetCount() - gtlD_8004A8EC) / 2971;
+            if (gtlFrameCounter % gtlDrawFrameInterval == 0 && gtl_switch_context(1)) {
+                gtlTimestamp = osGetCount();
+                arg0->fnDraw(arg0);
+                gtlDrawnFrameCounter += 1;
+                gtlD_8004A8F4 = (osGetCount() - gtlTimestamp) / 2971;
                 if (gtl_check_exit_main_loop()) {
                     break;
                 }
@@ -834,30 +835,30 @@ void gtl_main(FnBundle* arg0) {
 
 void func_80006E24(FnBundle* arg0) {
     gtlUpdateInputFunc();
-    arg0->fn04();
+    arg0->fnPrivUpdate();
 }
 
 void func_80006E5C(FnBundle* self) {
     gtl_reset_heap();
     gtl_init_display_lists();
-    self->fn0C();
+    self->fnPrivDraw();
     gtl_process_all_dlists();
     vi_apply_settings_nonblocking(gtlVideoSettingsTasks[gtlContextId]);
     gtl_cancel_current_gfx_task();
 }
 
-void func_80006EC0(FnBundle* self) {
+void gtl_update(FnBundle* self) {
     gtlUpdateInputFunc();
-    self->fn04();
+    self->fnPrivUpdate();
     if (gtl_check_exit_main_loop()) {
         func_8000C274();
     }
 }
 
-void func_80006F10(FnBundle* self) {
+void gtl_draw(FnBundle* self) {
     gtl_reset_heap();
     gtl_init_display_lists();
-    self->fn0C();
+    self->fnPrivDraw();
     gtl_process_all_dlists();
     vi_apply_settings_nonblocking(gtlVideoSettingsTasks[gtlContextId]);
     gtl_cancel_current_gfx_task();
@@ -894,68 +895,68 @@ void func_80006F8C(struct Temp8000641C* arg0) {
         gtlD_8004A918[idx] = 0;
     } while (gtlD_8004A918[gtlContextId] != 0);
 
-    gtlD_80040CF8 += 1;
+    gtlDrawnFrameCounter += 1;
 }
 
-void func_800070B8(BufferSetup* arg0, void (*arg1)(void)) {
+void gtl_start(BufferSetup* setup, void (*postInitFunc)(void)) {
     s32 i;
     DLBuffer dlBuffers[2][4];
     s32 tmp;
 
-    gtlNumContexts = arg0->unk18;
-    gtlD_8004A8D8.unk00 = arg0->unk00;
-    gtlD_8004A8D8.fn04 = arg0->fn04;
-    gtlD_8004A8D8.fn0C = arg0->fn08;
+    gtlNumContexts = setup->numContexts;
+    gtlCallbackBundle.unk00 = setup->unk00;
+    gtlCallbackBundle.fnPrivUpdate = setup->fnUpdate;
+    gtlCallbackBundle.fnPrivDraw = setup->fnDraw;
 
-    gtl_init_task_buffers(hal_alloc(arg0->unk14 * sizeof(SCTaskGfx) * gtlNumContexts, 8),
-                          arg0->unk14,
+    gtl_init_task_buffers(hal_alloc(setup->unk14 * sizeof(SCTaskGfx) * gtlNumContexts, 8),
+                          setup->unk14,
                           hal_alloc(sizeof(SCTaskGfxEnd) * gtlNumContexts, 8),
                           hal_alloc(sizeof(SCTaskVi) * gtlNumContexts, 8));
 
     for (i = 0; i < gtlNumContexts; i++) {
-        dlBuffers[i][0].start = hal_alloc(arg0->dlBufferSize0, 8);
-        dlBuffers[i][0].length = arg0->dlBufferSize0;
-        dlBuffers[i][1].start = hal_alloc(arg0->dlBufferSize1, 8);
-        dlBuffers[i][1].length = arg0->dlBufferSize1;
-        dlBuffers[i][2].start = hal_alloc(arg0->dlBufferSize2, 8);
-        dlBuffers[i][2].length = arg0->dlBufferSize2;
-        dlBuffers[i][3].start = hal_alloc(arg0->dlBufferSize3, 8);
-        dlBuffers[i][3].length = arg0->dlBufferSize3;
+        dlBuffers[i][0].start = hal_alloc(setup->dlBufferSize0, 8);
+        dlBuffers[i][0].length = setup->dlBufferSize0;
+        dlBuffers[i][1].start = hal_alloc(setup->dlBufferSize1, 8);
+        dlBuffers[i][1].length = setup->dlBufferSize1;
+        dlBuffers[i][2].start = hal_alloc(setup->dlBufferSize2, 8);
+        dlBuffers[i][2].length = setup->dlBufferSize2;
+        dlBuffers[i][3].start = hal_alloc(setup->dlBufferSize3, 8);
+        dlBuffers[i][3].length = setup->dlBufferSize3;
     }
     gtl_set_dl_buffers(dlBuffers);
 
     for (i = 0; i < gtlNumContexts; i++) {
-        init_bump_alloc(&gtlCurrentGfxHeap, 0x10002, hal_alloc(arg0->unk2C, 8), arg0->unk2C);
+        init_bump_alloc(&gtlCurrentGfxHeap, 0x10002, hal_alloc(setup->unk2C, 8), setup->unk2C);
         gtlGfxHeaps[i].id = gtlCurrentGfxHeap.id;
         gtlGfxHeaps[i].start = gtlCurrentGfxHeap.start;
         gtlGfxHeaps[i].end = gtlCurrentGfxHeap.end;
         gtlGfxHeaps[i].ptr = gtlCurrentGfxHeap.ptr;
     }
 
-    arg0->unk30 = 2;
-    if (arg0->unk34 == 0) {
-        arg0->unk34 = 0x1000;
+    setup->unk30 = 2;
+    if (setup->rdpOutputBufferSize == 0) {
+        setup->rdpOutputBufferSize = 0x1000;
     }
 
-    tmp = arg0->unk34;
-    gtl_set_rdp_output_settings(arg0->unk30, hal_alloc(tmp, 16), arg0->unk34);
-    func_80007D08(arg0->fn38);
-    gtlUpdateInputFunc = arg0->fn3C;
+    tmp = setup->rdpOutputBufferSize;
+    gtl_set_rdp_output_settings(setup->unk30, hal_alloc(tmp, 16), setup->rdpOutputBufferSize);
+    func_80007D08(setup->fnPreRender);
+    gtlUpdateInputFunc = setup->fnUpdateInput;
     contSetUpdateEveryTick((uintptr_t)contReadAndUpdate != (uintptr_t)gtlUpdateInputFunc ? TRUE : FALSE);
 
-    gtlFrameCounter = gtlD_80040CF8 = 0;
-    if (arg1 != NULL) {
-        arg1();
+    gtlFrameCounter = gtlDrawnFrameCounter = 0;
+    if (postInitFunc != NULL) {
+        postInitFunc();
     }
 
-    gtl_main(&gtlD_8004A8D8);
+    gtl_main(&gtlCallbackBundle);
 }
 
 void func_80007354(BufferSetup* arg) {
     init_hal_alloc(arg->heapBase, arg->heapSize);
-    gtlD_8004A8D8.fnDrawFrame = func_80006E24;
-    gtlD_8004A8D8.fn10 = func_80006E5C;
-    func_800070B8(arg, NULL);
+    gtlCallbackBundle.fnUpdate = func_80006E24;
+    gtlCallbackBundle.fnDraw = func_80006E5C;
+    gtl_start(arg, NULL);
 }
 
 void func_800073AC(Wrapper683C* arg) {
@@ -979,9 +980,9 @@ void func_800073AC(Wrapper683C* arg) {
     omSetup.processes = hal_alloc(sizeof(GObjProcess) * arg->numOMProcesses, 4);
     omSetup.numProcesses = arg->numOMProcesses;
 
-    omSetup.commons = hal_alloc(arg->omCommonSize * arg->numOMCommons, 8);
-    omSetup.numCommons = arg->numOMCommons;
-    omSetup.commonSize = arg->omCommonSize;
+    omSetup.commons = hal_alloc(arg->omCommonSize * arg->numOMGobjs, 8);
+    omSetup.numObjects = arg->numOMGobjs;
+    omSetup.objectSize = arg->omCommonSize;
 
     omSetup.matrices = hal_alloc(sizeof(OMMtx) * arg->numOMMtx, 8);
     omSetup.numMatrices = arg->numOMMtx;
@@ -1008,14 +1009,14 @@ void func_800073AC(Wrapper683C* arg) {
     omSetup.cameraSize = arg->omCameraSize;
 
     om_create_objects(&omSetup);
-    gtlD_8004A8D8.fnDrawFrame = func_80006EC0;
-    gtlD_8004A8D8.fn10 = func_80006F10;
-    func_800070B8(&arg->setup, arg->unk88);
+    gtlCallbackBundle.fnUpdate = gtl_update;
+    gtlCallbackBundle.fnDraw = gtl_draw;
+    gtl_start(&arg->setup, arg->postInitFunc);
 }
 
-void func_800075FC(u16 arg0, u16 arg1) {
-    gtlDrawFrameInterval = arg0;
-    gtlD_8004979A = arg1;
+void gtl_set_intervals(u16 updateInterval, u16 draw_interval) {
+    gtlUpdateInterval = updateInterval;
+    gtlDrawFrameInterval = draw_interval;
 }
 
 void func_80007618(void) {
@@ -1079,7 +1080,7 @@ void gtl_init(void) {
     scAddClient(&gtlSCClient, &gtlGameTickQueue, gtlGameTickQueueMsgs, ARRAY_COUNT(gtlGameTickQueueMsgs));
     osCreateMesgQueue(&gtlD_800497E0, gtlD_800497D0, ARRAY_COUNT(gtlD_800497D0));
     osCreateMesgQueue(&gtlResetQueue, gtlResetQueueMsgs, ARRAY_COUNT(gtlResetQueueMsgs));
-    gtlDrawFrameInterval = gtlD_8004979A = 1;
+    gtlUpdateInterval = gtlDrawFrameInterval = 1;
     osCreateMesgQueue(&gtlD_800497A8, gtlD_800497A0, ARRAY_COUNT(gtlD_800497A0));
     gtlD_8004979C = 2;
 }

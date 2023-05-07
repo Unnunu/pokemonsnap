@@ -8,8 +8,8 @@
 
 void loadCompressedData(u32 rom, u32 ram);
 
-GObj* om_create_process(GObj*, gfxFunc func, s8 kind, u32 priority);
-void om_end_process(GObj*);
+GObj* om_create_process(GObj*, gfxFunc func, u8 kind, u32 priority);
+void om_end_process(GObjProcess*);
 
 void sendSignalToLink(s32 llIndex, s32, GObj*);
 
@@ -69,12 +69,14 @@ void func_800073AC(Struct_800073AC*);
 void vi_set_screen_offsets(s16, s16, s16, s16);
 void vi_apply_screen_settings(s32*);
 
-GObj* om_add_gobj(s32, s32, s32, s32);
-void func_8000ADA0(void);
-void func_8000AFFC(void);
-void func_8000BC84(void);
+GObjCommon* om_add_gobj(u32 id, void (*fnUpdate)(GObjCommon*), u8 link, u32 priority);
+void om_draw_all(void);
+void om_update_all(void);
+void func_8000BC84(u32);
 void func_8000BCA8(s32);
-Struct_8000C37C* func_8000C37C(s32, void*, s32, s32, void*, s32, s32, s32, s32*, s32, void (*)(Struct_8000C37C *), s32);
+GObjCommon* func_8000C37C(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                          void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite, u8 procKind,
+                          void (*procFunc)(GObjCommon*), s32 procPriority);
 Struct_8000C37C* func_8000C3FC(s32, void*, s32, s32, void*, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_8000C4B0(s32, s32, s32, s32, s32);
 

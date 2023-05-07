@@ -9,6 +9,7 @@ options:
   base_path: .
   target_path: baserom.z64
   ld_script_path: pokemonsnap.ld
+  extensions_path: tools/splat_ext
   symbol_addrs_path: tools/symbol_addrs.txt
   symbol_name_format: $VRAM_$ROM
   migrate_rodata_to_functions: False
@@ -33,8 +34,8 @@ segments:
     - [0x8510, c, sys/vi]
     - [0x8820, c]
     - [0x8A80, c, sys/om]
-    - [0xC2F0, asm]
-    - [0xC5B0, asm]
+    - [0xC2F0, c]
+    - [0xC5B0, c]
     - [0xD150, asm]
     - [0x11E30, asm]
     - [0x1A560, asm]
@@ -196,13 +197,15 @@ segments:
     - [0x43E60, .rodata, sys/ml]
     - [0x43E80, .rodata, sys/om]
     - [0x44300, rodata]
+    - [0x44320, .rodata, C5B0]
+    - [0x44350, rodata]
   - name: app_render
     type: code
     start: 0x46270
     vram: 0x8009A8C0
     symbol_name_format: $VRAM
     subsegments:
-    - [0x46270, asm]
+    - [0x46270, c]
     - [0x47330, c]
     - [0x47380, c]
     - [0x4B670, asm]
@@ -214,7 +217,7 @@ segments:
     - [0x56880, c]
     - [0x568D0, asm]
     - [0x574F0, asm]
-  - [0x57580, bin]
+    - [0x57580, data]
   - name: more_funcs
     type: code
     start: 0x5BF20
@@ -525,10 +528,31 @@ segments:
     vram: 0x800E18A0
     exclusive_ram_id: level
     subsegments:
-    - [0xA5CC50, c, A5CC50]
-    - [0xA5D5B0, c, A5D5B0]
-    - [0xA5E3A0, .data, A5CC50]
-  - [0xA5F070, bin] # part of menu_new_game section
+    - name: code
+      type: group
+      subsegments:
+      - [0xA5CC50, c, A5CC50]
+      - [0xA5D5B0, c, A5D5B0]
+      - [0xA5E3A0, .data, A5CC50]
+      - [0xA5EA50, .rodata, A5CC50]
+      - [0xA5F040, .rodata, A5D5B0]
+    - name: images
+      type: group
+      start: 0xA5F070
+      vram: 0x800E3CC0
+      extract: True
+      subsegments:
+      - [0xA5F070, sprite, background]
+      - [0xA84C80, .data, background]    
+      - [0xA84C80, sprite, card]
+      - [0xA93390, .data, card]
+      - [0xA93390, sprite, cursor]
+      - [0xA93460, .data, cursor]
+    - [0xA93460, .bss, A5CC50]
+    - [0xA93460, .bss, A5D5B0]
+    - [0xA93460, .bss, background]
+    - [0xA93460, .bss, card]
+    - [0xA93460, .bss, cursor]
   - name: unk_level_end_11
     type: code
     start: 0xA93460

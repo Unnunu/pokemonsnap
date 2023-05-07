@@ -82,7 +82,7 @@ ENDLINE := \n'
 
 ### Compiler Options ###
 
-IINC           := -I include -I $(BUILD_DIR)/include -I src
+IINC           := -I include -I $(BUILD_DIR)/include -I src -I $(BUILD_DIR)/assets
 
 ASFLAGS        := -G 0 -I include -EB -mtune=vr4300 -march=vr4300
 CFLAGS         := -G 0 -non_shared -fullwarn -verbose -Xcpluscomm -nostdinc -Wab,-r4300_mul
@@ -108,6 +108,7 @@ SPLAT_TIMESTAMP := asm/splat_timestamp
 # Object files
 OBJECTS := $(shell $(PYTHON) tools/splat_objects.py $(SPLAT_YAML))
 DEPENDS := $(OBJECTS:=.d)
+SPRITES := $(shell find assets/sprite -name '*.png' 2>/dev/null | awk '{ print "build/" $$1 ".o" }')
 
 ### Targets ###
 
@@ -151,6 +152,11 @@ $(BUILD_DIR):
 	@$(P)$(PRINT)$(GREEN)Making build folder$(ENDGREEN)$(ENDLINE)
 	@mkdir -p $@
 
+# Create c files for images
+$(BUILD_DIR)/assets/sprite/%.png.o: assets/sprite/%.png
+	@$(P)$(PRINT)$(GREEN)Converting image file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	python3 tools/mksprite.py $< $(BUILD_DIR)/$<
+
 # Compile .c files with ido
 $(BUILD_DIR)/src/%.c.o: src/%.c $(SPLAT_TIMESTAMP) | $(BUILD_DIR)
 	@$(P)$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
@@ -171,7 +177,7 @@ $(BUILD_DIR)/%.bin.o: %.bin | $(BUILD_DIR)
 	$(V)$(LD) -r -b binary -o $@ $<
 
 # Link the .o files into the .elf
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS)
+$(BUILD_DIR)/$(TARGET).elf: $(SPRITES) $(OBJECTS)
 	@$(P)$(PRINT)$(GREEN)Linking elf file: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(LD) $(LDFLAGS) -o $@
 

@@ -4,7 +4,7 @@
 
 Vp sViewport;
 
-void (*funcD_80040D60)(Gfx**) = NULL;
+void (*gPreRenderFunc)(Gfx**) = NULL;
 
 Mtx sIdentityMatrix = {{
     /* Integer Portion */
@@ -66,7 +66,7 @@ void func_80007CBC(Vp *vp) {
 }
 
 void func_80007D08(void (*arg0)(Gfx**)) {
-    funcD_80040D60 = arg0;
+    gPreRenderFunc = arg0;
 }
 
 #ifdef NON_MATCHING
@@ -80,8 +80,8 @@ void func_80007D14(Gfx** arg0) {
     func_80007CBC(&sViewport);
     gSPDisplayList(gfxPtr++, sResetRdp);
     gDPSetScissor(gfxPtr++, G_SC_NON_INTERLACE, x, y, viScreenWidth, viScreenHeight);
-    if (funcD_80040D60 != NULL) {
-        funcD_80040D60(&gfxPtr);
+    if (gPreRenderFunc != NULL) {
+        gPreRenderFunc(&gfxPtr);
     }
     *arg0 = gfxPtr;
 }

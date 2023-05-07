@@ -5,9 +5,10 @@
 extern u8 D_80369F80;
 extern u8 D_8016A010;
 
-// TODO split bin at 0xA5F070
-extern s32 D_80109880;
-extern s32 D_80117F98;
+//data
+
+extern Sprite sprite_menu_new_game_card;
+extern Sprite sprite_menu_new_game_background;
 
 char* D_800E2FF0[] = {
     "あ", "い", "う", "え", "お", "か", "き", "く",
@@ -84,13 +85,13 @@ Gfx D_800E35B0[] = {
 };
 
 // BSS
-extern Struct_8000C37C* D_801180B0;
-extern Struct_8000C37C* D_801180B4;
-extern Struct_8000C37C* D_801180B8;
-extern s32 D_801180C0[20];
-extern s32 D_80118110;
-extern s32 D_80118114;
-extern s32 D_80118118;
+static Struct_8000C37C* D_801180B0;
+static Struct_8000C37C* D_801180B4;
+static Struct_8000C37C* D_801180B8;
+static s32 D_801180C0[20];
+s32 D_80118110;
+s32 D_80118114;
+static u8 D_80118118[0x50000];
 
 void func_800E2ED0_A5E280(void);
 
@@ -111,7 +112,7 @@ void func_800E18C4_A5CC74(void) {
 void func_800E18CC_A5CC7C(void) {
     Struct_8000C37C_Sub24* unk_48;
 
-    D_801180B4 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &D_80109880, 0, 0, 1);
+    D_801180B4 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_background, 0, 0, 1);
     unk_48 = D_801180B4->unk_48;
     unk_48->unk_24 = 0x201;
 }
@@ -119,7 +120,7 @@ void func_800E18CC_A5CC7C(void) {
 void func_800E1950_A5CD00(void) {
     Struct_8000C37C_Sub24* unk_48;
 
-    D_801180B8 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &D_80117F98, 0, 0, 1);
+    D_801180B8 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_card, 0, 0, 1);
     unk_48 = D_801180B8->unk_48; 
     unk_48->unk_10 = 96; unk_48->unk_12 = 21;
     unk_48->unk_24 = 0x201;
@@ -292,8 +293,8 @@ void func_800E2078_A5D428(void) {
 
 Struct_800073AC D_800E3608 = {
     0x00000000,
-    func_8000AFFC,
-    func_8000ADA0,
+    om_update_all,
+    om_draw_all,
     &D_8016A010,
     0x00000000,
     0x00000002,

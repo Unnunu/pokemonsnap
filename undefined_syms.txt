@@ -36,3 +36,5 @@ UcodeText1 = 0x8003E7A0;
 UcodeData1 = 0x80044E60;
 UcodeText2 = 0x8003FB30;
 UcodeData2 = 0x80045280;
+
+D_8016A010 = 0x8016A010;
