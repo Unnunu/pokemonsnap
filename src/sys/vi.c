@@ -1,16 +1,7 @@
 #include "PR/ultratypes.h"
 #include "PR/gbi.h"
 #include "sys/sched.h"
-
-typedef struct {
-    /* 0x00 */ void* fb1;
-    /* 0x04 */ void* fb2;
-    /* 0x08 */ void* fb3;
-    /* 0x0C */ u16* zBuffer;
-    /* 0x10 */ u32 screenWidth;
-    /* 0x14 */ u32 screenHeight;
-    /* 0x18 */ u32 flags;
-} ScreenSettings; // size >= 0x18
+#include "sys/vi.h"
 
 u16* viZBuffer;
 s32 viBitDepth;

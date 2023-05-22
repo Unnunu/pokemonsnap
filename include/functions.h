@@ -60,27 +60,29 @@ void runAnimalCleanup(GObj* obj);
 GObj* addAnimalAtGeo(GObj* obj, u16 AnimalID, animalDef* def);
 roomGFX* setNodePosToNegRoom(GObj*);
 void animalPathLoop(GObj* obj, f32 start, f32 end, f32 dt, f32 yawStep, u32 flags);
-void spawnAnimalUsingDeltaHeight(s32 gObjID, u16 id, roomGFX* roomA, roomGFX* roomB, objectSpawn* spawn, animalInitData* initData);
+void spawnAnimalUsingDeltaHeight(s32 gObjID, u16 id, roomGFX* roomA, roomGFX* roomB, objectSpawn* spawn,
+                                 animalInitData* initData);
 
 void contUpdate(void);
 void func_80005448(s32);
 void func_800067DC(void);
-void func_800073AC(Struct_800073AC*);
-void vi_set_screen_offsets(s16, s16, s16, s16);
-void vi_apply_screen_settings(s32*);
+void om_setup_scene(Struct_800073AC*);
 
 GObjCommon* om_add_gobj(u32 id, void (*fnUpdate)(GObjCommon*), u8 link, u32 priority);
 void om_draw_all(void);
 void om_update_all(void);
-void func_8000BC84(u32);
+void func_8000BC84(GObjCommon* arg0);
 void func_8000BCA8(s32);
-GObjCommon* func_8000C37C(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
-                          void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite, u8 procKind,
-                          void (*procFunc)(GObjCommon*), s32 procPriority);
-Struct_8000C37C* func_8000C3FC(s32, void*, s32, s32, void*, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_8000C4B0(s32, s32, s32, s32, s32);
+GObjCommon* create_sprite(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                          void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite,
+                          u8 procKind, void (*procFunc)(GObjCommon*), s32 procPriority);
+s32 func_8000C3FC(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                  void (*fnRender)(GObjCommon*), s32 dlPriority, s32 arg6, s32 arg7, s32 arg8, u8 procKind,
+                  void (*procFunc)(GObjCommon*), s32 procPriority, s32 argC);
+GObjCommon* func_8000C4B0(s32 link, s32 priority, s32 dlPriority, s32 arg3, s32 arg4);
 
 void func_80017768(void);
+void func_800191D8(GObjCommon*);
 void func_8001977C(void);
 void func_80022374(s32, s32);
 void func_80022454(s32, s32);
@@ -100,7 +102,9 @@ void func_800BF44C_5C2EC(u8*);
 void func_800BFC18_5CAB8(s32, s32);
 void func_800BFEBC_5CD5C(s32, s32);
 
-void func_8036A3F8(s32*, s32);
+void mem_create_heap(u8*, u32);
+void* mem_alloc(u32 size);
+
 void func_8036A8E4(s32);
 s32 func_8036AC6C(s32 posX, s32 posY, s32 width, s32 height, s32);
 void func_8036B734(s32);

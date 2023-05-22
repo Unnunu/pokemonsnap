@@ -1,11 +1,15 @@
 #ifndef _MACROS_H
 #define _MACROS_H
 
+typedef u8 Addr[];
+
 #define UNUSED __attribute__((unused))
 
 #if !defined(__GNUC__) && !defined(__clang__)
 #define __attribute__(x)
 #endif
+
+#define offsetof(st, m) ((u32) & (((st*)0)->m))
 
 /// Get the number of elements in a static array
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
@@ -17,14 +21,20 @@
 #define SCREEN_HEIGHT 240
 
 #ifndef MIN
-#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#define FLOAT_MAX     3.4028235e38
+#define ABS(x) (((x) < 0) ? (-(x)) : (x))
+
+#define SQ(x) ((x) * (x))
+
+#define FLOAT_MAX 3.4028235e38
 #define FLOAT_NEG_MAX -FLOAT_MAX
+
+#define TAU 6.2831855f
 
 #endif

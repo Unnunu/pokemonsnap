@@ -5,6 +5,7 @@
 #include "sys/cont.h"
 #include "sys/om.h"
 #include "sys/ml.h"
+#include "sys/gtl.h"
 #include "types.h"
 #include "macros.h"
 
@@ -33,48 +34,6 @@ enum UcodeTypes {
     UCODE_S2DEX2_FIFO = 10,
     UCODE_S2DEX2_XBUS = 11
 };
-
-typedef struct {
-    /* 0x00 */ u16 unk00;
-    /* 0x04 */ void (*fnUpdate)(void);
-    /* 0x08 */ void (*fnDraw)(void);
-    /* 0x0C */ void* heapBase;
-    /* 0x10 */ u32 heapSize;
-    /* 0x14 */ u32 unk14; // count?
-    /* 0x18 */ s32 numContexts;
-    /* 0x1C */ u32 dlBufferSize0;
-    /* 0x20 */ u32 dlBufferSize1;
-    /* 0x24 */ u32 dlBufferSize2;
-    /* 0x28 */ u32 dlBufferSize3;
-    /* 0x2C */ u32 unk2C;
-    /* 0x30 */ u16 unk30;
-    /* 0x34 */ s32 rdpOutputBufferSize;
-    /* 0x38 */ void (*fnPreRender)(Gfx**); // scissor callback?
-    /* 0x3C */ void (*fnUpdateInput)(void);  // controller read callback?
-} BufferSetup;                      // size == 0x40
-
-typedef struct {
-    /* 0x00 */ BufferSetup setup;
-    /* 0x40 */ u32 numOMThreads;
-    /* 0x44 */ u32 omThreadStackSize;
-    /* 0x48 */ u32 numOMStacks;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ u32 numOMProcesses;
-    /* 0x54 */ u32 numOMGobjs;
-    /* 0x58 */ u32 omCommonSize;
-    /* 0x5C */ u32 numOMMtx;
-    /* 0x60 */ void* unk60;
-    /* 0x64 */ void* unk64; // fn pointer void(*)(struct DObjDynamicStore *)
-    /* 0x68 */ u32 numOMAobjs;
-    /* 0x6C */ u32 numOMMobjs;
-    /* 0x70 */ u32 numOMDobjs;
-    /* 0x74 */ u32 omDobjSize;
-    /* 0x78 */ u32 numOMSobjs;
-    /* 0x7C */ u32 omSobjSize;
-    /* 0x80 */ u32 numOMCameras;
-    /* 0x84 */ u32 omCameraSize;
-    /* 0x88 */ void (*postInitFunc)(void);
-} Wrapper683C; // size >= 0x8C
 
 typedef struct {
     /* 0x00 */ u64* text;
@@ -926,7 +885,7 @@ void gtl_start(BufferSetup* setup, void (*postInitFunc)(void)) {
     gtl_set_dl_buffers(dlBuffers);
 
     for (i = 0; i < gtlNumContexts; i++) {
-        init_bump_alloc(&gtlCurrentGfxHeap, 0x10002, hal_alloc(setup->unk2C, 8), setup->unk2C);
+        init_bump_alloc(&gtlCurrentGfxHeap, 0x10002, hal_alloc(setup->gfxHeapSize, 8), setup->gfxHeapSize);
         gtlGfxHeaps[i].id = gtlCurrentGfxHeap.id;
         gtlGfxHeaps[i].start = gtlCurrentGfxHeap.start;
         gtlGfxHeaps[i].end = gtlCurrentGfxHeap.end;
@@ -959,10 +918,10 @@ void func_80007354(BufferSetup* arg) {
     gtl_start(arg, NULL);
 }
 
-void func_800073AC(Wrapper683C* arg) {
+void om_setup_scene(SceneSetup* arg) {
     OMSetup omSetup;
 
-    init_hal_alloc(arg->setup.heapBase, arg->setup.heapSize);
+    init_hal_alloc(arg->gtlSetup.heapBase, arg->gtlSetup.heapSize);
 
     omSetup.threads = hal_alloc(sizeof(GObjThread) * arg->numOMThreads, 8);
     omSetup.numThreads = arg->numOMThreads;
@@ -980,9 +939,9 @@ void func_800073AC(Wrapper683C* arg) {
     omSetup.processes = hal_alloc(sizeof(GObjProcess) * arg->numOMProcesses, 4);
     omSetup.numProcesses = arg->numOMProcesses;
 
-    omSetup.commons = hal_alloc(arg->omCommonSize * arg->numOMGobjs, 8);
+    omSetup.commons = hal_alloc(arg->objectSize * arg->numOMGobjs, 8);
     omSetup.numObjects = arg->numOMGobjs;
-    omSetup.objectSize = arg->omCommonSize;
+    omSetup.objectSize = arg->objectSize;
 
     omSetup.matrices = hal_alloc(sizeof(OMMtx) * arg->numOMMtx, 8);
     omSetup.numMatrices = arg->numOMMtx;
@@ -1011,7 +970,7 @@ void func_800073AC(Wrapper683C* arg) {
     om_create_objects(&omSetup);
     gtlCallbackBundle.fnUpdate = gtl_update;
     gtlCallbackBundle.fnDraw = gtl_draw;
-    gtl_start(&arg->setup, arg->postInitFunc);
+    gtl_start(&arg->gtlSetup, arg->postInitFunc);
 }
 
 void gtl_set_intervals(u16 updateInterval, u16 draw_interval) {

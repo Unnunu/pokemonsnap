@@ -518,4 +518,11 @@ typedef struct {
     /* 0x02 */ u8 b;
 } ColorRGB; // size = 0x03
 
+typedef struct {
+    /* 0x00 */ u8 r;
+    /* 0x01 */ u8 g;
+    /* 0x02 */ u8 b;
+    /* 0x03 */ u8 a;
+} ColorRGBA; // size = 0x04
+
 #endif

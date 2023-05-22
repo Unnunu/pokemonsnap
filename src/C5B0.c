@@ -3,7 +3,7 @@
 s32 func_8000B880(void (*handler)(GObjCommon*, s32));
 OMMtx* om_dobj_append_mtx(DObj* dobj, u8 kind, u8 arg2);
 OMMtx* om_camera_add_mtx(OMCamera* arg0, u8 kind, u8 arg2);
-void func_80009C94(DObj* obj);
+void om_dobj_remove_all_mobj(DObj* obj);
 void om_link_gobj_dl(GObjCommon* obj, void (*arg1)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 arg4);
 SObj* om_gobj_add_sprite(GObjCommon* arg0, Sprite* sprite);
 
@@ -99,20 +99,20 @@ GObjCommon* func_8000BC58(u32 id) {
     return func_8000BB4C(func_8000BC0C, id, TRUE);
 }
 
-void func_8000BC84(UNUSED u32 arg0) {
+void func_8000BC84(UNUSED GObjCommon* arg0) {
     func_8000B880(NULL);
 }
 
-void func_8000BCA8(s32 timesToStop) {
+void func_8000BCA8(s32 numFrames) {
     // todo: main.h STACK_PROBE_MAGIC
     if (omCurrentProcess->unk1C.thread->osStack[7] != 0xFEDCBA98) {
         fatal_printf("gobjthread stack over  gobjid = %d\n", omCurrentProcess->object->id);
     }
 
-    while (timesToStop) {
+    while (numFrames) {
         osSendMesg(&omProcessWaitQueue, (OSMesg)1, OS_MESG_NOBLOCK);
         osStopThread(NULL);
-        timesToStop--;
+        numFrames--;
     }
 }
 
@@ -170,7 +170,7 @@ void func_8000BDDC(GObjCommon* obj, void (*function)(GObjCommon*)) {
     proc = obj->processListHead;
     while (proc != NULL) {
         if (proc->function == function) {
-            proc->frozen = 1;
+            proc->frozen = TRUE;
         }
         proc = proc->next;
     }
@@ -186,7 +186,7 @@ void func_8000BE1C(GObjCommon* obj, void (*function)(GObjCommon*)) {
     proc = obj->processListHead;
     while (proc != NULL) {
         if (proc->function == function) {
-            proc->frozen = 0;
+            proc->frozen = FALSE;
         }
         proc = proc->next;
     }
@@ -229,43 +229,108 @@ void func_8000BF74(GObjCommon* obj) {
 
     curr = obj->children;
     while (curr != NULL) {
-        func_80009C94(curr);
+        om_dobj_remove_all_mobj(curr);
         curr = func_8000C550(curr);
     }
 }
 
 DObj* func_8000BFB8(GObjCommon* obj, void* arg1) {
-    DObj* ret;
-
-    ret = func_80009D70(obj, arg1);
+    DObj* ret = om_gobj_add_dobj(obj, arg1);
     func_8000BEAC(ret);
-
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000BFE8.s")
+s32 func_8000BFE8(DObj* dobj, void* arg1) {
+    DObj* ret = om_dobj_add_sibling(dobj, arg1);
+    func_8000BEAC(ret);
+    return ret;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C018.s")
+s32 func_8000C018(DObj* dobj, void* arg1) {
+    DObj* ret = om_dobj_add_child(dobj, arg1);
+    func_8000BEAC(ret);
+    return ret;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C048.s")
+DObj* func_8000C048(GObjCommon* obj, void* arg1) {
+    DObj* ret = om_gobj_add_dobj(obj, arg1);
+    func_8000BEF4(ret);
+    return ret;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C078.s")
+s32 func_8000C078(DObj* dobj, void* arg1) {
+    DObj* ret = om_dobj_add_sibling(dobj, arg1);
+    func_8000BEF4(ret);
+    return ret;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C0A8.s")
+s32 func_8000C0A8(DObj* dobj, void* arg1) {
+    DObj* ret = om_dobj_add_child(dobj, arg1);
+    func_8000BEF4(ret);
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C0D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C1CC.s")
+void func_8000C1CC(GObjCommon* obj) {
+    if (obj == NULL) {
+        obj = omCurrentObject;
+    }
+    while (obj->children != 0) {
+        om_dobj_remove(obj->children);
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C220.s")
+void func_8000C220(GObjCommon* obj) {
+    if (obj == NULL) {
+        obj = omCurrentObject;
+    }
+    while (obj->children != 0) {
+        om_gobj_remove_sprite(obj->children);
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C274.s")
+void func_8000C274(void) {
+    GObjCommon* curr;
+    GObjCommon* next;
+    s32 i;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C2E4.s")
+    for (i = 0; i < 32; i++) {
+        curr = omGObjListHead[i];
+        while (curr != NULL) {
+            next = curr->next;
+            func_8000A52C(curr);
+            curr = next;
+        }
+    }
+}
 
-GObjCommon* func_8000C37C(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
-                          void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite, u8 procKind,
-                          void (*procFunc)(GObjCommon*), s32 procPriority) {
+s32 func_8000C2E4(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                  void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, s32 arg8, s32 arg9, u8 procKind,
+                  void (*procFunc)(GObjCommon*), s32 procPriority) {
+    GObjCommon* obj;
+    DObj* dobj;
+
+    obj = om_add_gobj(objId, objFnUpdate, objLink, objPriority);
+    if (obj == NULL) {
+        return NULL;
+    }
+
+    om_link_gobj_dl(obj, fnRender, dlLink, dlPriority, dlArg);
+
+    dobj = om_gobj_add_dobj(obj, arg8);
+    if (arg9) {
+        func_8000BEAC(dobj);
+    }
+    if (procFunc != NULL) {
+        om_create_process(obj, procFunc, procKind, procPriority);
+    }
+    return obj;
+}
+
+GObjCommon* create_sprite(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                          void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite,
+                          u8 procKind, void (*procFunc)(GObjCommon*), s32 procPriority) {
     GObjCommon* obj;
 
     obj = om_add_gobj(objId, objFnUpdate, objLink, objPriority);
@@ -275,12 +340,47 @@ GObjCommon* func_8000C37C(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLi
 
     om_link_gobj_dl(obj, fnRender, dlLink, dlPriority, dlArg);
     om_gobj_add_sprite(obj, sprite);
-    if (procFunc != 0) {
+    if (procFunc != NULL) {
         om_create_process(obj, procFunc, procKind, procPriority);
     }
     return obj;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C3FC.s")
+s32 func_8000C3FC(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                  void (*fnRender)(GObjCommon*), s32 dlPriority, s32 arg6, s32 arg7, s32 arg8, u8 procKind,
+                  void (*procFunc)(GObjCommon*), s32 procPriority, s32 argC) {
+    GObjCommon* obj;
+    OMCamera* cam;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/C5B0/func_8000C4B0.s")
+    obj = om_add_gobj(objId, objFnUpdate, objLink, objPriority);
+    if (obj == NULL) {
+        return NULL;
+    }
+    om_link_gobj_dl_special(obj, fnRender, dlPriority, arg6, arg7);
+    cam = om_gobj_set_camera(obj);
+    if (arg8) {
+        func_8000BF3C(cam);
+    }
+    if (procFunc != NULL) {
+        om_create_process(obj, procFunc, procKind, procPriority);
+    }
+    if (argC) {
+        cam->unk80 = 7;
+        cam->unk84 = 0xFF;
+    }
+    return obj;
+}
+
+GObjCommon* func_8000C4B0(s32 link, s32 priority, s32 dlPriority, s32 arg3, s32 arg4) {
+    GObjCommon* obj;
+    OMCamera* cam;
+
+    obj = func_8000C3FC(-1, func_8000BC84, link, priority, func_800191D8, dlPriority, 0, 0, 0, 0, 0, 0, 0);
+    if (obj == NULL) {
+        return NULL;
+    }
+    cam = obj->children;
+    cam->unk80 = arg3;
+    cam->unk84 = arg4;
+    return obj;
+}

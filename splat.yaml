@@ -9,10 +9,11 @@ options:
   base_path: .
   target_path: baserom.z64
   ld_script_path: pokemonsnap.ld
+  ld_symbol_header_path: build/include/ld_addrs.h
   extensions_path: tools/splat_ext
   symbol_addrs_path: tools/symbol_addrs.txt
   symbol_name_format: $VRAM_$ROM
-  migrate_rodata_to_functions: False
+  migrate_rodata_to_functions: True
   dump_symbols: True
 segments:
   - [0x000000, header, header]
@@ -25,7 +26,7 @@ segments:
     subsegments:
     - [0x1000, hasm, entry]
     - [0x1060, c, sys/main]
-    - [0x1510, hasm, padding]
+    - [0x1510, hasm, padding_1510]
     - [0x1520, c, sys/sched]
     - [0x35E0, c, sys/dma]
     - [0x4680, c, sys/cont]
@@ -36,9 +37,10 @@ segments:
     - [0x8A80, c, sys/om]
     - [0xC2F0, c]
     - [0xC5B0, c]
-    - [0xD150, asm]
-    - [0x11E30, asm]
-    - [0x1A560, asm]
+    - [0xD150, c]
+    - [0x11E20, hasm, padding_11E20]
+    - [0x11E30, c]
+    - [0x1A560, c]
     - [0x1AF60, asm]
     - [0x1BCF0, asm]
     - [0x1F960, asm]
@@ -196,9 +198,11 @@ segments:
     - [0x43C40, .rodata, sys/gtl]
     - [0x43E60, .rodata, sys/ml]
     - [0x43E80, .rodata, sys/om]
-    - [0x44300, rodata]
+    - [0x44300, .rodata, C2F0]
     - [0x44320, .rodata, C5B0]
-    - [0x44350, rodata]
+    - [0x44350, .rodata, D150]
+    - [0x446F0, .rodata, 11E30]
+    - [0x44940, bin]
   - name: app_render
     type: code
     start: 0x46270
@@ -418,8 +422,9 @@ segments:
     - [0x829670, asm]
     - [0x829900, asm]
   - [0x82A280, bin]
-  - name: unk_end_level
+  - name: window
     type: code
+    dir: window
     start: 0x83D730
     vram: 0x80369F80
     exclusive_ram_id: level
@@ -542,12 +547,21 @@ segments:
       vram: 0x800E3CC0
       extract: True
       subsegments:
-      - [0xA5F070, sprite, background]
-      - [0xA84C80, .data, background]    
-      - [0xA84C80, sprite, card]
-      - [0xA93390, .data, card]
-      - [0xA93390, sprite, cursor]
-      - [0xA93460, .data, cursor]
+      - name: background
+        type: .data
+        start: 0xA5F070
+        subsegments:
+        - [0xA5F070, sprite, background]
+      - name: card
+        type: .data
+        start: 0xA84C80
+        subsegments:
+        - [0xA84C80, sprite, card]
+      - name: cursor
+        type: .data
+        start: 0xA93390
+        subsegments:
+        - [0xA93390, sprite, cursor]
     - [0xA93460, .bss, A5CC50]
     - [0xA93460, .bss, A5D5B0]
     - [0xA93460, .bss, background]

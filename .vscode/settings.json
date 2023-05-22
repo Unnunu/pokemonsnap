@@ -31,7 +31,10 @@
         "mbi.h": "c",
         "ml.h": "c",
         "types.h": "c",
-        "sp.h": "c"
+        "sp.h": "c",
+        "ld_addrs.h": "c",
+        "vi.h": "c",
+        "gtl.h": "c"
     },
 
 }

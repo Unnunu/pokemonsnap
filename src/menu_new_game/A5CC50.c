@@ -1,11 +1,11 @@
 #include "common.h"
 #include "unknown_structs.h"
+#include "ld_addrs.h"
+#include "sys/vi.h"
+#include "sys/gtl.h"
 
 // TODO: use header
-extern u8 D_80369F80;
-extern u8 D_8016A010;
-
-//data
+extern u8 D_80369F80[];
 
 extern Sprite sprite_menu_new_game_card;
 extern Sprite sprite_menu_new_game_background;
@@ -59,15 +59,14 @@ char* D_800E2FF0[] = {
 
 char* D_800E356C[] = { "←", "→", "　", "End" };
 
-// TODO: STRUCT
-s32 D_800E357C_A5E92C[] = {
-    0x803B5000,
-    0x803DA800,
-    0x00000000,
-    0x00000000,
-    0x00000140,
-    0x000000F0,
-    0x00016A99,
+ScreenSettings menuNewGameVideoSettings = {
+    0x803B5000, /* fb1 */
+    0x803DA800, /* fb2 */
+    NULL,       /* fb3 */
+    NULL,       /* zbuffer */
+    320,        /* width*/
+    240,        /* height */
+    0x00016A99 /* flags*/
 };
 
 Lights1 D_800E3598 = gdSPDefLights1(100, 100, 100, 180, 180, 180, 30, 30, 30);
@@ -86,8 +85,8 @@ Gfx D_800E35B0[] = {
 
 // BSS
 static Struct_8000C37C* D_801180B0;
-static Struct_8000C37C* D_801180B4;
-static Struct_8000C37C* D_801180B8;
+static GObjCommon* D_801180B4;
+static GObjCommon* D_801180B8;
 static s32 D_801180C0[20];
 s32 D_80118110;
 s32 D_80118114;
@@ -110,20 +109,20 @@ void func_800E18C4_A5CC74(void) {
 }
 
 void func_800E18CC_A5CC7C(void) {
-    Struct_8000C37C_Sub24* unk_48;
+    SObj* sobj;
 
-    D_801180B4 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_background, 0, 0, 1);
-    unk_48 = D_801180B4->unk_48;
-    unk_48->unk_24 = 0x201;
+    D_801180B4 = create_sprite(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_background, 0, 0, 1);
+    sobj = D_801180B4->children;
+    sobj->sp.attr = SP_TEXSHUF | SP_TRANSPARENT;
 }
 
 void func_800E1950_A5CD00(void) {
-    Struct_8000C37C_Sub24* unk_48;
+    SObj* sobj;
 
-    D_801180B8 = func_8000C37C(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_card, 0, 0, 1);
-    unk_48 = D_801180B8->unk_48; 
-    unk_48->unk_10 = 96; unk_48->unk_12 = 21;
-    unk_48->unk_24 = 0x201;
+    D_801180B8 = create_sprite(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_card, 0, 0, 1);
+    sobj = D_801180B8->children; 
+    sobj->sp.x = 96; sobj->sp.y = 21;
+    sobj->sp.attr = SP_TEXSHUF | SP_TRANSPARENT;
 }
 
 void func_800E19E4_A5CD94(void) {
@@ -239,11 +238,11 @@ void func_800E1EE4_A5D294(void) {
     u8 var_a1;
 
     var_a1 = 255; do {
-        func_800E18A0_A5CC50(D_801180B4->unk_48, var_a1);
+        func_800E18A0_A5CC50(D_801180B4->children, var_a1);
         func_8000BCA8(1);
         var_a1 -= 5;
     } while (var_a1 > 128);
-    func_800E18A0_A5CC50(D_801180B4->unk_48, 128);
+    func_800E18A0_A5CC50(D_801180B4->children, 128);
     func_8000BCA8(1);
 }
 
@@ -263,6 +262,7 @@ void func_800E1F58_A5D308(GObj* arg0) {
     func_800224DC(0, 0, 60);
     func_800A7470(0, 0, 0);
     func_800A7860(0, 1.0f);
+    // wait 60 frames
     for (i = 0; i < 60; i++) {
         func_8000BCA8(1);
     }
@@ -278,65 +278,64 @@ void func_800E2054_A5D404(Gfx** gfxPtr) {
     gSPDisplayList((*gfxPtr)++, D_800E35B0);
 }
 
-void func_800E2078_A5D428(void) {
-    func_8036A3F8(&D_80118118, 0x50000);
+void menu_newgame_init(void) {
+    mem_create_heap(D_80118118, sizeof(D_80118118));
     func_800AAE28();
     func_800AA85C(24, 6);
     func_800AA870(0xF0000);
     func_8036EB98();
-    func_8000C4B0(0, 0x80000000, 0x64, 6, 0);
-    D_801180B0 = func_8000C3FC(3, func_8000BC84, 0, 0x80000000, func_8001977C, 3, 2, -1, 1, 1, 0, 1, 1);
+    func_8000C4B0(0, 0x80000000, 100, 6, 0);
+    D_801180B0 = func_8000C3FC(3, func_8000BC84, 0, 0x80000000, func_8001977C, 3, 2, -1, 1, 1, NULL, 1, 1);
     D_801180B0->unk_48->unk_80 = 8;
     func_800A7F68(0, 0x101);
-    om_create_process(om_add_gobj(0xE, 0, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
+    om_create_process(om_add_gobj(0xE, NULL, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
 }
 
-Struct_800073AC D_800E3608 = {
-    0x00000000,
-    om_update_all,
-    om_draw_all,
-    &D_8016A010,
-    0x00000000,
-    0x00000002,
-    0x00000001,
-    0x00005000,
-    0x00002000,
-    0x00000000,
-    0x00000000,
-    0x0000C800,
-    0x00000000,
-    0x00002000,
-    func_800A1A50,
-    contUpdate,
-    0x00000020,
-    0x00000400,
-    0x00000080,
-    0x00000000,
-    0x00000040,
-    0x00000040,
-    0x0000005C,
-    0x00000400,
-    0x00000000,
-    0x00000000,
-    0x00000010,
-    0x00000008,
-    0x00000010,
-    0x00000088,
-    0x00000080,
-    0x00000058,
-    0x00000008,
-    0x00000090,
-    func_800E2078_A5D428,
-    0x00000000,
-    0x00000000,
-    0x00000000,
+SceneSetup menuNewGameSetup = {
+    {
+        0,                          /* unk_00*/
+        om_update_all,              /* fnUpdate */
+        om_draw_all,                /* fnDraw */
+        menu_new_game_VRAM_END,     /* heapBase */
+        0,                          /* heapSize */
+        2,                          /* unk14 */
+        1,                          /* numContexts */
+        0x5000,                     /* dlBufferSize0 */
+        0x2000,                     /* dlBufferSize1 */
+        0x0000,                     /* dlBufferSize2 */
+        0x0000,                     /* dlBufferSize3 */
+        0xC800,                     /* gfxHeapSize */
+        0,                          /* unk30 */
+        0x2000,                     /* rdpOutputBufferSize */
+        func_800A1A50,              /* fnPreRender */
+        contUpdate                  /* fnUpdateInput */
+    },
+    32,                             /* numOMThreads */
+    1024,                           /* omThreadStackSize */
+    128,                            /* numOMStacks */
+    0,                              /* unk4C */
+    64,                             /* numOMProcesses */
+    64,                             /* numOMGobjs */
+    0x5C,                           /* objectSize */
+    1024,                           /* numOMMtx */
+    0,                              /* unk60 */
+    NULL,                           /* unk64 */
+    16,                             /* numOMAobjs */
+    8,                              /* numOMMobjs */
+    16,                             /* numOMDobjs */
+    0x88,                           /* omDobjSize */
+    128,                            /* numOMSobjs */
+    0x58,                           /* omSobjSize */
+    8,                              /* numOMCameras */
+    0x90,                           /* omCameraSize */
+    menu_newgame_init               /* postInitFunc */
 };
 
 s32 func_800E218C_A5D53C(s32 arg0) {
-    vi_apply_screen_settings(D_800E357C_A5E92C);
-    D_800E3608.unk_10 = &D_80369F80 - &D_8016A010;
+    vi_apply_screen_settings(&menuNewGameVideoSettings);
+    menuNewGameSetup.gtlSetup.heapSize = D_80369F80 - menu_new_game_VRAM_END;
     func_80005448(1);
-    func_800073AC(&D_800E3608);
-    func_800BFEBC_5CD5C(0x10, 1);
+    om_setup_scene(&menuNewGameSetup);
+    func_800BFEBC_5CD5C(16, 1);
     return 11;
 }
