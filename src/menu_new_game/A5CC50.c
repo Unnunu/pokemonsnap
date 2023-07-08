@@ -84,7 +84,7 @@ Gfx D_800E35B0[] = {
 };
 
 // BSS
-static Struct_8000C37C* D_801180B0;
+static GObjCommon* D_801180B0;
 static GObjCommon* D_801180B4;
 static GObjCommon* D_801180B8;
 static s32 D_801180C0[20];
@@ -94,10 +94,10 @@ static u8 D_80118118[0x50000];
 
 void func_800E2ED0_A5E280(void);
 
-void func_800E18A0_A5CC50(Struct_8000C37C_Sub24* arg0, u8 arg1) {
-    arg0->unk_28 = arg1;
-    arg0->unk_29 = arg1;
-    arg0->unk_2A = arg1;
+void func_800E18A0_A5CC50(SObj* arg0, u8 arg1) {
+    arg0->sp.red = arg1;
+    arg0->sp.green = arg1;
+    arg0->sp.blue = arg1;
 }
 
 char** func_800E18B4_A5CC64(s32 arg0) {
@@ -111,7 +111,7 @@ void func_800E18C4_A5CC74(void) {
 void func_800E18CC_A5CC7C(void) {
     SObj* sobj;
 
-    D_801180B4 = create_sprite(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_background, 0, 0, 1);
+    D_801180B4 = create_sprite(14, func_8000BC84, 0, 0x80000000, draw_sprite, 1, 0x80000000, -1, &sprite_menu_new_game_background, 0, 0, 1);
     sobj = D_801180B4->children;
     sobj->sp.attr = SP_TEXSHUF | SP_TRANSPARENT;
 }
@@ -119,7 +119,7 @@ void func_800E18CC_A5CC7C(void) {
 void func_800E1950_A5CD00(void) {
     SObj* sobj;
 
-    D_801180B8 = create_sprite(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_card, 0, 0, 1);
+    D_801180B8 = create_sprite(14, func_8000BC84, 0, 0x80000000, draw_sprite, 1, 0x80000000, -1, &sprite_menu_new_game_card, 0, 0, 1);
     sobj = D_801180B8->children; 
     sobj->sp.x = 96; sobj->sp.y = 21;
     sobj->sp.attr = SP_TEXSHUF | SP_TRANSPARENT;
@@ -285,8 +285,8 @@ void menu_newgame_init(void) {
     func_800AA870(0xF0000);
     func_8036EB98();
     func_8000C4B0(0, 0x80000000, 100, 6, 0);
-    D_801180B0 = func_8000C3FC(3, func_8000BC84, 0, 0x80000000, func_8001977C, 3, 2, -1, 1, 1, NULL, 1, 1);
-    D_801180B0->unk_48->unk_80 = 8;
+    D_801180B0 = create_camera(3, func_8000BC84, 0, 0x80000000, sprite_camera_render, 3, 2, -1, TRUE, 1, NULL, 1, TRUE);
+    ((OMCamera*)D_801180B0->children)->flags = 8;
     func_800A7F68(0, 0x101);
     om_create_process(om_add_gobj(0xE, NULL, 0, 0x80000000), func_800E1F58_A5D308, 0, 1);
 }

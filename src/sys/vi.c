@@ -19,7 +19,7 @@ s16 viEdgeOffsetBottom;
  * Convert an RBGA32 color value into a packed set of RBGA5551
  * that can be used with gDPSetFillColor
  *
- * Depends on the state of `gPixelComponentSize`
+ * Depends on the state of `viBitDepth`
  * @param color RRGGBBAA
  */
 u32 func_80007910(u32 color) {

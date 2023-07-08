@@ -93,10 +93,10 @@ s32 func_8000B880(void (*handler)(GObjCommon*, s32)) {
                 func_8000BD78(NULL);
                 break;
             case -4:
-                omCurrentObject->unk_50 |= 1;
+                omCurrentObject->flags |= GOBJ_FLAG_1;
                 break;
             case -5:
-                omCurrentObject->unk_50 &= ~1;
+                omCurrentObject->flags &= ~GOBJ_FLAG_1;
                 break;
             default:
                 if (handler != NULL) {

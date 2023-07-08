@@ -13,7 +13,7 @@ static u8 D_80168130[16];
 static u8 D_80168140[3];
 static u8 D_80168143;
 static u8 D_80168144;
-static Struct_8000C37C* D_80168148;
+static GObjCommon* D_80168148;
 static u8 D_8016814C;
 
 void func_800E2800_A5DBB0(void);
@@ -266,13 +266,13 @@ s32 func_800E2A24_A5DDD4(char* arg0) {
 void func_800E2A84_A5DE34(char* arg0) {
     u8** temp_v0;
     s16 sp1A;    
-    Struct_8000C37C_Sub24* unk_48;
+    SObj* unk_48;
 
     func_8036D344(12);
     sp1A = func_8036D4F0(D_80168130) + 203;
-    unk_48 = D_80168148->unk_48;
-    unk_48->unk_12 = 0x40;
-    unk_48->unk_10 = sp1A;
+    unk_48 = D_80168148->children;
+    unk_48->sp.y = 64;
+    unk_48->sp.x = sp1A;
     if (D_80168143 >= 14 || D_80168124 >= 19) {
         if (D_80168143 < 14) {
             D_8016814C = 1;
@@ -321,18 +321,18 @@ void func_800E2C38_A5DFE8(GObj* arg0) {
     }
 }
 
-void func_800E2D18_A5E0C8(Struct_8000C37C* arg0) {
+void func_800E2D18_A5E0C8(GObjCommon* arg0) {
     s16 var_s0 = 10;
     s16 var_s2 = 5;
-    Struct_8000C37C_Sub24* unk_48 = arg0->unk_48;
+    SObj* unk_48 = arg0->children;
 
     while (TRUE) {
         if (D_8016814C == 0) {
             var_s0 = 10;
             var_s2 = 5;
-            unk_48->unk_24 |= 4;
+            unk_48->sp.attr |= 4;
         } else {
-            unk_48->unk_24 &= ~4;
+            unk_48->sp.attr &= ~4;
         }
 
         var_s0 += var_s2;
@@ -343,20 +343,20 @@ void func_800E2D18_A5E0C8(Struct_8000C37C* arg0) {
             var_s0 = 120;
             var_s2 = 5;
         }
-        unk_48->unk_2B = var_s0;
+        unk_48->sp.alpha = var_s0;
         func_8000BCA8(1);
     }
 }
 
 void func_800E2E00_A5E1B0(void) {
-    Struct_8000C37C_Sub24* unk_48;
+    SObj* unk_48;
 
-    om_create_process(om_add_gobj(0xE, 0, 0, 0x80000000), func_800E2C38_A5DFE8, 0, 1);
+    om_create_process(om_add_gobj(14, NULL, 0, 0x80000000), func_800E2C38_A5DFE8, 0, 1);
     D_8016814C = 0;
-    D_80168148 = create_sprite(14, func_8000BC84, 0, 0x80000000, func_80017768, 1, 0x80000000, -1, &sprite_menu_new_game_cursor, 0, func_800E2D18_A5E0C8, 1);
-    unk_48 = D_80168148->unk_48;
-    unk_48->unk_24 = 0x201;
-    unk_48->unk_10 = 203; unk_48->unk_12 = 64;
+    D_80168148 = create_sprite(14, func_8000BC84, 0, 0x80000000, draw_sprite, 1, 0x80000000, -1, &sprite_menu_new_game_cursor, 0, func_800E2D18_A5E0C8, 1);
+    unk_48 = D_80168148->children;
+    unk_48->sp.attr = 0x201;
+    unk_48->sp.x = 203; unk_48->sp.y = 64;
 }
 
 void func_800E2ED0_A5E280(void) {

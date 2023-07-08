@@ -16,8 +16,10 @@ typedef struct {
 extern u16* viZBuffer;
 extern s32 viScreenWidth;
 extern s32 viScreenHeight;
+extern s32 viBitDepth;
 
 void vi_apply_screen_settings(ScreenSettings* settings);
 void vi_set_screen_offsets(s16, s16, s16, s16);
+u32 func_80007910(u32 color);
 
 #endif /* SYS_VI_H */

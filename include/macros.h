@@ -32,7 +32,9 @@ typedef u8 Addr[];
 
 #define SQ(x) ((x) * (x))
 
-#define FLOAT_MAX 3.4028235e38
+#define M_PI_F      ((f32)M_PI)
+
+#define FLOAT_MAX 3.4028234e38f
 #define FLOAT_NEG_MAX -FLOAT_MAX
 
 #define TAU 6.2831855f

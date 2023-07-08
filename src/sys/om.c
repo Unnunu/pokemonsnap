@@ -5,6 +5,8 @@
 
 void func_80007CBC(Vp*);
 // TODO: header
+#define ANIMATION_DISABLED (FLOAT_NEG_MAX)
+
 void omh_end_all_object_processes(GObjCommon*);
 void func_8000B740(s32*);
 void func_80015448(void);
@@ -17,11 +19,6 @@ typedef struct ThreadStackList {
     /* 0x04 */ ThreadStackNode* stack;
     /* 0x08 */ u32 size;
 } ThreadStackList; // size == 0x0C
-
-struct Unk80046A88 {
-    /* 0x00 */ u8 unk00;
-    /* 0x04 */ Gfx* unk04[4];
-}; // sizeof == 0x14
 
 GObjThread* omFreeThreadList;
 s32 omActiveThreads;
@@ -58,8 +55,8 @@ OMCamera* omFreeCameraList;
 s32 omActiveCameras;
 u16 omCameraSize;
 GObjCommon* omCurrentObject;
+GObjCommon* omCurrentCamera;
 GObjCommon* omRenderedObject;
-void* omD_8004AC4C;
 GObjProcess* omCurrentProcess;
 s32 omD_8004AC54;
 OSMesg omProcessWaitMsgs[1];
@@ -68,10 +65,10 @@ struct Unk80046A88 omD_8004AC78[32];
 
 // data
 s32 omThreadCounter = 10000000;
-struct Mtx6Float omD_80040E84 = { NULL, { 0.0, 30.0, 4.0 / 3.0, 100.0, 12800.0, 1.0 } };
-struct Mtx7Float omD_80040EA0 = { NULL, { -160.0, 160.0, -120.0, 120.0, 100.0, 12800.0, 1.0 } };
-struct Mtx3x3Float omD_80040EC0 = { NULL, { { 1500.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0 } } };
-union Mtx3fi omD_80040EE8 = { { NULL, { 0.0, 0.0, 0.0 } } };
+struct MtxCameraPersp omD_80040E84 = { NULL, 0, 30.0, 4.0 / 3.0, 100.0, 12800.0, 1.0 };
+struct MtxCameraOrtho omD_80040EA0 = { NULL, -160.0, 160.0, -120.0, 120.0, 100.0, 12800.0, 1.0 };
+struct MtxCameraLookAt omD_80040EC0 = { NULL, 1500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
+struct Mtx3Float omD_80040EE8 = { NULL, { 0.0, 0.0, 0.0 } };
 struct Mtx4Float omD_80040EF8 = { NULL, { 0.0, 0.0, 0.0, 1.0 } };
 struct Mtx4Float omD_80040F0C = { NULL, { 0.0, 0.0, 0.0, 0.0 } };
 struct Mtx3Float omD_80040F20 = { NULL, { 1.0, 1.0, 1.0 } };
@@ -521,11 +518,9 @@ void om_mobj_attach_aobj(MObj* mobj, AObj* aobj) {
     mobj->aobjList = aobj;
 }
 
-// `arg0` could be another object type? SObj maybe
-// copy of `append_aobj_to_dobj`
-void func_80008950(DObj* arg0, AObj* arg1) {
-    arg1->next = arg0->aobjList;
-    arg0->aobjList = arg1;
+void om_camera_attach_aobj(OMCamera* cam, AObj* aobj) {
+    aobj->next = cam->aobjList;
+    cam->aobjList = aobj;
 }
 
 void om_free_aobj(AObj* aobj) {
@@ -650,7 +645,7 @@ GObjProcess* om_create_process(GObjCommon* com, void (*func)(struct GObjCommon*)
     }
     process->priority = pri;
     process->kind = kind;
-    process->frozen = 0;
+    process->paused = 0;
     process->object = com;
     process->function = func;
 
@@ -700,7 +695,7 @@ GObjProcess* om_create_process_threaded(GObjCommon* obj, void (*entry)(void*), u
     }
 
     process->priority = pri;
-    process->frozen = 0;
+    process->paused = 0;
     process->object = obj;
     process->function = entry;
 
@@ -755,7 +750,7 @@ void om_end_process(GObjProcess* proc) {
 
 OMMtx* om_dobj_add_mtx(DObj* dobj, u8 kind, u8 arg2, s32 index) {
     uintptr_t csr;
-    union Mtx3fi* t2;
+    struct Mtx3Float* t2;
     struct Mtx4Float* t1;
     struct Mtx3Float* t4;
     s32 i;
@@ -798,119 +793,119 @@ OMMtx* om_dobj_add_mtx(DObj* dobj, u8 kind, u8 arg2, s32 index) {
     mtx->kind = kind;
 
     switch (kind) {
-        case 18:
-        case 34:
-        case 36:
-        case 38:
-        case 40:
-        case 55:
-            dobj->unk18 = omD_80040EE8;
-            dobj->unk18.f.mtx = mtx;
+        case MTX_TYPE_TRANSLATE:
+        case MTX_TYPE_34:
+        case MTX_TYPE_36:
+        case MTX_TYPE_38:
+        case MTX_TYPE_40:
+        case MTX_TYPE_55:
+            dobj->position = omD_80040EE8;
+            dobj->position.mtx = mtx;
             break;
-        case 19:
-        case 23:
-            dobj->unk28 = omD_80040EF8;
-            dobj->unk28.mtx = mtx;
+        case MTX_TYPE_ROTATE_DEG:
+        case MTX_TYPE_ROTATE:
+            dobj->rotation = omD_80040EF8;
+            dobj->rotation.mtx = mtx;
             break;
-        case 20:
-        case 24:
-            dobj->unk18 = omD_80040EE8;
-            dobj->unk28 = omD_80040EF8;
-            dobj->unk18.f.mtx = mtx;
-            dobj->unk28.mtx = mtx;
+        case MTX_TYPE_ROTATE_DEG_TRANSLATE:
+        case MTX_TYPE_ROTATE_TRANSLATE:
+            dobj->position = omD_80040EE8;
+            dobj->rotation = omD_80040EF8;
+            dobj->position.mtx = mtx;
+            dobj->rotation.mtx = mtx;
             break;
-        case 21:
-        case 26:
-        case 29:
-            dobj->unk28 = omD_80040F0C;
-            dobj->unk28.mtx = mtx;
+        case MTX_TYPE_ROTATE_RPY_DEG:
+        case MTX_TYPE_ROTATE_RPY:
+        case MTX_TYPE_ROTATE_PYR:
+            dobj->rotation = omD_80040F0C;
+            dobj->rotation.mtx = mtx;
             break;
-        case 22:
-        case 27:
-        case 30:
-        case 51:
-        case 52:
-            dobj->unk18 = omD_80040EE8;
-            dobj->unk28 = omD_80040F0C;
-            dobj->unk18.f.mtx = mtx;
-            dobj->unk28.mtx = mtx;
+        case MTX_TYPE_ROTATE_RPY_TRANSLATE_DEG:
+        case MTX_TYPE_ROTATE_RPY_TRANSLATE:
+        case MTX_TYPE_ROTATE_PYR_TRANSLATE:
+        case MTX_TYPE_51:
+        case MTX_TYPE_52:
+            dobj->position = omD_80040EE8;
+            dobj->rotation = omD_80040F0C;
+            dobj->position.mtx = mtx;
+            dobj->rotation.mtx = mtx;
             break;
-        case 25:
-            dobj->unk18 = omD_80040EE8;
-            dobj->unk28 = omD_80040EF8;
-            dobj->unk3C = omD_80040F20;
-            dobj->unk18.f.mtx = mtx;
-            dobj->unk28.mtx = mtx;
-            dobj->unk3C.mtx = mtx;
+        case MTX_TYPE_ROTATE_TRANSLATE_SCALE:
+            dobj->position = omD_80040EE8;
+            dobj->rotation = omD_80040EF8;
+            dobj->scale = omD_80040F20;
+            dobj->position.mtx = mtx;
+            dobj->rotation.mtx = mtx;
+            dobj->scale.mtx = mtx;
             break;
-        case 28:
-        case 31:
-        case 54:
-            dobj->unk18 = omD_80040EE8;
-            dobj->unk28 = omD_80040F0C;
-            dobj->unk3C = omD_80040F20;
-            dobj->unk18.f.mtx = mtx;
-            dobj->unk28.mtx = mtx;
-            dobj->unk3C.mtx = mtx;
+        case MTX_TYPE_ROTATE_RPY_TRANSLATE_SCALE:
+        case MTX_TYPE_ROTATE_PYR_TRANSLATE_SCALE:
+        case MTX_TYPE_54:
+            dobj->position = omD_80040EE8;
+            dobj->rotation = omD_80040F0C;
+            dobj->scale = omD_80040F20;
+            dobj->position.mtx = mtx;
+            dobj->rotation.mtx = mtx;
+            dobj->scale.mtx = mtx;
             break;
-        case 32:
-        case 43:
-        case 44:
-        case 47:
-        case 48:
-        case 49:
-        case 50:
-        case 53:
-            dobj->unk3C = omD_80040F20;
-            dobj->unk3C.mtx = mtx;
+        case MTX_TYPE_SCALE:
+        case MTX_TYPE_43:
+        case MTX_TYPE_44:
+        case MTX_TYPE_47:
+        case MTX_TYPE_48:
+        case MTX_TYPE_49:
+        case MTX_TYPE_50:
+        case MTX_TYPE_53:
+            dobj->scale = omD_80040F20;
+            dobj->scale.mtx = mtx;
             break;
-        case 45:
-        case 46:
-            dobj->unk28 = omD_80040EF8;
-            dobj->unk3C = omD_80040F20;
-            dobj->unk28.mtx = mtx;
-            dobj->unk3C.mtx = mtx;
+        case MTX_TYPE_45:
+        case MTX_TYPE_46:
+            dobj->rotation = omD_80040EF8;
+            dobj->scale = omD_80040F20;
+            dobj->rotation.mtx = mtx;
+            dobj->scale.mtx = mtx;
             break;
-        case 56:
+        case MTX_TYPE_56:
             *t2 = omD_80040EE8;
-            t2->f.mtx = mtx;
+            t2->mtx = mtx;
             break;
-        case 57:
+        case MTX_TYPE_57:
             *t1 = omD_80040EF8;
             t1->mtx = mtx;
             break;
-        case 58:
+        case MTX_TYPE_58:
             *t1 = omD_80040F0C;
             t1->mtx = mtx;
             break;
-        case 59:
+        case MTX_TYPE_59:
             *t4 = omD_80040F20;
             t4->mtx = mtx;
             break;
-        case 60:
+        case MTX_TYPE_60:
             *t2 = omD_80040EE8;
             *t1 = omD_80040EF8;
-            t2->f.mtx = t1->mtx = mtx;
+            t2->mtx = t1->mtx = mtx;
             break;
-        case 61:
+        case MTX_TYPE_61:
             *t2 = omD_80040EE8;
             *t1 = omD_80040EF8;
             *t4 = omD_80040F20;
-            t2->f.mtx = t1->mtx = t4->mtx = mtx;
+            t2->mtx = t1->mtx = t4->mtx = mtx;
             break;
-        case 62:
+        case MTX_TYPE_62:
             *t2 = omD_80040EE8;
             *t1 = omD_80040F0C;
-            t2->f.mtx = t1->mtx = mtx;
+            t2->mtx = t1->mtx = mtx;
             break;
-        case 63:
+        case MTX_TYPE_63:
             *t2 = omD_80040EE8;
             *t1 = omD_80040F0C;
             *t4 = omD_80040F20;
-            t2->f.mtx = t1->mtx = t4->mtx = mtx;
+            t2->mtx = t1->mtx = t4->mtx = mtx;
             break;
-        case 1:
-        case 17:
+        case MTX_TYPE_1:
+        case MTX_TYPE_LOOKAT_REFLECT_ROLL_Z_MVIEW:
             // empty branch?
             // could be for any and all cases between 1 and 17
             break;
@@ -939,32 +934,32 @@ OMMtx* om_camera_add_mtx(OMCamera* arg0, u8 kind, u8 arg2) {
     mtx->kind = kind;
 
     switch (kind) {
-        case 3:
-        case 4:
-            arg0->unk18.f6 = omD_80040E84;
-            arg0->unk18.f6.mtx = mtx;
+        case MTX_TYPE_PERSP_FAST:
+        case MTX_TYPE_PERSP:
+            arg0->perspMtx.persp = omD_80040E84;
+            arg0->perspMtx.persp.mtx = mtx;
             break;
-        case 5:
-            arg0->unk18.f7 = omD_80040EA0;
-            arg0->unk18.f7.mtx = mtx;
+        case MTX_TYPE_ORTHO:
+            arg0->perspMtx.ortho = omD_80040EA0;
+            arg0->perspMtx.ortho.mtx = mtx;
             break;
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-            arg0->unk38 = omD_80040EC0;
-            arg0->unk38.mtx = mtx;
+        case MTX_TYPE_LOOKAT:
+        case MTX_TYPE_LOOKAT_MVIEW:
+        case MTX_TYPE_LOOKAT_ROLL:
+        case MTX_TYPE_LOOKAT_ROLL_MVIEW:
+        case MTX_TYPE_LOOKAT_ROLL_Z:
+        case MTX_TYPE_LOOKAT_ROLL_Z_MVIEW:
+        case MTX_TYPE_LOOKAT_REFLECT:
+        case MTX_TYPE_LOOKAT_REFLECT_MVIEW:
+        case MTX_TYPE_LOOKAT_REFLECT_ROLL:
+        case MTX_TYPE_LOOKAT_REFLECT_ROLL_MVIEW:
+        case MTX_TYPE_LOOKAT_REFLECT_ROLL_Z:
+        case MTX_TYPE_LOOKAT_REFLECT_ROLL_Z_MVIEW:
+            arg0->viewMtx.lookAt = omD_80040EC0;
+            arg0->viewMtx.lookAt.mtx = mtx;
             break;
-        case 1:
-        case 2:
+        case MTX_TYPE_1:
+        case MTX_TYPE_2:
             break;
     }
 
@@ -975,22 +970,22 @@ OMMtx* om_camera_add_mtx(OMCamera* arg0, u8 kind, u8 arg2) {
 AObj* om_dobj_add_aobj(DObj* dobj, u8 index) {
     AObj* aobj = om_get_aobj();
 
-    aobj->unk04 = index;
-    aobj->unk05 = 0;
+    aobj->paramID = index;
+    aobj->kind = ANIM_TYPE_NONE;
     aobj->unk20 = NULL;
-    aobj->unk1C = 0.0;
-    aobj->unk18 = 0.0;
-    aobj->unk14 = 0.0;
-    aobj->unk10 = 0.0;
-    aobj->unk0C = 0.0;
-    aobj->unk08 = 1.0;
+    aobj->targetRate = 0.0;
+    aobj->rate = 0.0;
+    aobj->targetValue = 0.0;
+    aobj->initialValue = 0.0;
+    aobj->time = 0.0;
+    aobj->invDuration = 1.0;
 
     om_dobj_attach_aobj(dobj, aobj);
 
     return aobj;
 }
 
-void om_dobj_reset_aobj_list(DObj* dobj) {
+void om_dobj_reset_animation(DObj* dobj) {
     AObj* curr;
     AObj* origNext;
 
@@ -1001,21 +996,21 @@ void om_dobj_reset_aobj_list(DObj* dobj) {
         curr = origNext;
     }
     dobj->aobjList = NULL;
-    dobj->unk74 = FLOAT_NEG_MAX;
+    dobj->timeLeft = ANIMATION_DISABLED;
 }
 
 AObj* om_mobj_add_aobj(MObj* mobj, u8 index) {
     AObj* aobj = om_get_aobj();
 
-    aobj->unk04 = index;
-    aobj->unk05 = 0;
+    aobj->paramID = index;
+    aobj->kind = ANIM_TYPE_NONE;
     aobj->unk20 = NULL;
-    aobj->unk1C = 0.0;
-    aobj->unk18 = 0.0;
-    aobj->unk14 = 0.0;
-    aobj->unk10 = 0.0;
-    aobj->unk0C = 0.0;
-    aobj->unk08 = 1.0;
+    aobj->targetRate = 0.0;
+    aobj->rate = 0.0;
+    aobj->targetValue = 0.0;
+    aobj->initialValue = 0.0;
+    aobj->time = 0.0;
+    aobj->invDuration = 1.0;
 
     om_mobj_attach_aobj(mobj, aobj);
 
@@ -1033,30 +1028,28 @@ void om_mobj_reset_aobj_list(MObj* mobj) {
         curr = origNext;
     }
     mobj->aobjList = NULL;
-    mobj->unk98 = FLOAT_NEG_MAX;
+    mobj->timeLeft = ANIMATION_DISABLED;
 }
 
-// might be another type? SObj; matches `func_80008950`
-AObj* func_80009AB0(DObj* obj, u8 index) {
+AObj* om_camera_add_aobj(OMCamera* obj, u8 index) {
     AObj* aobj = om_get_aobj();
 
-    aobj->unk04 = index;
-    aobj->unk05 = 0;
+    aobj->paramID = index;
+    aobj->kind = ANIM_TYPE_NONE;
     aobj->unk20 = NULL;
-    aobj->unk1C = 0.0;
-    aobj->unk18 = 0.0;
-    aobj->unk14 = 0.0;
-    aobj->unk10 = 0.0;
-    aobj->unk0C = 0.0;
-    aobj->unk08 = 1.0;
+    aobj->targetRate = 0.0;
+    aobj->rate = 0.0;
+    aobj->targetValue = 0.0;
+    aobj->initialValue = 0.0;
+    aobj->time = 0.0;
+    aobj->invDuration = 1.0;
 
-    func_80008950(obj, aobj);
+    om_camera_attach_aobj(obj, aobj);
 
     return aobj;
 }
 
-// could be dobj, but maybe it's another type; probably matches `func_80008950`
-void func_80009B1C(DObj* dobj) {
+void func_80009B1C(OMCamera* dobj) {
     AObj* curr;
     AObj* origNext;
 
@@ -1067,10 +1060,10 @@ void func_80009B1C(DObj* dobj) {
         curr = origNext;
     }
     dobj->aobjList = NULL;
-    dobj->unk74 = FLOAT_NEG_MAX;
+    dobj->timeLeft = ANIMATION_DISABLED;
 }
 
-MObj* om_dobj_add_mobj(DObj* dobj, MObjSub* arg1) {
+MObj* om_dobj_add_mobj(DObj* dobj, Texture* arg1) {
     MObj* mobj;
 
     mobj = om_get_mobj();
@@ -1088,19 +1081,19 @@ MObj* om_dobj_add_mobj(DObj* dobj, MObjSub* arg1) {
     }
 
     mobj->next = NULL;
-    mobj->unk84 = *(u8*)&arg1->unk54 / 255.0f;
-    mobj->unk08 = *arg1;
+    mobj->lodLevel = arg1->unk54 / 255.0f;
+    mobj->texture = *arg1;
 
-    mobj->unk08.unk24 = arg1->unk14;
-    mobj->unk08.unk28 = arg1->unk1C;
-    mobj->unk80 = 0;
-    mobj->unk82 = 0;
-    mobj->unk88 = 0.f;
+    mobj->texture.unk24 = arg1->unk14;
+    mobj->texture.unk28 = arg1->scaleS;
+    mobj->imageIndex = 0;
+    mobj->nextImageIndex = 0;
+    mobj->paletteIndex = 0.f;
     mobj->aobjList = NULL;
-    mobj->unk94 = NULL;
-    mobj->unk98 = FLOAT_NEG_MAX;
-    mobj->unk9C = 1.0f;
-    mobj->unkA0 = 0.0f;
+    mobj->animList = NULL;
+    mobj->timeLeft = ANIMATION_DISABLED;
+    mobj->animSpeed = 1.0f;
+    mobj->timePassed = 0.0f;
 
     return mobj;
 }
@@ -1130,18 +1123,18 @@ void om_dobj_init(DObj* dobj) {
     s32 i;
 
     dobj->unk4C = 0;
-    dobj->unk54 = 0;
-    dobj->unk55 = 0;
+    dobj->flags = 0;
+    dobj->animCBReceiver = FALSE;
     dobj->numMatrices = 0;
 
     for (i = 0; i < 5; i++) {
         dobj->matrices[i] = NULL;
     }
     dobj->aobjList = NULL;
-    dobj->unk70 = NULL;
-    dobj->unk74 = FLOAT_NEG_MAX;
-    dobj->unk78 = 1.0;
-    dobj->unk7C = 0.0;
+    dobj->animList = NULL;
+    dobj->timeLeft = ANIMATION_DISABLED;
+    dobj->animSpeed = 1.0;
+    dobj->timePassed = 0.0;
     dobj->mobjList = NULL;
     dobj->unk84 = 0;
 }
@@ -1173,7 +1166,7 @@ DObj* om_gobj_add_dobj(GObjCommon* obj, void* arg1) {
     newDobj->obj = obj;
     newDobj->parent = (void*)1;
     newDobj->next = NULL;
-    newDobj->childList = NULL;
+    newDobj->firstChild = NULL;
     newDobj->unk50 = arg1;
 
     om_dobj_init(newDobj);
@@ -1194,7 +1187,7 @@ DObj* om_dobj_add_sibling(DObj* dobj, void* arg1) {
     newObj->obj = dobj->obj;
     newObj->parent = dobj->parent;
 
-    newObj->childList = NULL;
+    newObj->firstChild = NULL;
     newObj->unk50 = arg1;
     om_dobj_init(newObj);
 
@@ -1206,8 +1199,8 @@ DObj* om_dobj_add_child(DObj* arg0, void* arg1) {
     DObj* curr;
 
     newObj = om_get_dobj();
-    if (arg0->childList != NULL) {
-        curr = arg0->childList;
+    if (arg0->firstChild != NULL) {
+        curr = arg0->firstChild;
 
         while (curr->next != NULL) {
             curr = curr->next;
@@ -1216,13 +1209,13 @@ DObj* om_dobj_add_child(DObj* arg0, void* arg1) {
         curr->next = newObj;
         newObj->prev = curr;
     } else {
-        arg0->childList = newObj;
+        arg0->firstChild = newObj;
         newObj->prev = NULL;
     }
 
     newObj->obj = arg0->obj;
     newObj->parent = arg0;
-    newObj->childList = NULL;
+    newObj->firstChild = NULL;
     newObj->next = NULL;
     newObj->unk50 = arg1;
 
@@ -1238,8 +1231,8 @@ void om_dobj_remove(DObj* dobj) {
     MObj* currM;
     MObj* nextM;
 
-    while (dobj->childList != NULL) {
-        om_dobj_remove(dobj->childList);
+    while (dobj->firstChild != NULL) {
+        om_dobj_remove(dobj->firstChild);
     }
 
     if ((uintptr_t)dobj->parent == 1) {
@@ -1250,8 +1243,8 @@ void om_dobj_remove(DObj* dobj) {
                 dobj->obj->type = 0;
             }
         }
-    } else if (dobj == dobj->parent->childList) {
-        dobj->parent->childList = dobj->next;
+    } else if (dobj == dobj->parent->firstChild) {
+        dobj->parent->firstChild = dobj->next;
     }
 
     if (dobj->prev != NULL) {
@@ -1367,15 +1360,15 @@ OMCamera* om_gobj_set_camera(GObjCommon* obj) {
     for (i = 0; i < ARRAY_COUNT(camera->matrices); i++) {
         camera->matrices[i] = NULL;
     }
-    camera->unk80 = 0;
+    camera->flags = 0;
     camera->unk84 = 0;
-    camera->unk88 = NULL;
+    camera->fnPreRender = NULL;
     camera->unk8C = 0;
-    camera->aobjs = NULL;
-    camera->unk70 = 0;
-    camera->unk74 = FLOAT_NEG_MAX;
-    camera->unk78 = 1.0;
-    camera->unk7C = 0.0;
+    camera->aobjList = NULL;
+    camera->animList = 0;
+    camera->timeLeft = ANIMATION_DISABLED;
+    camera->animSpeed = 1.0;
+    camera->timePassed = 0.0;
 
     return camera;
 }
@@ -1396,7 +1389,7 @@ void om_gobj_remove_camera(OMCamera* cam) {
         }
     }
 
-    curr = cam->aobjs;
+    curr = cam->aobjList;
     while (curr != NULL) {
         next = curr->next;
         om_free_aobj(curr);
@@ -1428,15 +1421,15 @@ GObjCommon* om_add_gobj_common(u32 id, void (*fnUpdate)(GObjCommon*), u8 link, u
     obj->sub3C.count = 0;
     obj->sub3C.head = NULL;
     obj->sub3C.tail = NULL;
-    obj->unk_4C = 0.0f;
-    obj->unk_50 = 0;
+    obj->animationTime = 0.0f;
+    obj->flags = 0;
     obj->type = 0;
     obj->children = NULL;
     obj->dlLink = 33;
 
     if (FALSE) {} // required to match
 
-    obj->unk_54 = 0;
+    obj->fnAnimCallback = NULL;
     obj->unk_58 = 0;
     return obj;
 }
@@ -1583,7 +1576,8 @@ void om_move_gobj_before(GObjCommon* arg0, GObjCommon* arg1) {
     om_move_gobj_common(3, arg0, arg1->link, arg1->priority, arg1);
 }
 
-void om_link_gobj_dl_common(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 arg4) {
+void om_link_gobj_dl_common(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u8 dlLink, s32 dlPriority,
+                            s32 cameraTag) {
     if (dlLink >= 32) {
         fatal_printf("omGLinkObjDLCommon() : dl_link num over : dl_link = %d : id = %d\n", dlLink, obj->id);
         while (TRUE) {}
@@ -1591,16 +1585,16 @@ void om_link_gobj_dl_common(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u8
 
     obj->dlLink = dlLink;
     obj->dlPriority = dlPriority;
-    obj->render = renderFunc;
-    obj->unk34 = arg4;
-    obj->unk0E = gtlDrawnFrameCounter - 1;
+    obj->fnRender = renderFunc;
+    obj->cameraTag = cameraTag;
+    obj->lastDrawFrame = gtlDrawnFrameCounter - 1;
 }
 
-void om_link_gobj_dl(GObjCommon* obj, void (*arg1)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 arg4) {
+void om_link_gobj_dl(GObjCommon* obj, void (*arg1)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 cameraTag) {
     if (obj == NULL) {
         obj = omCurrentObject;
     }
-    om_link_gobj_dl_common(obj, arg1, dlLink, dlPriority, arg4);
+    om_link_gobj_dl_common(obj, arg1, dlLink, dlPriority, cameraTag);
     om_insert_gobj_dl_after_same_priority(obj);
 }
 
@@ -1613,7 +1607,7 @@ void om_link_gobj_dl_before_same_priority(GObjCommon* obj, void (*renderFunc)(GO
     om_insert_gobj_dl_before_same_priority(obj);
 }
 
-void om_link_gobj_dl_before(GObjCommon* obj, void (*renderFunc)(GObjCommon*), s32 arg2, GObjCommon* other) {
+void om_link_gobj_dl_after(GObjCommon* obj, void (*renderFunc)(GObjCommon*), s32 arg2, GObjCommon* other) {
     if (obj == NULL) {
         obj = omCurrentObject;
     }
@@ -1621,7 +1615,7 @@ void om_link_gobj_dl_before(GObjCommon* obj, void (*renderFunc)(GObjCommon*), s3
     om_insert_gobj_dl(obj, other);
 }
 
-void func_8000A980(GObjCommon* obj, void (*renderFunc)(struct GObjCommon*), s32 arg2, GObjCommon* other) {
+void om_link_gobj_dl_before(GObjCommon* obj, void (*renderFunc)(struct GObjCommon*), s32 arg2, GObjCommon* other) {
     if (obj == NULL) {
         obj = omCurrentObject;
     }
@@ -1629,47 +1623,48 @@ void func_8000A980(GObjCommon* obj, void (*renderFunc)(struct GObjCommon*), s32 
     om_insert_gobj_dl(obj, other->prev);
 }
 
-void om_link_gobj_dl_special_common(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u32 dlPriority, s32 arg3,
-                                    s32 arg4) {
+void om_link_gobj_dl_camera_common(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u32 dlPriority, s32 dlLinkBitMask,
+                                   s32 cameraTag) {
     obj->dlLink = 32;
     obj->dlPriority = dlPriority;
-    obj->render = renderFunc;
-    obj->unk30 = arg3;
-    obj->unk34 = arg4;
+    obj->fnRender = renderFunc;
+    obj->dlLinkBitMask = dlLinkBitMask;
+    obj->cameraTag = cameraTag;
     obj->unk38 = 0;
-    obj->unk0E = gtlDrawnFrameCounter - 1;
+    obj->lastDrawFrame = gtlDrawnFrameCounter - 1;
 }
 
-void om_link_gobj_dl_special(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u32 dlPriority, s32 arg3, s32 arg4) {
+void om_link_gobj_dl_camera(GObjCommon* obj, void (*renderFunc)(GObjCommon*), u32 dlPriority, s32 dlLinkBitMask,
+                            s32 cameraTag) {
     if (obj == NULL) {
         obj = omCurrentObject;
     }
-    om_link_gobj_dl_special_common(obj, renderFunc, dlPriority, arg3, arg4);
+    om_link_gobj_dl_camera_common(obj, renderFunc, dlPriority, dlLinkBitMask, cameraTag);
     om_insert_gobj_dl_after_same_priority(obj);
 }
 
-void om_link_gobj_dl_special_before_same_priority(GObjCommon* arg0, void (*arg1)(GObjCommon*), u32 arg2, s32 arg3,
-                                                  s32 arg4) {
+void om_link_gobj_dl_camera_before_same_priority(GObjCommon* arg0, void (*arg1)(GObjCommon*), u32 arg2, s32 arg3,
+                                                 s32 arg4) {
     if (arg0 == NULL) {
         arg0 = omCurrentObject;
     }
-    om_link_gobj_dl_special_common(arg0, arg1, arg2, arg3, arg4);
+    om_link_gobj_dl_camera_common(arg0, arg1, arg2, arg3, arg4);
     om_insert_gobj_dl_before_same_priority(arg0);
 }
 
-void om_link_gobj_dl_special_after(GObjCommon* arg0, void (*arg1)(GObjCommon*), s32 arg2, s32 arg3, GObjCommon* arg4) {
+void om_link_gobj_dl_camera_after(GObjCommon* arg0, void (*arg1)(GObjCommon*), s32 arg2, s32 arg3, GObjCommon* arg4) {
     if (arg0 == NULL) {
         arg0 = omCurrentObject;
     }
-    om_link_gobj_dl_special_common(arg0, arg1, arg4->dlPriority, arg2, arg3);
+    om_link_gobj_dl_camera_common(arg0, arg1, arg4->dlPriority, arg2, arg3);
     om_insert_gobj_dl(arg0, arg4);
 }
 
-void om_link_gobj_dl_special_before(GObjCommon* arg0, void (*arg1)(GObjCommon*), s32 arg2, s32 arg3, GObjCommon* arg4) {
+void om_link_gobj_dl_camera_before(GObjCommon* arg0, void (*arg1)(GObjCommon*), s32 arg2, s32 arg3, GObjCommon* arg4) {
     if (arg0 == NULL) {
         arg0 = omCurrentObject;
     }
-    om_link_gobj_dl_special_common(arg0, arg1, arg4->dlPriority, arg2, arg3);
+    om_link_gobj_dl_camera_common(arg0, arg1, arg4->dlPriority, arg2, arg3);
     om_insert_gobj_dl(arg0, arg4->prev);
 }
 
@@ -1746,8 +1741,8 @@ void om_draw_all(void) {
     s32 i;
     GObjCommon* curr;
 
+    omCurrentCamera = NULL;
     omRenderedObject = NULL;
-    omD_8004AC4C = NULL;
 
     for (i = 0; i < ARRAY_COUNT(omD_8004AC78); i++) {
         omD_8004AC78[i].unk00 = gtlDrawnFrameCounter - 1;
@@ -1755,9 +1750,9 @@ void om_draw_all(void) {
 
     curr = omGObjListDlHead[32];
     while (curr != NULL) {
-        if (!(curr->unk_50 & 1)) {
-            omRenderedObject = curr;
-            curr->render(curr);
+        if (!(curr->flags & GOBJ_FLAG_1)) {
+            omCurrentCamera = curr;
+            curr->fnRender(curr);
         }
         curr = curr->nextDl;
     }
@@ -1844,7 +1839,7 @@ void om_update_all(void) {
     for (i = 0; i < 32; i++) {
         obj = omGObjListHead[i];
         while (obj != NULL) {
-            if (!(obj->unk_50 & 0x40) && obj->fnUpdate != NULL) {
+            if (!(obj->flags & GOBJ_FLAG_40) && obj->fnUpdate != NULL) {
                 obj = om_update_gobj(obj);
             } else {
                 obj = obj->next;
@@ -1855,7 +1850,7 @@ void om_update_all(void) {
     for (i = ARRAY_COUNT(omGProcessList) - 1; i >= 0; i--) {
         proc = omGProcessList[i];
         while (proc != NULL) {
-            if (!proc->frozen) {
+            if (!proc->paused) {
                 proc = om_run_process(proc);
             } else {
                 proc = proc->nextInPriorityList;

@@ -76,14 +76,14 @@ void func_8000BCA8(s32);
 GObjCommon* create_sprite(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
                           void (*fnRender)(GObjCommon*), u8 dlLink, s32 dlPriority, s32 dlArg, Sprite* sprite,
                           u8 procKind, void (*procFunc)(GObjCommon*), s32 procPriority);
-s32 func_8000C3FC(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
-                  void (*fnRender)(GObjCommon*), s32 dlPriority, s32 arg6, s32 arg7, s32 arg8, u8 procKind,
-                  void (*procFunc)(GObjCommon*), s32 procPriority, s32 argC);
+GObjCommon* create_camera(s32 objId, void (*objFnUpdate)(GObjCommon*), s32 objLink, s32 objPriority,
+                  void (*fnRender)(GObjCommon*), s32 dlPriority, s32 dlLinkBitMask, s32 cameraTag, s32 defaultMatrices,
+                  u8 procKind, void (*procFunc)(GObjCommon*), s32 procPriority, s32 defaultFlags);
 GObjCommon* func_8000C4B0(s32 link, s32 priority, s32 dlPriority, s32 arg3, s32 arg4);
 
-void func_80017768(void);
+void draw_sprite(GObjCommon*);
 void func_800191D8(GObjCommon*);
-void func_8001977C(void);
+void sprite_camera_render(GObjCommon*);
 void func_80022374(s32, s32);
 void func_80022454(s32, s32);
 void func_800224DC(s32, s32, s32);

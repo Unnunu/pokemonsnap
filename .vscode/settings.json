@@ -34,7 +34,8 @@
         "sp.h": "c",
         "ld_addrs.h": "c",
         "vi.h": "c",
-        "gtl.h": "c"
+        "gtl.h": "c",
+        "*.tcc": "c"
     },
 
 }

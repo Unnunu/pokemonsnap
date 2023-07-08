@@ -3,6 +3,19 @@
 
 #include <PR/ultratypes.h>
 #include <PR/mbi.h>
+#include "sys/ml.h"
+
+typedef struct {
+    /* 0x00 */ Gfx* start;
+    /* 0x04 */ s32 length;
+} DLBuffer; // size = 0x08
+
+struct OMCamera;
+
+typedef struct Struct_8004B038 {
+    /* 0x00 */ s32 (*unk_00)(Mtx*, void*, Gfx**);
+    /* 0x04 */ s32 (*unk_04)(Mtx*, void*, Gfx**);
+} Struct_8004B038; // size = 0x08
 
 typedef struct {
     /* 0x00 */ u16 unk00;
@@ -33,7 +46,7 @@ typedef struct {
     /* 0x54 */ u32 numOMGobjs;
     /* 0x58 */ u32 objectSize;
     /* 0x5C */ u32 numOMMtx;
-    /* 0x60 */ void* unk60;
+    /* 0x60 */ Struct_8004B038* unk60;
     /* 0x64 */ void* unk64; // fn pointer void(*)(struct DObjDynamicStore *)
     /* 0x68 */ u32 numOMAobjs;
     /* 0x6C */ u32 numOMMobjs;
@@ -47,7 +60,18 @@ typedef struct {
 } SceneSetup; // size >= 0x8C
 
 void* hal_alloc(s32 size, s32 alignment);
+void gtl_process_all_dlists(void);
+void gtl_combine_all_dlists(void);
+void gtl_reset(void);
+void gtl_load_ucode(Gfx** dlist, u32 ucodeIdx);
 
 extern s32 gtlDrawnFrameCounter;
+extern Gfx* gMainGfxPos[4];
+extern Gfx* gSavedGfxPos[4];
+extern s32 gtlContextId;
+extern DLBuffer gtlDLBuffers[2][4];
+extern DynamicBuffer gtlCurrentGfxHeap;
+extern u16 gtlD_8004A906;
+extern u16 gtlD_8004A908;
 
 #endif /* SYS_GTL_H */

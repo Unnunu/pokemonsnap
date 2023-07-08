@@ -40,11 +40,6 @@ typedef struct {
     /* 0x04 */ u64* data;
 } UcodeInfo; // size = 0x08
 
-typedef struct {
-    /* 0x00 */ Gfx* start;
-    /* 0x04 */ s32 length;
-} DLBuffer; // size = 0x08
-
 typedef struct FnBundle {
     /* 0x00 */ u16 unk00;
     /* 0x04 */ void (*fnPrivUpdate)(void);
