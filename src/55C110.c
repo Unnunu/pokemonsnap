@@ -55,7 +55,7 @@ void func_802C43CC_55C43C(s32 arg0) {
     func_800A19D8();
     func_80359074();
     func_8036650C();
-    func_80022334();
+    auStopSongPlayers();
     func_80022B14();
     func_800E3064();
     func_80356FBC();

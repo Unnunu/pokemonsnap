@@ -35,7 +35,9 @@
         "ld_addrs.h": "c",
         "vi.h": "c",
         "gtl.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "libaudio.h": "c",
+        "synthinternals.h": "c"
     },
 
 }

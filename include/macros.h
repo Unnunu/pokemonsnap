@@ -38,5 +38,6 @@ typedef u8 Addr[];
 #define FLOAT_NEG_MAX -FLOAT_MAX
 
 #define TAU 6.2831855f
+#define PI_2 1.5707964f
 
 #endif

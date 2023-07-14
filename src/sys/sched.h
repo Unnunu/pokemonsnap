@@ -65,6 +65,11 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ SCTaskInfo info;
+    /* 0x28 */ OSTask task;
+} SCTaskAudio; // size = 0x68
+
+typedef struct {
+    /* 0x00 */ SCTaskInfo info;
     /* 0x24 */ SCClient* client;
 } SCTaskAddClient; // size == 0x28
 

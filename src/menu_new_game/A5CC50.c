@@ -257,7 +257,7 @@ void func_800E1F58_A5D308(GObj* arg0) {
     func_800E1E94_A5D244();
     func_800E1EE4_A5D294();
     func_80022454(0, 0x7F00);
-    func_80022374(0, 12);
+    auPlaySong(0, 12);
     func_800E2ED0_A5E280();
     func_800224DC(0, 0, 60);
     func_800A7470(0, 0, 0);

@@ -40,7 +40,7 @@ void func_800E2314_A5D6C4(void) {
     D_80168120 = 2;
     D_80168124 = 19;
     func_800E2200_A5D5B0();
-    func_800228E4(65);
+    auPlaySound(65);
 }
 
 void func_800E2350_A5D700(void) {
@@ -87,9 +87,9 @@ void func_800E23E0_A5D790(s32 buttons) {
         if (D_80168124 >= 19) {
             D_80168128 = D_80168120;
             D_80168120 = D_80168120 / 3;
-            func_800228E4(65);
+            auPlaySound(65);
         } else {
-            func_800228E4(69);
+            auPlaySound(69);
         }
     } else {
         if (buttons & 0x10000) {
@@ -113,9 +113,9 @@ void func_800E23E0_A5D790(s32 buttons) {
         }
         if (D_80168124 < 19) {
             D_80168120 = D_80168128;
-            func_800228E4(69);
+            auPlaySound(69);
         } else {
-            func_800228E4(65);
+            auPlaySound(65);
         }
     }
 }
@@ -173,7 +173,7 @@ void func_800E26A0_A5DA50(void) {
 void func_800E270C_A5DABC(void) {
     if (D_80168124 < 19) {
         func_800E25C0_A5D970();
-        func_800228E4(66);
+        auPlaySound(66);
     } else {
         func_800E26A0_A5DA50();
     }
@@ -186,7 +186,7 @@ void func_800E2758_A5DB08(void) {
         u8* src = sp24;
         u8* dst = &D_80168130[D_80168143];        
         
-        func_800228E4(66);
+        auPlaySound(66);
        
         while (*src != 0) {
             *dst++ = *src++;
@@ -205,7 +205,7 @@ void func_800E2800_A5DBB0(void) {
     } else {
         D_80168130[--D_80168143] = 0;
         D_80168130[--D_80168143] = 0;
-        func_800228E4(74);
+        auPlaySound(74);
     }
     func_8036A8E4(D_80118110);
     func_8036B9EC(D_80118110, 0, 0);
@@ -244,11 +244,11 @@ void func_800E28C0_A5DC70(void) {
         func_8036A8E4(D_80118110);
         func_8036B9EC(D_80118110, 0, 0);
         func_8036C898(D_80118110, D_80168130);
-        func_80022A58(96, 0x7FFF, 84, 1.0f, 10);
+        auPlaySoundWithParams(96, 0x7FFF, 84, 1.0f, 10);
     }
 
     func_800BF44C_5C2EC(D_80168130);
-    func_800228E4(66);
+    auPlaySound(66);
 }
 
 s32 func_800E2A24_A5DDD4(char* arg0) {

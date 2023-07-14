@@ -1,8 +1,46 @@
 #include "common.h"
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1A560/func_80019960.s")
+f32 func_80019960(f32 angle) {
+    return sinf(angle) / cosf(angle);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/1A560/func_80019994.s")
+f32 func_80019994(f32 arg) {
+    f32 arg2;
+    f32 result;
+    s32 phi_v0;
+
+    if (arg == 0.0f) {
+        return 0.0f;
+    }
+
+    phi_v0 = 1;
+
+    if (arg > 1.0f) {
+        arg = 1.0f / arg;
+    } else if (arg < -1.0f) {
+        arg = 1.0f / arg;
+        phi_v0 = 2;
+    } else {
+        phi_v0 = 0;
+    }
+
+    arg2 = arg * arg;
+    result =
+        (arg2 / (arg2 / (arg2 / (arg2 / (arg2 / ((arg2 / -0.10810675f) + -44.57192f) + -0.1619081f) + -15.774018f) +
+                         -0.55556977f) +
+                 -3.000003f) +
+         1) *
+        arg;
+
+    switch (phi_v0) {
+        case 0:
+            return result;
+        case 1:
+            return PI_2 - result;
+        case 2:
+            return -PI_2 - result;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/1A560/func_80019ABC.s")
 

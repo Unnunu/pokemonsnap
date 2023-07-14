@@ -84,11 +84,11 @@ GObjCommon* func_8000C4B0(s32 link, s32 priority, s32 dlPriority, s32 arg3, s32 
 void draw_sprite(GObjCommon*);
 void func_800191D8(GObjCommon*);
 void sprite_camera_render(GObjCommon*);
-void func_80022374(s32, s32);
+void auPlaySong(s32, s32);
 void func_80022454(s32, s32);
-void func_800224DC(s32, s32, s32);
-void func_800228E4(s32);
-void func_80022A58(s32, s32, s32, f32, s32);
+void func_800224DC(s32, u32, u32);
+void auPlaySound(s32);
+void auPlaySoundWithParams(s32, s32, s32, f32, s32);
 
 void func_800A1A50(void);
 void func_800A7470(s32, s32, s32);

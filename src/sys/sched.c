@@ -612,7 +612,7 @@ void scExecuteGfxTask(SCTaskGfx* task) {
     scCurrentGfxTask = task;
 }
 
-void scExecuteAudioTask(SCTaskGfx* task) {
+void scExecuteAudioTask(SCTaskAudio* task) {
     scTimestampAudioTaskStarted = osGetCount();
 
     if (scCurrentGfxTask != NULL && scCurrentGfxTask->info.state == SC_TASK_STATE_RUNNUNG) {
@@ -653,7 +653,7 @@ s32 scExecuteTask(SCTaskInfo* task) {
             }
         case SC_TASK_TYPE_AUDIO:
             {
-                SCTaskGfx* t = (void *)task;
+                SCTaskAudio* t = (void *)task;
 
                 osWritebackDCacheAll();
                 scExecuteAudioTask(t);

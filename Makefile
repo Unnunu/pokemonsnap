@@ -82,7 +82,7 @@ ENDLINE := \n'
 
 ### Compiler Options ###
 
-IINC           := -I include -I $(BUILD_DIR)/include -I src -I $(BUILD_DIR)/assets
+IINC           := -I include -I include/PR -I $(BUILD_DIR)/include -I src -I $(BUILD_DIR)/assets
 
 ASFLAGS        := -G 0 -I include -EB -mtune=vr4300 -march=vr4300
 CFLAGS         := -G 0 -non_shared -fullwarn -verbose -Xcpluscomm -nostdinc -Wab,-r4300_mul

@@ -14,11 +14,7 @@ extern u64 UcodeData1[];
 extern u64 UcodeText2[];
 extern u64 UcodeData2[];
 
-enum GtlStates {
-    GTL_STATE_0 = 0,
-    GTL_STATE_1 = 1,
-    GTL_STATE_2 = 2
-};
+enum GtlStates { GTL_STATE_0 = 0, GTL_STATE_1 = 1, GTL_STATE_2 = 2 };
 
 enum UcodeTypes {
     UCODE_F3DEX2_FIFO = 0,
@@ -52,10 +48,10 @@ typedef struct FnBundle {
 s32 gtlD_80040CF0 = 0;
 u32 gtlFrameCounter = 0;
 s32 gtlDrawnFrameCounter = 0;
-UcodeInfo gtlD_80040CFC[] = {
-    { NULL, NULL }, { NULL, NULL }, { UcodeText1, UcodeData1 }, { NULL, NULL }, { NULL, NULL }, { NULL, NULL },
-    { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 }, { NULL, NULL }, { NULL, NULL }
-};
+UcodeInfo gtlD_80040CFC[] = { { NULL, NULL }, { NULL, NULL }, { UcodeText1, UcodeData1 },
+                              { NULL, NULL }, { NULL, NULL }, { NULL, NULL },
+                              { NULL, NULL }, { NULL, NULL }, { UcodeText2, UcodeData2 },
+                              { NULL, NULL }, { NULL, NULL } };
 
 // BSS
 u8 gtl_padding[0x10];
@@ -247,7 +243,7 @@ SCTaskGfx* gtl_get_task_gfx(void) {
     return task;
 }
 
-void gtl_init_task_buffers(SCTaskGfx *gfxTasks, s32 taskBufferSize, SCTaskGfxEnd *gfxEndTasks, SCTaskVi *viTasks) {
+void gtl_init_task_buffers(SCTaskGfx* gfxTasks, s32 taskBufferSize, SCTaskGfxEnd* gfxEndTasks, SCTaskVi* viTasks) {
     s32 i;
     for (i = 0; i < gtlNumContexts; i++) {
         gtlGfxTasksBufferStart[i] = (uintptr_t)(gfxTasks) + taskBufferSize * sizeof(SCTaskGfx) * i;
@@ -302,7 +298,8 @@ void gtl_reset(void) {
     gtl_init_display_lists();
 }
 
-void gtl_schedule_gfx(SCTaskGfx* t, s32* fb, u32 ucodeIdx, s32 contextId, u64* dlist, u64* outputBuff, u32 outputBuffSize) {
+void gtl_schedule_gfx(SCTaskGfx* t, s32* fb, u32 ucodeIdx, s32 contextId, u64* dlist, u64* outputBuff,
+                      u32 outputBuffSize) {
     UcodeInfo* ucode;
 
     t->info.type = SC_TASK_TYPE_GFX;
@@ -424,7 +421,8 @@ void func_80005D60(s32 arg0, u64* dlist) {
         case UCODE_F3DEX2_REJ_FIFO:
         case UCODE_F3DLX2_REJ_FIFO:
         case UCODE_L3DEX2_FIFO:
-            gtl_schedule_gfx(gtl_get_task_gfx(), 0, uidx, gtlContextId, dlist, gtlRPDOutputBuffer, gtlRPDOutputBufferSize);
+            gtl_schedule_gfx(gtl_get_task_gfx(), 0, uidx, gtlContextId, dlist, gtlRPDOutputBuffer,
+                             gtlRPDOutputBufferSize);
             break;
     }
 }
@@ -862,8 +860,7 @@ void gtl_start(BufferSetup* setup, void (*postInitFunc)(void)) {
     gtlCallbackBundle.fnPrivUpdate = setup->fnUpdate;
     gtlCallbackBundle.fnPrivDraw = setup->fnDraw;
 
-    gtl_init_task_buffers(hal_alloc(setup->unk14 * sizeof(SCTaskGfx) * gtlNumContexts, 8),
-                          setup->unk14,
+    gtl_init_task_buffers(hal_alloc(setup->unk14 * sizeof(SCTaskGfx) * gtlNumContexts, 8), setup->unk14,
                           hal_alloc(sizeof(SCTaskGfxEnd) * gtlNumContexts, 8),
                           hal_alloc(sizeof(SCTaskVi) * gtlNumContexts, 8));
 
