@@ -1,8 +1,10 @@
+#include <sp.h>
 #include "common.h"
 #include "sys/om.h"
 #include "sys/gtl.h"
 #include "sys/vi.h"
 #include "sys/gu.h"
+
 
 #define gSPMvpRecalc(pkt) gImmp21((pkt), G_SPECIAL_1, 0, 1, 0)
 #define gsSPMvpRecalc() gsImmp21(G_SPECIAL_1, 0, 1, 0)

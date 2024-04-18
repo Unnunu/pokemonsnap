@@ -37,7 +37,8 @@
         "gtl.h": "c",
         "*.tcc": "c",
         "libaudio.h": "c",
-        "synthinternals.h": "c"
+        "synthinternals.h": "c",
+        "assert.h": "c"
     },
 
 }

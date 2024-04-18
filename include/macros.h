@@ -30,6 +30,8 @@ typedef u8 Addr[];
 
 #define ABS(x) (((x) < 0) ? (-(x)) : (x))
 
+#define ABSF(x) (((x) < 0.0f) ? (-(x)) : (x))
+
 #define SQ(x) ((x) * (x))
 
 #define M_PI_F      ((f32)M_PI)
