@@ -76,7 +76,7 @@ void func_800E6D64_A0E2F4(void) {
     GObj* gobj;
     SObj* sobj;
 
-    D_800E838C_A0F91C = gobj = ohCreateSprite(0xE, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1U, 0x80000000, -1,
+    D_800E838C_A0F91C = gobj = ohCreateSprite(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1U, 0x80000000, -1,
                                               &D_80344388, 0, NULL, 1);
     sobj = gobj->data.sobj;
     SET_SPRITE_POS(sobj->sprite, 0, -3);
@@ -94,7 +94,7 @@ void func_800E6D64_A0E2F4(void) {
     SET_SPRITE_POS(sobj->sprite, -24, 95);
     sobj->sprite.attr = SP_TEXSHUF | SP_TRANSPARENT;
 
-    D_800E8390_A0F920 = gobj = ohCreateSprite(0xE, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1,
+    D_800E8390_A0F920 = gobj = ohCreateSprite(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1,
                                               &D_80344388, 0, NULL, 1);
     sobj = gobj->data.sobj;
     SET_SPRITE_POS(sobj->sprite, 48, 238);
@@ -324,7 +324,7 @@ s8 func_800E7700_A0EC90(void) {
     s32 pressedB;
     SObj* sobj;
 
-    gobj = omAddGObj(0xE, NULL, 0, 0x80000000);
+    gobj = omAddGObj(OBJECT_ID_14, NULL, 0, 0x80000000);
     omCreateProcess(gobj, func_800E7478_A0EA08, 0, 1);
     omCreateProcess(gobj, func_800E7604_A0EB94, 0, 1);
     ohWait(1);
@@ -491,7 +491,7 @@ void func_800E7C40_A0F1D0(void) {
 
     sp44[0] = sobj;
     sp44[1] = sobj->next;
-    gobj = omAddGObj(0xE, NULL, 0, 0x80000000);
+    gobj = omAddGObj(OBJECT_ID_14, NULL, 0, 0x80000000);
     omCreateProcess(gobj, func_800E7950_A0EEE0, 0, 1);
     omCreateProcess(gobj, func_800E7B24_A0F0B4, 0, 1);
     setting = D_800E8375_A0F905;

@@ -2,7 +2,7 @@
 #include "credits.h"
 
 GObj* func_credits_801DCC00(GObj* arg0, Sprite* arg1) {
-    return ohCreateSprite(0xE, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1, arg1, 0, NULL, 1);
+    return ohCreateSprite(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1, arg1, 0, NULL, 1);
 }
 
 GObj* func_credits_801DCC70(void) {

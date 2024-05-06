@@ -88,7 +88,7 @@ void func_800E4960_A0BEF0(GObj* gobj) {
 }
 
 void func_800E4AF8_A0C088(void) {
-    D_800E831C_A0F8AC = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    D_800E831C_A0F8AC = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omCreateProcess(D_800E831C_A0F8AC, func_800E4960_A0BEF0, 0, 1);
 }
 
@@ -134,7 +134,7 @@ void func_800E4B4C_A0C0DC(GObj* arg0) {
 void func_800E4D74_A0C304(void) {
     GObj* gobj;
 
-    gobj = D_800E8300_A0F890 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    gobj = D_800E8300_A0F890 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omLinkGObjDL(gobj, renderModelTypeDFogged, 4, 0x80000000, -1);
     anim_func_80010230(gobj, &D_8037F658, &D_8036A458, 0, 0x1C, 0, 0);
     setFogColor(120, 120, 150);
@@ -145,7 +145,7 @@ void func_800E4D74_A0C304(void) {
 void func_800E4E34_A0C3C4(void) {
     GObj* gobj;
 
-    gobj = D_800E8304_A0F894 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    gobj = D_800E8304_A0F894 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omLinkGObjDL(gobj, renderModelTypeJFogged, 4, 0x80000000, -1);
     anim_func_80010230(gobj, &D_803A1730, &D_8039BC48, 0, 0x1C, 0, 0);
     setFogColor(120, 120, 150);
@@ -156,7 +156,7 @@ void func_800E4E34_A0C3C4(void) {
 void func_800E4EF4_A0C484(void) {
     GObj* gobj;
 
-    gobj = D_800E8308_A0F898 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    gobj = D_800E8308_A0F898 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omLinkGObjDL(gobj, renderModelTypeDFogged, 4, 0x80000000, -1);
     anim_func_80010230(gobj, &D_80359A20, &D_80359378, 0, 0x1C, 0, 0);
     setFogColor(120, 120, 150);
@@ -167,7 +167,7 @@ void func_800E4EF4_A0C484(void) {
 void func_800E4FB4_A0C544(void) {
     GObj* gobj;
 
-    gobj = D_800E830C_A0F89C = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    gobj = D_800E830C_A0F89C = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omLinkGObjDL(gobj, renderModelTypeIFogged, 4, 0x80000000, -1);
     anim_func_80010230(gobj, &D_8038F3E0, &D_8038AD40, 0, 0x1C, 0, 0);
     setFogColor(120, 120, 150);
@@ -178,7 +178,7 @@ void func_800E4FB4_A0C544(void) {
 void func_800E5074_A0C604(void) {
     GObj* gobj;
 
-    gobj = D_800E8310_A0F8A0 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    gobj = D_800E8310_A0F8A0 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omLinkGObjDL(gobj, renderModelTypeBFogged, 4, 0x80000000, -1);
     anim_func_80010230(gobj, &D_80393D30, NULL, 0, 0x1C, 0, 0);
     setFogColor(120, 120, 150);
@@ -241,7 +241,7 @@ void func_800E5370_A0C900(GObj* arg0) {
 void func_800E5468_A0C9F8(void) {
     SObj* sobj;
 
-    D_800E8318_A0F8A8 = ohCreateSprite(0x1F, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1,
+    D_800E8318_A0F8A8 = ohCreateSprite(OBJECT_ID_31, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1,
                              &D_803051F0, 0, func_800E5370_A0C900, 1);
 
     sobj = D_800E8318_A0F8A8->data.sobj;
@@ -389,7 +389,7 @@ void func_800E5574_A0CB04(GObj*);
 // }
 
 void func_800E5C38_A0D1C8(void) {
-    D_800E8314_A0F8A4 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    D_800E8314_A0F8A4 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omCreateProcess(D_800E8314_A0F8A4, func_800E5574_A0CB04, 0, 1);
 }
 
@@ -420,7 +420,7 @@ void func_800E5D2C_A0D2BC(void) {
     func_800E4AF8_A0C088();
     D_800E832B_A0F8BB = 0;
     D_800E832C_A0F8BC = 0;
-    temp_v0 = omAddGObj(0xE, ohUpdateDefault, 0, 0x80000000);
+    temp_v0 = omAddGObj(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000);
     omCreateProcess(temp_v0, func_800E4B4C_A0C0DC, 0, 1);
     D_800E832B_A0F8BB = 5;
     func_800E1930_A08EC0(0, 0, 0, 0, 1.0f);

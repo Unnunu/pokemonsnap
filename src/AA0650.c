@@ -82,7 +82,7 @@ GObj* func_800E18A0_AA0650(void) {
     GObj* temp_v0;
 
     temp_v0 =
-        ohCreateSprite(0xE, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1, &D_802BC0C0, 0, NULL, 1);
+        ohCreateSprite(OBJECT_ID_14, ohUpdateDefault, 0, 0x80000000, renDrawSprite, 1, 0x80000000, -1, &D_802BC0C0, 0, NULL, 1);
     temp_v1 = temp_v0->data.sobj;
     temp_v1->sprite.attr = SP_TEXSHUF | SP_TRANSPARENT;
     temp_v1->sprite.x = SCREEN_WIDTH / 2 - (temp_v1->sprite.width / 2);
@@ -148,7 +148,7 @@ void func_800E1B54_AA0904(void) {
     ohCreateCameraWrapper(0, 0x80000000, 0x64, 3, 0);
     camera = ohCreateCamera(3, ohUpdateDefault, 0, 0x80000000, renSpriteCameraRender, 3, 2, -1, 1, 1, NULL, 1, 1);
     camera->data.cam->flags = 8;
-    objE = omAddGObj(0xE, NULL, 0, 0x80000000);
+    objE = omAddGObj(OBJECT_ID_14, NULL, 0, 0x80000000);
     objE_Clone = objE;
     omCreateProcess(objE, (void*) func_800E1A94_AA0844, 0, 1);
     omCreateProcess(objE_Clone, (void*) func_800E1A34_AA07E4, 0, 1);

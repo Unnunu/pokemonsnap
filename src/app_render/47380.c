@@ -638,7 +638,7 @@ void func_8009E3D0(GObj*);
 void func_8009FA00(UNK_TYPE arg0, UNK_TYPE arg1) {
     GObj* gobj;
 
-    gobj = omAddGObj(0x80, NULL, D_800BDF1E, 0x80000000);
+    gobj = omAddGObj(OBJECT_ID_128, NULL, D_800BDF1E, 0x80000000);
     gobj->userData = (void*) (arg1 + 0x1A0);
     omLinkGObjDL(gobj, func_8009E3D0, D_800BDF1C, 0, -1);
 }

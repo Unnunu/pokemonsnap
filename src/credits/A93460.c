@@ -22,7 +22,7 @@ void func_credits_801DC8C4(void) {
     ohCreateCamera(3, &ohUpdateDefault, 0, 0x80000000, &renSpriteCameraRender, 3, 2, -1, 1, 1, 0, 1, 1)
         ->data.cam->flags = 8;
     func_800A7F68(0, 0x101);
-    omCreateProcess(omAddGObj(0xE, NULL, 0, 0x80000000), func_credits_801DE844, 0, 1);
+    omCreateProcess(omAddGObj(OBJECT_ID_14, NULL, 0, 0x80000000), func_credits_801DE844, 0, 1);
 }
 
 void func_credits_801DC9FC(void* arg1) {

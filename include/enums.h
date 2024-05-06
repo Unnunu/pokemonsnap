@@ -29,4 +29,10 @@ enum SceneIds {
     SCENE_24 = 24
 };
 
+enum ObjectIds {
+    OBJECT_ID_14 = 14,
+    OBJECT_ID_31 = 31,
+    OBJECT_ID_128 = 128
+};
+
 #endif
