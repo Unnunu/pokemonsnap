@@ -34,6 +34,7 @@ void func_803571C4_4F75D4(void);
 void func_803572B0_4F76C0(void);
 void func_803573BC_4F77CC(void);
 OMCamera* func_803586F8_4F8B08(void);
+void func_80359484_4F9894(GObj*);
 void func_8035E298_4FE6A8(GObj*);
 void func_8035ED90_4FF1A0(GObj*, void (*)(GObj*));
 void func_8035FC54_500064(GObj*, s32);
@@ -244,6 +245,28 @@ extern void* D_beach_80347658;
 
 extern PokemonDef beachPokemonData[17];
 
+void beach_spawnButterfree(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C8570(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C7AD0(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CA05C(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void beach_spawnSnorlax(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C8274(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C9A7C(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C7270(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C8D3C(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802C91CC(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CAC48(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CBCA8(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_8035E0D4_4FE4E4(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CA418(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CA2BC(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+void func_beach_802CAB14(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn);
+
+void func_80362D2C_50313C(GObj* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void func_beach_802C71E8(GObj* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+
+void func_80364280_504690(GObj*);
+
 void func_beach_802C52EC(GObj*);
 void func_beach_802C5620(GObj*);
 void func_beach_802C5700(GObj*);
@@ -347,5 +370,9 @@ void func_beach_802CB874(GObj*);
 void func_beach_802CBB90(GObj*);
 void func_beach_802CBD04(GObj*);
 void func_beach_802CBDD8(GObj*);
+
+void func_beach_802C45C0(void);
+void beachSpawnMagikarpAtGObj(GObj* obj);
+void func_beach_802C4738(s32 arg0);
 
 #endif

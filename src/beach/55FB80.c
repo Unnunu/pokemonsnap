@@ -49,7 +49,7 @@ void func_beach_802C7DEC(GObj* obj) {
     func_8035EDC8_4FF1D8(obj);
 }
 
-void func_beach_802C7E38(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+void beach_spawnButterfree(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
     spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CCDA4);
 }
 

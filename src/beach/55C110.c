@@ -57,113 +57,180 @@ u32 D_beach_802CBE10[] = {
     0x0034010F,
     0x0130010A,
     0x016B000A,
+    0x0184000A,
 };
 
-AnimalDef beachAnimalData[] = {
+PokemonDef beachAnimalData[] = {
     {
-        0xC,
-        func_beach_802C7E38,
+        PokemonID_BUTTERFREE,
+        beach_spawnButterfree,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x54,
-        func_beach_802C7E38,
+        PokemonID_DODUO,
+        func_beach_802C8570,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x85,
+        PokemonID_EEVEE,
         func_beach_802C7AD0,
         func_80362D2C_50313C,
         NULL
     },
     {
-        0x73,
+        PokemonID_KANGASKHAN,
         func_beach_802CA05C,
         func_80363EB4_5042C4,
         func_80364280_504690
     },
     {
-        0x8F,
-        func_beach_802C5C28,
+        PokemonID_SNORLAX,
+        beach_spawnSnorlax,
         func_80363EB4_5042C4,
         func_80364280_504690
     },
     {
-        0x83,
+        PokemonID_LAPRAS,
         func_beach_802C8274,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x71,
+        PokemonID_CHANSEY,
         func_beach_802C9A7C,
         func_80363EB4_5042C4,
         func_80364280_504690
     },
     {
-        0x34,
+        PokemonID_MEOWTH,
         func_beach_802C7270,
         func_beach_802C71E8,
         func_80364280_504690
     },
     {
-        0x10,
+        PokemonID_PIDGEY,
         func_beach_802C8D3C,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x7B,
+        PokemonID_SCYTHER,
         func_beach_802C91CC,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x81,
+        PokemonID_MAGIKARP,
         func_beach_802CAC48,
         func_80363EB4_5042C4,
         func_80364280_504690
     },
     {
-        0x19,
+        PokemonID_PIKACHU,
         func_beach_802CBCA8,
         func_80363EB4_5042C4,
         func_80364280_504690
     },
     {
-        0x3EB,
+        PokemonID_1003,
         func_8035E0D4_4FE4E4,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x3EC,
+        PokemonID_1004,
         func_beach_802CA418,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x3ED,
+        PokemonID_1005,
         func_beach_802CA2BC,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
     {
-        0x3E9,
+        PokemonID_1001,
         func_beach_802CAB14,
         func_80363DBC_5041CC,
         func_80364280_504690
     },
-    { },
+    {
+        0,
+        NULL,
+        NULL,
+        NULL
+     },
 };
 
-AnimalDef D_beach_802CBFF4 = {
+PokemonDef D_beach_802CBFF4 = {
     0x81,
     func_beach_802CAC48,
     func_80363EB4_5042C4,
     func_80364280_504690
+};
+
+// TODO type
+u32 D_beach_802CC004[] = {
+    0x03000000,
+    beachSpawnMagikarpAtGObj,
+    0x07000000,
+    NULL
+};
+
+s16 D_beach_802CC014 = 0;
+s32 D_beach_802CC018 = 0;
+
+ScreenSettings D_beach_802CC01C = {
+    D_803B5000,    /* fb1 */
+    D_803DA800,    /* fb2 */
+    NULL,          /* fb3 */
+    NULL,          /* zbuffer */
+    SCREEN_WIDTH,  /* width*/
+    SCREEN_HEIGHT, /* height */
+    0x00000A99     /* flags*/
+};
+
+SceneSetup D_beach_802CC038 = {
+    {
+        0,                          /* unk_00*/
+        omUpdateAll,                /* fnUpdate */
+        omDrawAll,                  /* fnDraw */
+        &D_801B0310,                /* heapBase */
+        0,                          /* heapSize */
+        1,                          /* unk_14 */
+        2,                          /* numContexts */
+        0x5000,                     /* dlBufferSize0 */
+        0x0C00,                     /* dlBufferSize1 */
+        0x0400,                     /* dlBufferSize2 */
+        0x0000,                     /* dlBufferSize3 */
+        0xC800,                     /* gfxHeapSize */
+        0x20000,                    /* unk30 */
+        0x4000,                     /* rdpOutputBufferSize */
+        func_800A1A50,              /* fnPreRender */
+        contUpdate                  /* fnUpdateInput */
+    },
+    0,                              /* numOMThreads */
+    1088,                           /* omThreadStackSize */
+    0,                              /* numOMStacks */
+    0,                              /* unk4C */
+    0,                              /* numOMProcesses */
+    0,                              /* numOMGobjs */
+    0x5C,                           /* objectSize */
+    0,                              /* numOMMtx */
+    0,                              /* unk60 */
+    func_beach_802C4738,            /* unk64 */
+    0,                              /* numOMAobjs */
+    0,                              /* numOMMobjs */
+    0,                              /* numOMDobjs */
+    0x88,                           /* omDobjSize */
+    0,                              /* numOMSobjs */
+    0x58,                           /* omSobjSize */
+    0,                              /* numOMCameras */
+    0x90,                           /* omCameraSize */
+    func_beach_802C45C0             /* postInitFunc */
 };
 
 void beachSpawnMagikarpAtGObj(GObj* obj) {
