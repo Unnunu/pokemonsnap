@@ -1,13 +1,10 @@
 #include "common.h"
 
-extern f32 D_80393AC0_533ED0;
-extern f32 D_80393AC4_533ED4;
 extern Mtx4f D_803B14D8_5518E8;
 extern Mtx4f D_803B1518_551928;
 void func_803643E0_5047F0(OMCamera* cam);
+
 s32 func_80364618_504A28(GObj* obj, f32 x, f32 y, f32 z);
-s32 func_80364494_5048A4(OMCamera* cam, f32* arg1, f32* arg2, f32* arg3, f32* arg4);
-extern f32 D_80393AC8_533ED8;
 
 void func_803643E0_5047F0(OMCamera* cam) {
     hal_perspective_fast_f(D_803B1518_551928, NULL, cam->perspMtx.persp.fovy, cam->perspMtx.persp.aspect,
@@ -31,14 +28,14 @@ s32 func_80364618_504A28(GObj* obj, f32 x, f32 y, f32 z) {
     if (outZ > -1.0f) {
         return 1;
     }
-    if (outZ < D_80393AC0_533ED0) {
+    if (outZ < -10000.0f) {
         return 1;
     }
-    temp = (outX * D_80393AC4_533ED4) / outZ;
+    temp = (outX * 228.506134f) / outZ;
     if (temp < -240 || temp > 240) {
         return 1;
     }
-    temp = (outY * D_80393AC4_533ED4) / outZ;
+    temp = (outY * 228.506134f) / outZ;
     if (temp < -180 || temp > 180) {
         return 1;
     }
@@ -46,16 +43,16 @@ s32 func_80364618_504A28(GObj* obj, f32 x, f32 y, f32 z) {
 }
 
 s32 func_80364718_504B28(GObj* obj) {
-    Animal* animal = GET_ANIMAL(obj);
-    if (GET_ANIMAL(obj)->flags & 0x40) {
+    Pokemon* pokemon = GET_POKEMON(obj);
+    if (GET_POKEMON(obj)->flags & 0x40) {
         func_8035FEEC_5002FC(obj, 0);
         return 0;
     }
-    if (D_80393AC8_533ED8 < GET_ANIMAL(obj)->playerDist) {
+    if (10000.0f < GET_POKEMON(obj)->playerDist) {
         func_8035FEEC_5002FC(obj, 1);
         return 1;
     }
-    if (func_80364618_504A28(obj, animal->collPosition.x, animal->collPosition.y, animal->collPosition.z) != 0) {
+    if (func_80364618_504A28(obj, pokemon->collPosition.x, pokemon->collPosition.y, pokemon->collPosition.z) != 0) {
         func_8035FEEC_5002FC(obj, 1);
         return 1;
     }
@@ -63,9 +60,9 @@ s32 func_80364718_504B28(GObj* obj) {
     return 0;
 }
 
-void func_803647BC_504BCC(GObj* obj) {
+s32 func_803647BC_504BCC(GObj* obj) {
     DObj* dobj;
 
     dobj = obj->data.dobj;
-    func_80364618_504A28(obj, dobj->position.v.x, dobj->position.v.y, dobj->position.v.z);
+    return func_80364618_504A28(obj, dobj->position.v.x, dobj->position.v.y, dobj->position.v.z);
 }

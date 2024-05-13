@@ -6,7 +6,7 @@
 
 s32 sRandSeed = 1;
 s32 qsortItemSize = 0;
-s32 (*qsortCompareFunc)(u8*, u8*) = NULL;
+s32 (*qsortCompareFunc)(const void*, const void*) = NULL;
 
 
 f32 tanf(f32 arg0) {
@@ -196,11 +196,13 @@ void qsortInternal(u8* first, u8* last) {
     }
 }
 
-void qsort(u8* base, s32 count, s32 itemSize, s32 (*compare)(u8*, u8*)) {
+void qsort(void* _base, u32 count, u32 itemSize, s32 (*compare)(const void*, const void*)) {
     u8 *curr, *next;
     s32 s0;
     s32 foundInversion;
     s32 nv = 1; // required to match
+
+    u8* base = (u8*)_base;
 
     curr = base;
     next = base + itemSize;
@@ -266,7 +268,7 @@ u8* func_8001A29C(u8* dst, u8* src, u32* count, u32 itemSize, s32 (*compare)(u8*
         if (compare(dst, src) == 0) {
             return src;
         }
-        src += itemSize;        
+        src += itemSize;
     }
     memcpy(dst, src, itemSize);
     *count += 1;

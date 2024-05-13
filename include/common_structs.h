@@ -4,6 +4,7 @@
 #include "ultra64.h"
 #include "types.h"
 #include "sys/om.h"
+#include "sys/anim.h"
 
 typedef f32 quartic[5];
 
@@ -19,14 +20,6 @@ typedef struct {
 } pathSpline;
 
 typedef struct {
-    /* 0x00 */ f32 speed;
-    /* 0x04 */ f32 field_0x4;
-    /* 0x08 */ AnimCmd** animList;
-    /* 0x0C */ AnimCmd*** matAnims;
-    /* 0x10 */ s32* ids;
-} AnimationHeader;
-
-typedef struct {
     /* 0x00 */ s32 id;
     /* 0x04 */ GObjFunc state;
     /* 0x08 */ f32 radius;
@@ -40,7 +33,7 @@ typedef struct {
     /* 0x09 */ char unk_09[0x3];
     /* 0x0C */ void* unk_0C;
     /* 0x10 */ idFuncStruct* idfuncs;
-} animalAnimationSetup;
+} PokemonAnimationSetup;
 
 typedef struct {
     /* 0x0 */ s8 r;
@@ -74,7 +67,7 @@ typedef struct PokemonInitData {
     /* 0x00 */ UnkEC64Arg3* tree;
     /* 0x04 */ Texture*** textures;
     /* 0x08 */ GObjFunc fnRender;
-    /* 0x0C */ animalAnimationSetup* animSetup;
+    /* 0x0C */ PokemonAnimationSetup* animSetup;
     /* 0x10 */ Vec3f scale;
     /* 0x1C */ Vec3f scaleNumerator;
     /* 0x28 */ f32 radius;
@@ -116,7 +109,7 @@ typedef struct {
 typedef struct GroundResult {
     /* 0x00 */ f32 height;
     /* 0x04 */ Vec3f normal;
-    /* 0x10 */ s32 type;
+    /* 0x10 */ u32 surfaceType;
 } GroundResult; // size = 0x14
 
 struct WorldBlock;
@@ -137,7 +130,7 @@ typedef struct {
     /* 0x040 */ Vec3f euler;
     /* 0x04C */ Vec3f collisionOffset;
     /* 0x058 */ f32 collisionRadius;
-    /* 0x05C */ animalAnimationSetup* animSetup;
+    /* 0x05C */ PokemonAnimationSetup* animSetup;
     /* 0x060 */ GObjProcess* interactionProc;
     /* 0x064 */ GObj* apple;
     /* 0x068 */ f32 interactionDist;
@@ -145,8 +138,8 @@ typedef struct {
     /* 0x070 */ GObj* interactionTarget;
     /* 0x074 */ struct WorldBlock* someRoom;
     /* 0x078 */ char unk_78[0x8];
-    /* 0x080 */ AnimCmd** animators;
-    /* 0x084 */ AnimCmd*** matAnims;
+    /* 0x080 */ union AnimCmd** animators;
+    /* 0x084 */ union AnimCmd*** matAnims;
     /* 0x088 */ s32 behavior;
     /* 0x08C */ u32 processFlags;
     /* 0x090 */ s32 counter;
@@ -154,7 +147,7 @@ typedef struct {
     /* 0x098 */ f32 hSpeed;
     /* 0x09C */ f32 jumpVel;
     /* 0x0A0 */ f32 facingYaw;
-    /* 0x0A4 */ s32 animalLoopTarget;
+    /* 0x0A4 */ s32 pokemonLoopTarget;
     /* 0x0A8 */ f32 lastAnimationFrame;
     /* 0x0AC */ idFuncStruct* transitionGraph;
     /* 0x0B0 */ misc miscVars[7];
@@ -171,7 +164,7 @@ typedef struct {
     /* 0x100 */ Vec3f collPosition;
     /* 0x10C */ s16 unk_10C;
     /* 0x10E */ s16 field_0x10e;
-} Animal; // size = 0x110
+} Pokemon; // size = 0x110
 
 typedef struct {
     /* 0x00 */ char unk_00[0x1];
@@ -186,11 +179,11 @@ typedef struct {
 } projectileData; // size = 0x30
 
 typedef union {
-    Animal* animal;
+    Pokemon* pokemon;
     projectileData* projectileData;
 } gobjData;
 
-typedef GObj* (*animalInit)(s32 arg0, u16 id, struct WorldBlock* blockA, struct WorldBlock* blockB, ObjectSpawn* spawn);
+typedef GObj* (*pokemonInit)(s32 arg0, u16 id, struct WorldBlock* blockA, struct WorldBlock* blockB, ObjectSpawn* spawn);
 
 typedef struct {
     s32 value;
@@ -199,14 +192,10 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u32 id;
-    /* 0x04 */ animalInit init;
+    /* 0x04 */ pokemonInit init;
     /* 0x08 */ void* update;
     /* 0x0C */ void* kill;
-} AnimalDef; // size = 0x10
-
-typedef struct UnkPinkBarracuda {
-    s32 unk4_25 : 7;
-} UnkPinkBarracuda;
+} PokemonDef; // size = 0x10
 
 typedef struct UnkStruct800BEDF8 {
     /* 0x00 */ char unk_00[0x14];
@@ -218,51 +207,60 @@ typedef struct PlayerName {
     /* 0x00 */ char data[0x10];
 } PlayerName; // size = 0x10
 
-typedef struct UnkStruct80366BA4 {
-    /* 0x00 */ u8 pad00[0x8];
-    /* 0x08 */ s32* unk_08;
-    /* 0x0C */ Vec3f unk_0C;
-    /* 0x18 */ u8 pad18[0x4];
-    /* 0x1C */ f32 unk_1C;
-} UnkStruct80366BA4; // size >= 0x20
-
-typedef struct UnkGoofyGlobule {
-    s32 levelID : 7;
-} UnkGoofyGlobule;
-
-typedef struct UnkThingSub {
+typedef struct PhotoDataSub {
     /* 0x00 */ s32 pokemonID : 13;
-    /* 0x00 */ s32 unk_20_7 : 3;
-    /* 0x02 */ s32 unk_02 : 16;
-    /* 0x04 */ char unk_04[0x14];
-} UnkThingSub; // size = 0x18
+    /* 0x00 */ s32 unk_20_7 : 3; // padding?
+    /* 0x02 */ char unk_02[0x2];
+    /* 0x04 */ f32 unk_04;
+    /* 0x08 */ Vec3f unk_08;
+    /* 0x14 */ f32 unk_14;
+} PhotoDataSub; // size = 0x18
 
-typedef struct UnkThingSub2 {
+typedef struct PhotoDataSub2 {
     /* 0x00 */ s8 unk_00;
     /* 0x01 */ u8 unk_01; // TODO skipFrames bitfield?
-    /* 0x04 */ Vec3f unk_04;
-} UnkThingSub2; // size == 0x10
+    /* 0x04 */ Vec3f pos;
+} PhotoDataSub2; // size == 0x10
 
-typedef struct UnkThingSub3 {
+typedef struct PhotoDataSub3 {
     /* 0x00 */ s8 unk_00;
     /* 0x01 */ char unk_01[0x3];
-    /* 0x04 */ char unk_04[0xC];
-} UnkThingSub3;
+    /* 0x04 */ char unk_04[0x8];
+    /* 0x0C */ f32 unk_0C;
+} PhotoDataSub3;
 
-typedef struct UnkThing {
-    /* 0x000 */ s32 unk_00_25 : 7;
-                s32 unk_00_24 : 1;
+typedef struct PhotoData {
+    /* 0x000 */ s8 levelID : 7;
+                u8 unk_00_24 : 1;
                 u32 unk_00_16 : 8;
-                s32 unk_00_8 : 8;
-                s32 unk_00_0 : 8;
-    /* 0x004 */ f32 unk_04;
+    /* 0x002 */ char unk_02[0x2];
+    /* 0x004 */ union {
+                    s32 s32;
+                    f32 f32;
+                } unk_04;
     /* 0x008 */ Vec3f unk_08;
     /* 0x014 */ Vec3f unk_14;
-    /* 0x020 */ UnkThingSub unk_20[12];
-    /* 0x140 */ UnkThingSub2 unk_140[6];
-    /* 0x1A0 */ UnkThingSub3 unk_1A0[32];
+    /* 0x020 */ PhotoDataSub unk_20[12];
+    /* 0x140 */ PhotoDataSub2 unk_140[6];
+    /* 0x1A0 */ PhotoDataSub3 unk_1A0[32];
+} PhotoData; // size = 0x3A0
+
+typedef struct UnkThing {
+    /* 0x000 */ PhotoData main;
     /* 0x3A0 */ UNK_TYPE unk_3A0;
     /* 0x3A4 */ GObj* unk_3A4[12];
 } UnkThing;
+
+typedef struct UnkCanaryScallop {
+    s32 unk_0;
+    s32 unk_4;
+} UnkCanaryScallop; // size == 0x8
+
+typedef struct UnkBrassLynx {
+    /* 0x00 */ char unk_00[0x14];
+    /* 0x14 */ Vec3f unk_14;
+    /* 0x20 */ char unk_20[0x28];
+    /* 0x48 */ DObj* unk_48;
+} UnkBrassLynx;
 
 #endif

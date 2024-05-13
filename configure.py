@@ -245,7 +245,7 @@ def create_build_script(linker_entries: List[LinkerEntry]):
             c_path = entry.src_paths[0]
             opt_level = "-O2"
 
-            if c_path.stem in ["98C330", "98D0F0", "993F80", "993C50", "A084B0"]:
+            if c_path.stem in ["98C330", "98D0F0", "993F80", "993C50", "A084B0", "9FAC10", "9FA580", "9FD510", "9FEC10"]:
                 opt_level = "-g"
 
             if "ultralib" not in str(c_path):
@@ -344,9 +344,8 @@ def create_build_script(linker_entries: List[LinkerEntry]):
                     },
                 )
         elif isinstance(seg, splat.segtypes.common.textbin.CommonSegTextbin):
-            build(entry.object_path, entry.src_paths, "as")
-        elif isinstance(seg, splat.segtypes.common.databin.CommonSegDatabin):
-            build(entry.object_path, entry.src_paths, "as")
+            if seg.sibling is None:
+                build(entry.object_path, entry.src_paths, "as")
         elif isinstance(seg, splat.segtypes.common.bin.CommonSegBin):
             build(entry.object_path, entry.src_paths, "bin")
         else:

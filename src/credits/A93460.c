@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../unk_end_level/unk_end_level.h"
 #include "credits.h"
 
 void func_credits_801DC8A0(Gfx** gfx) {
@@ -15,7 +16,7 @@ void func_credits_801DC8C4(void) {
     } else {
         var_a1 = 0x78000;
     }
-    func_8036A3F8(mlHeapAlloc(&sGeneralHeap, var_a1, 8), (s32) var_a1);
+    func_8036A3F8_83DBA8(mlHeapAlloc(&sGeneralHeap, var_a1, 8), (s32) var_a1);
     func_800AAE28();
     func_80374D40_8484F0();
     ohCreateCameraWrapper(0, 0x80000000, 0x64, 6, 0xFF);
@@ -32,13 +33,13 @@ void func_credits_801DC9FC(void* arg1) {
 void func_credits_801DCA1C(void* arg0) {
     void* sp34;
     s32 temp_v0;
-    void* temp_v0_2;
+    PhotoData* temp_v0_2;
 
     while (TRUE) {
         osRecvMesg(&D_credits_801ECC68, &sp34, 1);
         osSetThreadPri(NULL, 0x34);
         temp_v0 = func_credits_801DE8D8();
-        temp_v0_2 = func_800BF710_5C5B0(temp_v0);
+        temp_v0_2 = func_800BF710_5C5B0(temp_v0); // TODO TYPE
         if (temp_v0_2 != NULL) {
             func_8009FC38(temp_v0_2);
         }

@@ -23,7 +23,7 @@ struct DObjDynamicStore* func_8035E944_4FED54(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035E9E0_4FEDF0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035EA80_4FEE90.s")
-Animal* func_8035EA80_4FEE90(void);
+Pokemon* func_8035EA80_4FEE90(void);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035EAE0_4FEEF0.s")
 
@@ -33,8 +33,8 @@ Animal* func_8035EA80_4FEE90(void);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035EC1C_4FF02C.s")
 
-void updateAnimalState(GObj* obj, GObjFunc func) {
-    Animal* pokemon = GET_ANIMAL(obj);
+void updatePokemonState(GObj* obj, GObjFunc func) {
+    Pokemon* pokemon = GET_POKEMON(obj);
     GObjProcess* oldProc = pokemon->interactionProc;
 
     pokemon->transitionGraph = NULL;
@@ -49,21 +49,21 @@ void updateAnimalState(GObj* obj, GObjFunc func) {
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/weightedRandomStaightTransition.s")
 
 void func_8035ED90_4FF1A0(GObj* obj, GObjFunc func) {
-    Animal* pokemon = GET_ANIMAL(obj);
+    Pokemon* pokemon = GET_POKEMON(obj);
 
     pokemon->processFlags &= ~0x8;
     omCreateProcess(obj, func, 0, 6);
 }
 
 void func_8035EDC8_4FF1D8(GObj* obj) {
-    Animal* pokemon = GET_ANIMAL(obj);
+    Pokemon* pokemon = GET_POKEMON(obj);
 
     pokemon->processFlags |= 0x8;
     omEndProcess(NULL);
 }
 
 void runPathProcess(GObj* obj, GObjFunc func) {
-    Animal* pokemon = GET_ANIMAL(obj);
+    Pokemon* pokemon = GET_POKEMON(obj);
     GObjProcess* oldProc = pokemon->pathProcess;
 
     if (func != NULL) {
@@ -82,8 +82,8 @@ void runPathProcess(GObj* obj, GObjFunc func) {
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035EF2C_4FF33C.s")
 void func_8035EF2C_4FF33C(GObj* arg0, Texture*** arg1);
 
-void animalUVStuff(GObj* obj, AnimationHeader* header, f32 startTime, s32 force) {
-    Animal* pokemon = GET_ANIMAL(obj);
+void pokemonUVStuff(GObj* obj, AnimationHeader* header, f32 startTime, s32 force) {
+    Pokemon* pokemon = GET_POKEMON(obj);
 
     if (header != NULL) {
         if (pokemon->animators == NULL) {
@@ -121,16 +121,16 @@ void animalUVStuff(GObj* obj, AnimationHeader* header, f32 startTime, s32 force)
 
     pokemon->loopCount = 0;
     pokemon->processFlags &= ~1;
-    pokemon->animalLoopTarget = 1;
+    pokemon->pokemonLoopTarget = 1;
     pokemon->lastAnimationFrame = 0.0f;
 }
 
-void setAnimalAnimation(GObj* obj, AnimationHeader* header) {
-    animalUVStuff(obj, header, 0, 0);
+void setPokemonAnimation(GObj* obj, AnimationHeader* header) {
+    pokemonUVStuff(obj, header, 0, 0);
 }
 
-void forceAnimalAnimation(GObj* obj, AnimationHeader* header) {
-    animalUVStuff(obj, header, 0, 1);
+void forcePokemonAnimation(GObj* obj, AnimationHeader* header) {
+    pokemonUVStuff(obj, header, 0, 1);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035F180_4FF590.s")
@@ -154,14 +154,14 @@ f32 func_8035F21C_4FF62C(f32 arg0, f32 arg1) {
 f32 func_8035F2A4_4FF6B4(GObj* arg0, GObj* arg1);
 
 void func_8035F390_4FF7A0(GObj* obj) {
-    Animal* pokemon = GET_ANIMAL(obj);
+    Pokemon* pokemon = GET_POKEMON(obj);
     DObj* model = obj->data.dobj;
 
     if (D_80382C04_523014 != NULL) {
         Vec3f sp34;
         Vec3f sp28;
         Vec3f sp1C;
-        
+
         sp28.x = GET_TRANSFORM(model)->pos.v.x;
         sp28.y = GET_TRANSFORM(model)->pos.v.y;
         sp28.z = GET_TRANSFORM(model)->pos.v.z;
@@ -188,7 +188,7 @@ void func_8035F390_4FF7A0(GObj* obj) {
 void func_8035F900_4FFD10(GObj*);
 
 void runInteractionsAndWaitForFlags(GObj* obj, u32 flags) {
-    Animal* pokemon = GET_ANIMAL(obj);
+    Pokemon* pokemon = GET_POKEMON(obj);
 
     while (TRUE) {
         func_8035F900_4FFD10(obj);
@@ -207,20 +207,20 @@ void runInteractionsAndWaitForFlags(GObj* obj, u32 flags) {
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035FD00_500110.s")
 void func_8035FD00_500110(GObj*);
 
-void runAnimalCleanup(GObj* obj) {
+void runPokemonCleanup(GObj* obj) {
     omCreateProcess(obj, func_8035FD00_500110, 1, 4);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035FD9C_5001AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/addAnimalAtGeo.s")
-// GObj* addAnimalAtGeo(GObj *gobj, AnimalID id, AnimalDef *def) {
+#pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/addPokemonAtGeo.s")
+// GObj* addPokemonAtGeo(GObj *gobj, PokemonID id, PokemonDef *def) {
 //     ObjectSpawn spawn;
 //     WorldBlock* roomA;
-//     Animal* animalTmp;
-//     GObj* animalObj;
+//     Pokemon* pokemonTmp;
+//     GObj* pokemonObj;
 
-//     animalTmp = GET_ANIMAL(gobj);
+//     pokemonTmp = GET_POKEMON(gobj);
 //     roomA = getCurrentRoom();
 //     spawn.id = id;
 //     spawn.translation.x = 0.0f;
@@ -232,21 +232,21 @@ void runAnimalCleanup(GObj* obj) {
 //     spawn.scale.x = 1.0f;
 //     spawn.scale.y = 1.0f;
 //     spawn.scale.z = 1.0f;
-//     spawn.path = animalTmp->path;
-//     spawn.behavior = animalTmp->behavior;
+//     spawn.path = pokemonTmp->path;
+//     spawn.behavior = pokemonTmp->behavior;
 
-//     animalObj = animalAddOne(roomA, roomA, &spawn, def);
+//     pokemonObj = pokemonAddOne(roomA, roomA, &spawn, def);
 
-//     if (animalObj != NULL) {
+//     if (pokemonObj != NULL) {
 //         xformData* pxVar1 = gobj->data.dobj->unk4C; // TODO type issue
-//         xformData* pxVar2 = animalObj->data.dobj->unk4C; // TODO type issue
+//         xformData* pxVar2 = pokemonObj->data.dobj->unk4C; // TODO type issue
 
 //         pxVar2->translation.x = pxVar1->translation.x;
 //         pxVar2->translation.y = pxVar1->translation.y;
 //         pxVar2->translation.z = pxVar1->translation.z;
 //     }
 
-//     return animalObj;
+//     return pokemonObj;
 // }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_8035FEEC_5002FC.s")
@@ -311,19 +311,19 @@ s32 func_80360D18_501128(GObj* arg0, f32 arg1, f32 arg2, s32 arg3);
 s32 func_80361B68_501F78(GObj* arg0, f32 arg1, s32 arg2) {
     f32 dx, dz;
     f32 sp4C;
-    f32 sp48; 
+    f32 sp48;
     f32 unused;
     f32 f122;
     f32 sp3C;
     f32 sign;
     f32 delta;
-    f32 sp30;    
-    Animal* pokemon = GET_ANIMAL(arg0);
+    f32 sp30;
+    Pokemon* pokemon = GET_POKEMON(arg0);
     DObj* model = arg0->data.dobj;
 
     sp30 = pokemon->hSpeed * 0.033;
     dx = pokemon->targetPos.x - GET_TRANSFORM(model)->pos.v.x;
-    dz = pokemon->targetPos.z - GET_TRANSFORM(model)->pos.v.z;    
+    dz = pokemon->targetPos.z - GET_TRANSFORM(model)->pos.v.z;
 
     if (SQ(dx) + SQ(dz) < SQ(sp30)) {
         pokemon->processFlags |= 0x10;
@@ -381,7 +381,7 @@ s32 func_80361B68_501F78(GObj* arg0, f32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/setNodePosToNegRoom.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/animalPathLoop.s")
+#pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/pokemonPathLoop.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/app_level/4FEB90/func_803623F4_502804.s")
 
@@ -393,15 +393,15 @@ void func_80362480_502890(struct DObj*, s32, f32);
 #ifdef NON_MATCHING
 void func_803625B4_5029C4(GObj* source, s32 cmd) {
     idFuncStruct* a2;
-    f32 distance;    
-    Animal* pokemon;
+    f32 distance;
+    Pokemon* pokemon;
     GObjFunc sp24;
     GObjFunc sp20;
-    GObj* sp1C;    
+    GObj* sp1C;
     idFuncStruct* ptr;
-    
+
     sp1C = omCurrentObject;
-    pokemon = GET_ANIMAL(omCurrentObject);
+    pokemon = GET_POKEMON(omCurrentObject);
     sp24 = NULL;
     sp20 = NULL;
     a2 = pokemon->transitionGraph;
@@ -632,7 +632,7 @@ void func_803625B4_5029C4(GObj* source, s32 cmd) {
         func_8035ED90_4FF1A0(omCurrentObject, sp20);
     }
     if (sp24 != NULL) {
-        updateAnimalState(omCurrentObject, sp24);
+        updatePokemonState(omCurrentObject, sp24);
     }
     if (func_80353D68_4F4178() == 0) {
         ohPauseObjectProcesses(omCurrentObject);
@@ -644,12 +644,12 @@ void func_803625B4_5029C4(GObj* source, s32 cmd);
 #endif
 
 void updatePokemonDefault(GObj* obj) {
-    Animal* pokemon;
+    Pokemon* pokemon;
     if (obj == NULL) {
         return;
     }
 
-    pokemon = GET_ANIMAL(obj);
+    pokemon = GET_POKEMON(obj);
     if (func_803573A4_4F77B4() == 0 && !(pokemon->processFlags & 0x4)) {
         if (pokemon->counter > 0) {
             pokemon->counter--;
@@ -659,7 +659,7 @@ void updatePokemonDefault(GObj* obj) {
         }
     }
     if (!(pokemon->processFlags & 0x1)) {
-        if (pokemon->loopCount >= pokemon->animalLoopTarget) {
+        if (pokemon->loopCount >= pokemon->pokemonLoopTarget) {
             pokemon->processFlags |= 0x1;
         } else if (pokemon->lastAnimationFrame > 0.0f && pokemon->lastAnimationFrame < obj->animationTime) {
             pokemon->processFlags |= 0x1;
@@ -692,9 +692,9 @@ GObj* spawnPokemonOnGround(s32 objID, u16 id, WorldBlock* block, WorldBlock* blo
     f32 blockBX, blockBY, blockBZ;
     s32 unused;
     GObj* pokemonObj;
-    DObj* model;    
+    DObj* model;
     struct DObjDynamicStore* matrixStore;
-    Animal* pokemon;
+    Pokemon* pokemon;
 
     if (block == NULL || block->descriptor == NULL) {
         return NULL;
@@ -756,17 +756,17 @@ GObj* spawnPokemonOnGround(s32 objID, u16 id, WorldBlock* block, WorldBlock* blo
     pokemon->collisionRadius = initData->radius * initData->scale.y;
     pokemon->flags = initData->flags;
     pokemon->id = id;
-    pokemon->tangible = TRUE;    
+    pokemon->tangible = TRUE;
     pokemon->animSetup = initData->animSetup;
     pokemon->someRoom = block;
     pokemon->forbiddenGround = NULL;
     pokemon->loopCount = 0;
-    pokemon->playerDist = FLOAT_MAX;    
-    pokemon->interactionDist = FLOAT_MAX;    
+    pokemon->playerDist = FLOAT_MAX;
+    pokemon->interactionDist = FLOAT_MAX;
     pokemonObj->fnAnimCallback = func_80362480_502890;
     pokemon->animators = NULL;
     omCreateProcess(pokemonObj, animUpdateModelTreeAnimation, 1, 3);
-    forceAnimalAnimation(pokemonObj, initData->animSetup->animations);
+    forcePokemonAnimation(pokemonObj, initData->animSetup->animations);
     omCreateProcess(pokemonObj, func_8035F390_4FF7A0, 1, 8);
 
     pokemon->interactionProc = omCreateProcess(pokemonObj, initData->animSetup->func, initData->animSetup->kind, 7);
@@ -775,7 +775,7 @@ GObj* spawnPokemonOnGround(s32 objID, u16 id, WorldBlock* block, WorldBlock* blo
     pokemon->counter = 0;
     pokemon->pathProcess = NULL;
     pokemon->transitionGraph = NULL;
-    pokemon->animalLoopTarget = 0;
+    pokemon->pokemonLoopTarget = 0;
     pokemon->lastAnimationFrame = 0.0f;
     pokemon->jumpVel = 0.0f;
     pokemon->hSpeed = 0.0f;
@@ -787,7 +787,7 @@ GObj* spawnPokemonOnGround(s32 objID, u16 id, WorldBlock* block, WorldBlock* blo
     pokemon->behavior = spawn->behavior;
     pokemon->eggGeo = NULL;
     pokemon->unk_10C = 0;
-    pokemon->field_0x10e = 0;    
+    pokemon->field_0x10e = 0;
     pokemon->playerDist = FLOAT_MAX;
     func_8035E780_4FEB90(pokemonObj);
     return pokemonObj;
