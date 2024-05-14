@@ -61,6 +61,12 @@ enum SoundIds {
     SOUND_ID_31 = 31
 };
 
+enum SongIds {
+    SONG_ID_1 = 1,
+    SONG_ID_2 = 2,
+    SONG_ID_3 = 3,
+};
+
 enum Links {
     LINK_POKEMON = 3,
     LINK_ITEM = 4
@@ -97,10 +103,6 @@ enum PokemonIds {
     PokemonID_1007       = 1007,
     PokemonID_1010       = 1010,
     PokemonID_1022       = 1022
-};
-
-enum PokemonFlags {
-    POKEMON_FLAG_2 = 2
 };
 
 #endif

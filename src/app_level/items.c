@@ -62,8 +62,8 @@ s32 Items_ObjectCounter = 0;
 GObjFunc Items_FnUpdate = NULL;
 void (*Items_FnCollide)(GObj*, GroundResult*) = NULL;
 s32 (*D_80382EBC_5232CC)(Vec3f*, Vec3f*, Vec3f*, Vec3f*) = NULL;
-s32 Items_FluteSongsList[3] = { 1, 3, 2 };
-s32 D_80382ECC_5232DC[3] = { 5, 6, 7 };
+s32 Items_FluteSongsList[3] = { SONG_ID_1, SONG_ID_3, SONG_ID_2 };
+s32 Items_FluteCommands[3] = { POKEMON_CMD_FLUTE_SONG_1, POKEMON_CMD_FLUTE_SONG_2, POKEMON_CMD_FLUTE_SONG_3 };
 s32 Items_FluteSongIndex = 0;
 s32 Items_IsPokeFlutePlaying = FALSE;
 OSTime Items_SongStartTime = 0;
@@ -1258,7 +1258,7 @@ void Items_StopPokeFlute(void) {
 
 s32 Items_func_8035C834(void) {
     if (Items_IsPokeFlutePlaying) {
-        return D_80382ECC_5232DC[Items_FluteSongIndex];
+        return Items_FluteCommands[Items_FluteSongIndex];
     } else {
         return 0;
     }

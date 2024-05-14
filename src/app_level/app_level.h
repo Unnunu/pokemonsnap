@@ -9,9 +9,9 @@ enum ItemIds {
 };
 
 enum PokemonCommands {
-    POKEMON_CMD_5  =  5,
-    POKEMON_CMD_6  =  6,
-    POKEMON_CMD_7  =  7,
+    POKEMON_CMD_FLUTE_SONG_1  =  5,
+    POKEMON_CMD_FLUTE_SONG_2  =  6,
+    POKEMON_CMD_FLUTE_SONG_3  =  7,
     POKEMON_CMD_8  =  8,
     POKEMON_CMD_9  =  9,
     POKEMON_CMD_10 = 10,
@@ -21,6 +21,16 @@ enum PokemonCommands {
     POKEMON_CMD_19 = 19,
     POKEMON_CMD_21 = 21,
     POKEMON_CMD_58 = 58
+};
+
+enum PokemonFlags {
+    POKEMON_FLAG_2 = 0x0002,
+    POKEMON_FLAG_8 = 0x0008
+};
+
+enum PokemonProcessFlags {
+    POKEMON_PROCESS_FLAG_1 = 0x001,
+    POKEMON_PROCESS_FLAG_2 = 0x002
 };
 
 #define ITEM_CMD_REMOVE 100
