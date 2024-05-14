@@ -13,8 +13,8 @@ void func_beach_802CAC08(GObj* obj) {
     omEndProcess(NULL);
 }
 
-void func_beach_802CAC48(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CDAEC);
+GObj* beach_spawnMagikarp(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CDAEC);
 }
 
 // TODO: potential file split. spawnPokemonOnGround tends to be used at the end of files

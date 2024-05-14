@@ -204,10 +204,10 @@ void func_beach_802C8CFC(GObj* obj) {
     updatePokemonState(obj, NULL);
 }
 
-void func_beach_802C8D3C(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CD118);
+GObj* beach_spawnPidgey(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CD118);
 }
 
-void func_beach_802C8D74(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CD118);
+GObj* func_beach_802C8D74(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CD118);
 }

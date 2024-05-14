@@ -21,9 +21,9 @@ f32 SkyBoxAnimationPhase = 0.0f;
 f32 SkyBoxAnimationSpeed = 1.0f;
 s32 SkyBoxMaxAngle = 10000;
 AnimCmd*** SkyBoxAnimation = NULL;
-BlockFunc2 D_800E6AFC_642AC = NULL;
+BlockFunc2 WorldBlockEnterCb = NULL;
 BlockFunc WorldBlockDeleteCb = NULL;
-BlockFunc2 D_800E6B04_642B4 = NULL;
+BlockFunc2 WorldBlockChangeCb = NULL;
 
 // bss
 static char D_800F5A00_731B0[8]; // padding
@@ -258,13 +258,13 @@ void func_800E21E4_5F994(WorldBlock* arg0, WorldBlock* arg1) {
         return;
     }
 
-    x1 = arg1->descriptor->unk_04.x;
-    y1 = arg1->descriptor->unk_04.y;
-    z1 = arg1->descriptor->unk_04.z;
+    x1 = arg1->descriptor->worldPos.x;
+    y1 = arg1->descriptor->worldPos.y;
+    z1 = arg1->descriptor->worldPos.z;
 
-    arg0->blockModel->data.dobj->position.v.x = (arg0->descriptor->unk_04.x - x1) * 100.0f;
-    arg0->blockModel->data.dobj->position.v.y = (arg0->descriptor->unk_04.y - y1) * 100.0f;
-    arg0->blockModel->data.dobj->position.v.z = (arg0->descriptor->unk_04.z - z1) * 100.0f;
+    arg0->blockModel->data.dobj->position.v.x = (arg0->descriptor->worldPos.x - x1) * 100.0f;
+    arg0->blockModel->data.dobj->position.v.y = (arg0->descriptor->worldPos.y - y1) * 100.0f;
+    arg0->blockModel->data.dobj->position.v.z = (arg0->descriptor->worldPos.z - z1) * 100.0f;
 }
 
 void func_800E2280_5FA30(WorldBlock* arg0) {
@@ -321,8 +321,8 @@ void func_800E23A8_5FB58(WorldBlock* arg0) {
                 return;
             }
         }
-        if (D_800E6AFC_642AC != NULL) {
-            D_800E6AFC_642AC(next, arg0);
+        if (WorldBlockEnterCb != NULL) {
+            WorldBlockEnterCb(next, arg0);
         }
     }    
 }
@@ -338,12 +338,12 @@ WorldBlock* func_800E2400_5FBB0(void) {
     }
     next = curr->next;
     D_800E6AD0_64280 = next;
-    func_8035024C_4F065C((curr->descriptor->unk_04.x - next->descriptor->unk_04.x) * 100.0f,
-                         (curr->descriptor->unk_04.y - next->descriptor->unk_04.y) * 100.0f,
-                         (curr->descriptor->unk_04.z - next->descriptor->unk_04.z) * 100.0f);
-    func_800A71F8((curr->descriptor->unk_04.x - next->descriptor->unk_04.x) * 100.0f,
-                         (curr->descriptor->unk_04.y - next->descriptor->unk_04.y) * 100.0f,
-                         (curr->descriptor->unk_04.z - next->descriptor->unk_04.z) * 100.0f);
+    func_8035024C_4F065C((curr->descriptor->worldPos.x - next->descriptor->worldPos.x) * 100.0f,
+                         (curr->descriptor->worldPos.y - next->descriptor->worldPos.y) * 100.0f,
+                         (curr->descriptor->worldPos.z - next->descriptor->worldPos.z) * 100.0f);
+    func_800A71F8((curr->descriptor->worldPos.x - next->descriptor->worldPos.x) * 100.0f,
+                         (curr->descriptor->worldPos.y - next->descriptor->worldPos.y) * 100.0f,
+                         (curr->descriptor->worldPos.z - next->descriptor->worldPos.z) * 100.0f);
 
     func_800E2280_5FA30(next);
     func_800E2354_5FB04(curr);
@@ -353,8 +353,8 @@ WorldBlock* func_800E2400_5FBB0(void) {
         if (worldBlocks[i] == NULL) {
             break;
         }
-        if (D_800E6B04_642B4 != NULL) {
-            D_800E6B04_642B4(worldBlocks[i], next);
+        if (WorldBlockChangeCb != NULL) {
+            WorldBlockChangeCb(worldBlocks[i], next);
         }
     }
 
@@ -365,8 +365,8 @@ WorldBlock* func_800E2400_5FBB0(void) {
         if (worldBlocks[next->index + i] == NULL) {
             break;
         }
-        if (D_800E6B04_642B4 != NULL) {
-            D_800E6B04_642B4(worldBlocks[next->index + i], next);
+        if (WorldBlockChangeCb != NULL) {
+            WorldBlockChangeCb(worldBlocks[next->index + i], next);
         }
     }
 
@@ -383,8 +383,8 @@ WorldBlock* func_800E25E4_5FD94(WorldBlock* arg0) {
 
     D_800E6AD0_64280 = arg0;
     func_800E2280_5FA30(arg0);
-    if (D_800E6AFC_642AC != NULL) {
-        D_800E6AFC_642AC(arg0, arg0);
+    if (WorldBlockEnterCb != NULL) {
+        WorldBlockEnterCb(arg0, arg0);
     }
     
     for (i = -1; i >= -1;i--) {
@@ -392,8 +392,8 @@ WorldBlock* func_800E25E4_5FD94(WorldBlock* arg0) {
             break;
         }
         v1 = arg0->prev;
-        if (D_800E6AFC_642AC != NULL) {
-            D_800E6AFC_642AC(v1, arg0);
+        if (WorldBlockEnterCb != NULL) {
+            WorldBlockEnterCb(v1, arg0);
         }
     }
 
@@ -402,8 +402,8 @@ WorldBlock* func_800E25E4_5FD94(WorldBlock* arg0) {
             break;
         }
         v1 = arg0->next;
-        if (D_800E6AFC_642AC != NULL) {
-            D_800E6AFC_642AC(v1, arg0);
+        if (WorldBlockEnterCb != NULL) {
+            WorldBlockEnterCb(v1, arg0);
         }
     }
 
@@ -541,7 +541,7 @@ GObj* createWorldBlockUV(WorldBlock* block) {
     return obj;
 }
 
-WorldBlock** createWorldBlocks(UnkBoneFox* arg0, s32 skyBoxObjId, s32 blockMinObjId, s32 blockMaxObjId, s32 link, s32 dlLink, BlockFunc2 arg6, BlockFunc deleteCb, BlockFunc2 arg8) {
+WorldBlock** createWorldBlocks(UnkBoneFox* arg0, s32 skyBoxObjId, s32 blockMinObjId, s32 blockMaxObjId, s32 link, s32 dlLink, BlockFunc2 enterFunc, BlockFunc exitFunc, BlockFunc2 moveFunc) {
     s32 i;
     s32 num1;
     WorldBlock* s0;
@@ -552,9 +552,9 @@ WorldBlock** createWorldBlocks(UnkBoneFox* arg0, s32 skyBoxObjId, s32 blockMinOb
     WorldBlockMaxObjId = blockMaxObjId;
     WorldLink = link;
     WorldDlLink = dlLink;
-    D_800E6AFC_642AC = arg6;
-    WorldBlockDeleteCb = deleteCb;
-    D_800E6B04_642B4 = arg8;
+    WorldBlockEnterCb = enterFunc;
+    WorldBlockDeleteCb = exitFunc;
+    WorldBlockChangeCb = moveFunc;
 
     for (i = 0; i < MAX_BLOCKS; i++) {
         worldBlocks[i] = NULL;
@@ -649,7 +649,7 @@ WorldBlock** createWorldBlocks(UnkBoneFox* arg0, s32 skyBoxObjId, s32 blockMinOb
     return worldBlocks;
 }
 
-s32 createWorld(WorldSetup* arg0, s32 skyBoxObjId, s32 blockMinObjId, s32 blockMaxObjId, s32 link, s32 dllink, BlockFunc2 arg6, BlockFunc arg7, BlockFunc2 arg8) {
+s32 createWorld(WorldSetup* arg0, s32 skyBoxObjId, s32 blockMinObjId, s32 blockMaxObjId, s32 link, s32 dllink, BlockFunc2 enterFunc, BlockFunc exitFunc, BlockFunc2 moveFunc) {
     func_800E1924_5F0D4();
     if (arg0 == NULL || arg0->blocksSetup == NULL) {
         return FALSE;
@@ -659,7 +659,7 @@ s32 createWorld(WorldSetup* arg0, s32 skyBoxObjId, s32 blockMinObjId, s32 blockM
     setFogDistance(arg0->fogDistanceMin, arg0->fogDistanceMax);
     setFogColor(arg0->fogR, arg0->fogG, arg0->fogB);
     setBackgroundColor(arg0->backgroundR, arg0->backgroundG, arg0->backgroundB);
-    createWorldBlocks(arg0->blocksSetup, skyBoxObjId, blockMinObjId, blockMaxObjId, link, dllink, arg6, arg7, arg8);
+    createWorldBlocks(arg0->blocksSetup, skyBoxObjId, blockMinObjId, blockMaxObjId, link, dllink, enterFunc, exitFunc, moveFunc);
     func_800E1A78_5F228(arg0->unk_10);
     return TRUE;
 }

@@ -200,6 +200,6 @@ void func_beach_802C9A10(GObj* obj) {
     omEndProcess(NULL);
 }
 
-void func_beach_802C9A7C(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CD55C);
+GObj* beach_spawnChansey(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CD55C);
 }

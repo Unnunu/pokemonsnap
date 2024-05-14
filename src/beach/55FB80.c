@@ -49,8 +49,8 @@ void func_beach_802C7DEC(GObj* obj) {
     func_8035EDC8_4FF1D8(obj);
 }
 
-void beach_spawnButterfree(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CCDA4);
+GObj* beach_spawnButterfree(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CCDA4);
 }
 
 // TODO: potential file split
@@ -175,6 +175,6 @@ void func_beach_802C821C(GObj* obj) {
     updatePokemonState(obj, func_beach_802C7F1C);
 }
 
-void func_beach_802C8274(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CCE50);
+GObj* beach_spawnLapras(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CCE50);
 }

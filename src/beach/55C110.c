@@ -64,98 +64,98 @@ PokemonDef beachAnimalData[] = {
     {
         PokemonID_BUTTERFREE,
         beach_spawnButterfree,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_DODUO,
-        func_beach_802C8570,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        beach_spawnDoduo,
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_EEVEE,
-        func_beach_802C7AD0,
+        beach_spawnEevee,
         func_80362D2C_50313C,
         NULL
     },
     {
         PokemonID_KANGASKHAN,
-        func_beach_802CA05C,
-        func_80363EB4_5042C4,
-        func_80364280_504690
+        beach_spawnKangaskhan,
+        pokemonChangeBlockOnGround,
+        pokemonRemoveOne
     },
     {
         PokemonID_SNORLAX,
         beach_spawnSnorlax,
-        func_80363EB4_5042C4,
-        func_80364280_504690
+        pokemonChangeBlockOnGround,
+        pokemonRemoveOne
     },
     {
         PokemonID_LAPRAS,
-        func_beach_802C8274,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        beach_spawnLapras,
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_CHANSEY,
-        func_beach_802C9A7C,
-        func_80363EB4_5042C4,
-        func_80364280_504690
+        beach_spawnChansey,
+        pokemonChangeBlockOnGround,
+        pokemonRemoveOne
     },
     {
         PokemonID_MEOWTH,
-        func_beach_802C7270,
+        beach_spawnMeowth,
         func_beach_802C71E8,
-        func_80364280_504690
+        pokemonRemoveOne
     },
     {
         PokemonID_PIDGEY,
-        func_beach_802C8D3C,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        beach_spawnPidgey,
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_SCYTHER,
-        func_beach_802C91CC,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        beach_spawnScyther,
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_MAGIKARP,
-        func_beach_802CAC48,
-        func_80363EB4_5042C4,
-        func_80364280_504690
+        beach_spawnMagikarp,
+        pokemonChangeBlockOnGround,
+        pokemonRemoveOne
     },
     {
         PokemonID_PIKACHU,
-        func_beach_802CBCA8,
-        func_80363EB4_5042C4,
-        func_80364280_504690
+        beach_spawnPikachu,
+        pokemonChangeBlockOnGround,
+        pokemonRemoveOne
     },
     {
         PokemonID_1003,
         func_8035E0D4_4FE4E4,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_1004,
         func_beach_802CA418,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_1005,
         func_beach_802CA2BC,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         PokemonID_1001,
         func_beach_802CAB14,
-        func_80363DBC_5041CC,
-        func_80364280_504690
+        pokemonChangeBlock,
+        pokemonRemoveOne
     },
     {
         0,
@@ -166,10 +166,10 @@ PokemonDef beachAnimalData[] = {
 };
 
 PokemonDef D_beach_802CBFF4 = {
-    0x81,
-    func_beach_802CAC48,
-    func_80363EB4_5042C4,
-    func_80364280_504690
+    PokemonID_MAGIKARP,
+    beach_spawnMagikarp,
+    pokemonChangeBlockOnGround,
+    pokemonRemoveOne
 };
 
 // TODO type
@@ -207,7 +207,7 @@ SceneSetup D_beach_802CC038 = {
         0x0400,                     /* dlBufferSize2 */
         0x0000,                     /* dlBufferSize3 */
         0xC800,                     /* gfxHeapSize */
-        0x20000,                    /* unk30 */
+        2,                          /* unk30 */
         0x4000,                     /* rdpOutputBufferSize */
         func_800A1A50,              /* fnPreRender */
         contUpdate                  /* fnUpdateInput */
@@ -264,21 +264,21 @@ void beachSpawnMagikarpAtGObj(GObj* obj) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/beach/55C110/func_beach_802C416C.s")
 
-void beachPokemonAdd(WorldBlock* param_1, WorldBlock* param_2) {
+void beach_pokemonAdd(WorldBlock* param_1, WorldBlock* param_2) {
     pokemonAdd(param_1, param_2, beachPokemonData);
 }
 
-void func_beach_802C42F8(WorldBlock* param_1, WorldBlock* param_2) {
-    func_8036406C_50447C(param_1, param_2, beachPokemonData);
+void beach_pokemonChangeBlock(WorldBlock* param_1, WorldBlock* param_2) {
+    pokemonsChangeBlock(param_1, param_2, beachPokemonData);
 }
 
-void func_beach_802C431C(WorldBlock* arg0) {
-    func_803641B8_5045C8(arg0, beachPokemonData);
+void beach_pokemonRemove(WorldBlock* arg0) {
+    pokemonRemove(arg0, beachPokemonData);
 }
 
 void func_beach_802C4340(void) {
     setHeightMap(&D_beach_80318F00);
-    createWorld(&D_8011B914, 99, 100, 126, 9, 3, beachPokemonAdd, func_beach_802C431C, func_beach_802C42F8);
+    createWorld(&D_8011B914, 99, 100, 126, 9, 3, beach_pokemonAdd, beach_pokemonRemove, beach_pokemonChangeBlock);
     setSkyBoxFollowPlayer();
     func_80363928_503D38(0x80, 0xE4, 3, 5);
 }

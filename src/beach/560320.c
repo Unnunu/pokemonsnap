@@ -74,6 +74,6 @@ void func_beach_802C84A4(GObj* obj) {
     updatePokemonState(obj, func_beach_802C83D0);
 }
 
-void func_beach_802C8570(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CCF78);
+GObj* beach_spawnDoduo(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CCF78);
 }

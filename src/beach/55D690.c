@@ -151,7 +151,7 @@ void func_beach_802C5BD4(GObj* obj) {
     runInteractionsAndWaitForFlags(obj, 1);
     updatePokemonState(obj, func_beach_802C5700);
 }
-
+/*
 idFuncStruct D_beach_802CC294[] = {
     {
         5,
@@ -201,7 +201,7 @@ PokemonInitData D_beach_802CC2F0 = {
     { 0, 0, 0},
     0
 };
-
-void beach_spawnSnorlax(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CC2F0);
+*/
+GObj* beach_spawnSnorlax(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CC2F0);
 }

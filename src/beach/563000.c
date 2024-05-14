@@ -251,8 +251,8 @@ void func_beach_802CBC4C(GObj* obj) {
     updatePokemonState(obj, func_beach_802CBB90);
 }
 
-void func_beach_802CBCA8(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
-    spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CE038);
+GObj* beach_spawnPikachu(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+    return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CE038);
 }
 
 void func_beach_802CBCE0(GObj* obj) {

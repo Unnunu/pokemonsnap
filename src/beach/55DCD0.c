@@ -552,20 +552,20 @@ void func_beach_802C71E8(GObj* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32
     Pokemon* pokemon = GET_POKEMON(arg0);
 
     if (pokemon->behavior == 1) {
-        func_80363DBC_5041CC(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+        pokemonChangeBlock(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     } else {
-        func_80363EB4_5042C4(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+        pokemonChangeBlockOnGround(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 }
 
-void func_beach_802C7270(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
+GObj* beach_spawnMeowth(s32 gObjID, u16 id, WorldBlock* roomA, WorldBlock* roomB, ObjectSpawn* spawn) {
     if (spawn->behavior == 1) {
         // required to match
         if (FALSE) {
         }
 
-        spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CC968);
+        return spawnPokemon(gObjID, id, roomA, roomB, spawn, &D_beach_802CC968);
     } else {
-        spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CC968);
+        return spawnPokemonOnGround(gObjID, id, roomA, roomB, spawn, &D_beach_802CC968);
     }
 }

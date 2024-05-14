@@ -30,7 +30,7 @@ typedef struct {
     /* 0x24 */ u32 dlBufferSize2;
     /* 0x28 */ u32 dlBufferSize3;
     /* 0x2C */ u32 gfxHeapSize;
-    /* 0x30 */ u32 unk30;
+    /* 0x30 */ u16 unk30;
     /* 0x34 */ s32 rdpOutputBufferSize;
     /* 0x38 */ void (*fnPreRender)(Gfx**);
     /* 0x3C */ void (*fnUpdateInput)(void); // controller read callback?
