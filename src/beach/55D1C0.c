@@ -1,6 +1,9 @@
 #include "common.h"
 #include "beach.h"
 
+s32 D_beach_802CC0E0 = 0;
+GObj* D_beach_802CC0E4 = NULL;
+
 void func_beach_802C5150(GObj* obj) {
     func_803571C4_4F75D4();
     func_80357120_4F7530(obj);

@@ -9,6 +9,9 @@ enum ItemIds {
 };
 
 enum PokemonCommands {
+    POKEMON_CMD_5  =  5,
+    POKEMON_CMD_6  =  6,
+    POKEMON_CMD_7  =  7,
     POKEMON_CMD_8  =  8,
     POKEMON_CMD_9  =  9,
     POKEMON_CMD_10 = 10,
@@ -16,7 +19,8 @@ enum PokemonCommands {
     POKEMON_CMD_13 = 13,
     POKEMON_CMD_14 = 14,
     POKEMON_CMD_19 = 19,
-    POKEMON_CMD_21 = 21
+    POKEMON_CMD_21 = 21,
+    POKEMON_CMD_58 = 58
 };
 
 #define ITEM_CMD_REMOVE 100
