@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../world/world.h"
+#include "app_level/app_level.h"
 
 void func_802D0BA4_7AA134(GObj*);
 
@@ -8,7 +9,7 @@ extern AnimationHeader D_802EC6C0_7C5C50;
 extern idFuncStruct D_802EC718_7C5CA8;
 
 void func_802D0B80_7AA110(GObj* arg0) {
-    updatePokemonState(arg0, func_802D0BA4_7AA134);
+    Pokemon_SetState(arg0, func_802D0BA4_7AA134);
 }
 
 void func_802D0BA4_7AA134(GObj* obj) {
@@ -32,5 +33,5 @@ void func_802D0BA4_7AA134(GObj* obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/valley/7AA110/func_802D0F98_7AA528.s")
 
 GObj* func_802D1154_7AA6E4(s32 objID, u16 id, WorldBlock* block, WorldBlock* blockB, ObjectSpawn* spawn, PokemonInitData* initData) {
-    return func_80362DC4_5031D4(objID, id, block, blockB, spawn, &D_802EC750_7C5CE0);
+    return Pokemon_SpawnDlLink4(objID, id, block, blockB, spawn, &D_802EC750_7C5CE0);
 }

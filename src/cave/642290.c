@@ -1,5 +1,6 @@
 #include "common.h"
 #include "world/world.h"
+#include "app_level/app_level.h"
 
 extern PokemonInitData D_802C6C64_649114;
 extern AnimationHeader D_802C6BA4_649054;
@@ -35,5 +36,5 @@ void func_802C00B0_642560(GObj* obj) {
 }
 
 GObj* func_802C0104_6425B4(s32 objID, u16 id, WorldBlock* block, WorldBlock* blockB, ObjectSpawn* spawn, PokemonInitData* initData) {
-    return spawnPokemonOnGround(objID, id, block, blockB, spawn, &D_802C6C64_649114);
+    return Pokemon_SpawnOnGround(objID, id, block, blockB, spawn, &D_802C6C64_649114);
 }
