@@ -44,17 +44,16 @@ void func_802DD570_72E770(GObj* obj) {
 
 void func_802DD67C_72E87C(GObj*);
 extern AnimationHeader D_802E2EB4_7340B4;
-extern randomTransition D_802E2F28_734128;
 
 void func_802DD6D4_72E8D4(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E2EB4_7340B4);
-    runPathProcess(obj, func_802DD67C_72E87C);
+    Pokemon_SetAnimation(obj, &D_802E2EB4_7340B4);
+    Pokemon_StartPathProc(obj, func_802DD67C_72E87C);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1U);
-    weightedRandomStaightTransition(obj, &D_802E2F28_734128);
+    Pokemon_WaitForFlag(obj, 1U);
+    Pokemon_SetStateRandom(obj, D_802E2F28_734128);
 }
 
 void func_802DD67C_72E87C(GObj*);
@@ -64,11 +63,11 @@ void func_802DD740_72E940(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E2EB4_7340B4);
-    runPathProcess(obj, func_802DD67C_72E87C);
+    Pokemon_SetAnimation(obj, &D_802E2EB4_7340B4);
+    Pokemon_StartPathProc(obj, func_802DD67C_72E87C);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1U);
-    updatePokemonState(obj, func_802DD500_72E700);
+    Pokemon_WaitForFlag(obj, 1U);
+    Pokemon_SetState(obj, func_802DD500_72E700);
 }
 
 GObj* func_802DD7AC_72E9AC(s32 objID, u16 id, WorldBlock* block, WorldBlock* blockB, ObjectSpawn* spawn, PokemonInitData* initData) {

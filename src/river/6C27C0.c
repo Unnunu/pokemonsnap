@@ -26,9 +26,9 @@ void func_802DAC28_6C2A08(GObj* obj) {
     pokemon->counter = 1; pokemon->processFlags &= ~4;
     // clang-format on
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 4);
-    runPokemonCleanup(obj);
-    updatePokemonState(obj, NULL);
+    Pokemon_WaitForFlag(obj, 4);
+    Pokemon_RunCleanup(obj);
+    Pokemon_SetState(obj, NULL);
 }
 
 void func_802DAACC_6C28AC(GObj*);
@@ -42,9 +42,9 @@ void func_802DACA8_6C2A88(GObj* obj) {
     pokemon->counter = 1; pokemon->processFlags &= ~4;
     // clang-format on
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 4);
-    runPokemonCleanup(obj);
-    updatePokemonState(obj, NULL);
+    Pokemon_WaitForFlag(obj, 4);
+    Pokemon_RunCleanup(obj);
+    Pokemon_SetState(obj, NULL);
 }
 
 GObj* func_802DAD28_6C2B08(s32 objID, u16 id, WorldBlock* block, WorldBlock* blockB, ObjectSpawn* spawn, PokemonInitData* initData) {

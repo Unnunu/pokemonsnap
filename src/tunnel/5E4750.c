@@ -10,8 +10,8 @@ void func_802E9150_5E6220(GObj*);
 void func_802E85BC_5E568C(GObj*);
 void func_802E91FC_5E62CC(GObj*);
 
-extern idFuncStruct D_802EF280_5EC350;
-extern idFuncStruct D_802EF0A0_5EC170;
+extern InteractionHandler D_802EF280_5EC350;
+extern InteractionHandler D_802EF0A0_5EC170;
 extern AnimationHeader D_802EEDD0_5EBEA0;
 extern InteractionHandler D_802EEED8_5EBFA8[];
 extern RandomState D_802EEF78_5EC048[];
@@ -70,11 +70,11 @@ void func_802E8058_5E5128(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    forcePokemonAnimation(obj, &D_802EEDD0_5EBEA0);
-    runPathProcess(obj, func_802E80CC_5E519C);
+    Pokemon_ForceAnimation(obj, &D_802EEDD0_5EBEA0);
+    Pokemon_StartPathProc(obj, func_802E80CC_5E519C);
     pokemon->transitionGraph = &D_802EF0A0_5EC170;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802E8058_5E5128);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802E8058_5E5128);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5E4750/func_802E80CC_5E519C.s")
@@ -85,10 +85,10 @@ void func_802E823C_5E530C(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802EEE20_5EBEF0);
+    Pokemon_SetAnimation(obj, &D_802EEE20_5EBEF0);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802E8058_5E5128);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802E8058_5E5128);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5E4750/func_802E8290_5E5360.s")
@@ -109,10 +109,10 @@ void func_802E8628_5E56F8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802EEE20_5EBEF0);
+    Pokemon_SetAnimation(obj, &D_802EEE20_5EBEF0);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802E85BC_5E568C);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802E85BC_5E568C);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5E4750/func_802E867C_5E574C.s")
@@ -141,8 +141,8 @@ void func_802E8D38_5E5E08(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_8036148C_50189C(obj, 0.2f, 0x2A);
-    pokemon->pathProcess = NULL;
+    Pokemon_TurnToTarget(obj, 0.2f, 0x2A);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }
@@ -161,11 +161,11 @@ void func_802E90DC_5E61AC(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    forcePokemonAnimation(obj, &D_802EEDD0_5EBEA0);
-    runPathProcess(obj, func_802E9150_5E6220);
+    Pokemon_ForceAnimation(obj, &D_802EEDD0_5EBEA0);
+    Pokemon_StartPathProc(obj, func_802E9150_5E6220);
     pokemon->transitionGraph = &D_802EF280_5EC350;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802E90DC_5E61AC);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802E90DC_5E61AC);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5E4750/func_802E9150_5E6220.s")
@@ -174,10 +174,10 @@ void func_802E91A8_5E6278(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802EEE20_5EBEF0);
+    Pokemon_SetAnimation(obj, &D_802EEE20_5EBEF0);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802E91FC_5E62CC);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802E91FC_5E62CC);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5E4750/func_802E91FC_5E62CC.s")

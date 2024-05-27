@@ -13,7 +13,7 @@ void func_802C3348_6457F8(GObj* obj) {
     Pokemon* pokemon = GET_POKEMON(obj);
 
     func_8035E298_4FE6A8(obj);
-    pokemon->pathProcess = NULL;
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }
@@ -58,9 +58,9 @@ void func_802C3874_645D24(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C78D0_649D80);
-    runPathProcess(obj, func_802C38E0_645D90);
+    Pokemon_SetAnimation(obj, &D_802C78D0_649D80);
+    Pokemon_StartPathProc(obj, func_802C38E0_645D90);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_802C39B8_645E68);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_802C39B8_645E68);
 }

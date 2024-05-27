@@ -32,11 +32,11 @@ void func_802D990C_6C16EC(GObj * obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_8036148C_50189C(obj, 0.1f, 0);
-    setPokemonAnimation(obj, &D_802E2A38_6CA818);
+    Pokemon_TurnToTarget(obj, 0.1f, 0);
+    Pokemon_SetAnimation(obj, &D_802E2A38_6CA818);
     pokemon->hSpeed = 100.0f;
-    func_80361748_501B58(obj, 90.0f, 0.1f, 3);
-    pokemon->pathProcess = NULL;
+    Pokemon_RunToTarget(obj, 90.0f, 0.1f, 3);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }
@@ -48,8 +48,8 @@ void func_802D9A0C_6C17EC(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_8036148C_50189C(obj, 0.1f, 0x2E);
-    pokemon->pathProcess = NULL;
+    Pokemon_TurnToTarget(obj, 0.1f, 0x2E);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }
@@ -64,9 +64,9 @@ void func_802D9D7C_6C1B5C(GObj *obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_80361B50_501F60(obj, pokemon->pos1.x, pokemon->pos1.z);
-    func_80361E58_502268(obj, 0.1f);
-    pokemon->pathProcess = NULL;
+    Pokemon_SetTargetPos(obj, pokemon->pos1.x, pokemon->pos1.z);
+    Pokemon_RunToTargetPos(obj, 0.1f);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }

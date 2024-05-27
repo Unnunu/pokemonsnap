@@ -16,11 +16,11 @@ void func_8034A334_829AA4(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_8034B600_82AD70);
-    runPathProcess(obj, func_8034A3A0_829B10);
+    Pokemon_SetAnimation(obj, &D_8034B600_82AD70);
+    Pokemon_StartPathProc(obj, func_8034A3A0_829B10);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_8034A27C_8299EC);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_8034A27C_8299EC);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/rainbow/829900/func_8034A3A0_829B10.s")

@@ -63,9 +63,9 @@ void func_beach_802CADCC(GObj* obj) {
     Pokemon* pokemon = GET_POKEMON(obj);
 
     pokemon->tangible = 1;
-    ob->flags = 0;
-    Pokemon_StartPathProc(ob, func_beach_802CAEB0);
-    Pokemon_SetState(ob, func_beach_802CAE14);
+    obj->flags = 0;
+    Pokemon_StartPathProc(obj, func_beach_802CAEB0);
+    Pokemon_SetState(obj, func_beach_802CAE14);
 }
 
 void func_beach_802CAE14(GObj* obj) {

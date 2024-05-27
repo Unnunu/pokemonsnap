@@ -21,14 +21,14 @@ void func_802DE144_72F344(GObj* obj) {
     omEndProcess(NULL);
 }
 
-extern idFuncStruct D_802E317C_73437C;
+extern InteractionHandler D_802E317C_73437C;
 
 void func_802DE1B0_72F3B0(GObj* obj) {
     Pokemon* pokemon = GET_POKEMON(obj);
 
     pokemon->transitionGraph = &D_802E317C_73437C;
-    runInteractionsAndWaitForFlags(obj, 0);
-    updatePokemonState(obj, NULL);
+    Pokemon_WaitForFlag(obj, 0);
+    Pokemon_SetState(obj, NULL);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/volcano/72F100/func_802DE1F0_72F3F0.s")

@@ -70,10 +70,10 @@ void func_802C1124_6435D4(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C70DC_64958C);
+    Pokemon_SetAnimation(obj, &D_802C70DC_64958C);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802C1178_643628);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802C1178_643628);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/cave/642CC0/func_802C1178_643628.s")

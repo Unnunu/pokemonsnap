@@ -33,7 +33,7 @@ void func_802D1414_7AA9A4(GObj* obj) {
     Pokemon* pokemon = GET_POKEMON(obj);
 
     func_8035E298_4FE6A8(obj);
-    pokemon->pathProcess = NULL;
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }

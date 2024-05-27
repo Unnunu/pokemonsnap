@@ -8,7 +8,7 @@ void func_802ED644_5EA714(GObj*);
 extern GObj* D_802F0210_5ED2E0;
 extern PokemonInitData D_802F025C_5ED32C;
 extern AnimationHeader D_802F01F0_5ED2C0;
-extern idFuncStruct D_802F0228_5ED2F8;
+extern InteractionHandler D_802F0228_5ED2F8;
 
 void func_802ED620_5EA6F0(GObj* arg0) {
     Pokemon_SetState(arg0, func_802ED644_5EA714);
@@ -18,10 +18,10 @@ void func_802ED644_5EA714(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802F01F0_5ED2C0);
+    Pokemon_SetAnimation(obj, &D_802F01F0_5ED2C0);
     pokemon->transitionGraph = &D_802F0228_5ED2F8;
-    runInteractionsAndWaitForFlags(obj, 0);
-    updatePokemonState(obj, NULL);
+    Pokemon_WaitForFlag(obj, 0);
+    Pokemon_SetState(obj, NULL);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/tunnel/5EA6F0/func_802ED69C_5EA76C.s")

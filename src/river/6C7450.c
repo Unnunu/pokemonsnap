@@ -17,8 +17,8 @@ void func_802DF710_6C74F0(GObj *obj) {
 
     pokemon->tangible = 1;
     obj->flags = 0;
-    runPathProcess(obj, func_802DF7D8_6C75B8);
-    updatePokemonState(obj, func_802DF758_6C7538);
+    Pokemon_StartPathProc(obj, func_802DF7D8_6C75B8);
+    Pokemon_SetState(obj, func_802DF758_6C7538);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/river/6C7450/func_802DF758_6C7538.s")
@@ -58,10 +58,10 @@ void func_802DFDF8_6C7BD8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    forcePokemonAnimation(obj, &D_802E4140_6CBF20);
+    Pokemon_ForceAnimation(obj, &D_802E4140_6CBF20);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802DFDF8_6C7BD8);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802DFDF8_6C7BD8);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/river/6C7450/func_802DFE4C_6C7C2C.s")

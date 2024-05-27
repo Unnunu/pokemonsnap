@@ -110,15 +110,15 @@ void func_802DCC40_72DE40(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E2B28_733D28);
+    Pokemon_SetAnimation(obj, &D_802E2B28_733D28);
     pokemon->pokemonLoopTarget = 5;
-    runPathProcess(obj, func_802DCCE4_72DEE4);
-    pokemon->transitionGraph = &D_802E2CA4_733EA4;
-    runInteractionsAndWaitForFlags(obj, 3);
+    Pokemon_StartPathProc(obj, func_802DCCE4_72DEE4);
+    pokemon->transitionGraph = D_802E2CA4_733EA4;
+    Pokemon_WaitForFlag(obj, 3);
     if (pokemon->processFlags & 2) {
-        updatePokemonState(obj, func_802DCBD0_72DDD0);
+        Pokemon_SetState(obj, func_802DCBD0_72DDD0);
     }
-    weightedRandomStaightTransition(obj, &D_802E2D04_733F04);
+    Pokemon_SetStateRandom(obj, D_802E2D04_733F04);
 }
 
 void func_802DCCE4_72DEE4(GObj* obj) {
@@ -136,15 +136,15 @@ void func_802DCD40_72DF40(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E2B3C_733D3C);
+    Pokemon_SetAnimation(obj, &D_802E2B3C_733D3C);
     pokemon->pokemonLoopTarget = 5;
-    runPathProcess(obj, func_802DCDE4_72DFE4);
-    pokemon->transitionGraph = &D_802E2CA4_733EA4;
-    runInteractionsAndWaitForFlags(obj, 3);
+    Pokemon_StartPathProc(obj, func_802DCDE4_72DFE4);
+    pokemon->transitionGraph = D_802E2CA4_733EA4;
+    Pokemon_WaitForFlag(obj, 3);
     if (pokemon->processFlags & 2) {
-        updatePokemonState(obj, func_802DCBD0_72DDD0);
+        Pokemon_SetState(obj, func_802DCBD0_72DDD0);
     }
-    weightedRandomStaightTransition(obj, &D_802E2D04_733F04);
+    Pokemon_SetStateRandom(obj, D_802E2D04_733F04);
 }
 
 void func_802DCDE4_72DFE4(GObj* obj) {
@@ -166,11 +166,11 @@ void func_802DCF44_72E144(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E2B50_733D50);
-    runPathProcess(obj, NULL);
+    Pokemon_SetAnimation(obj, &D_802E2B50_733D50);
+    Pokemon_StartPathProc(obj, NULL);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802DCBD0_72DDD0);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802DCBD0_72DDD0);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/volcano/72D260/func_802DCFAC_72E1AC.s")

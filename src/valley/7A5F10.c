@@ -37,10 +37,10 @@ void func_802CD2A8_7A6838(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    runPathProcess(obj, func_802CD2FC_7A688C);
+    Pokemon_StartPathProc(obj, func_802CD2FC_7A688C);
     pokemon->transitionGraph = NULL;
-    runInteractionsAndWaitForFlags(obj, 2U);
-    updatePokemonState(obj, func_802CD4F4_7A6A84);
+    Pokemon_WaitForFlag(obj, 2U);
+    Pokemon_SetState(obj, func_802CD4F4_7A6A84);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/valley/7A5F10/func_802CD2FC_7A688C.s")

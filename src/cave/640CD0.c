@@ -13,9 +13,9 @@ extern InteractionHandler D_802C65E8_648A98[];
 extern RandomState D_802C67E8_648C98[];
 extern PokemonInitData D_802C6824_648CD4;
 extern AnimationHeader D_802C6588_648A38;
-extern idFuncStruct D_802C67A8_648C58;
+extern InteractionHandler D_802C67A8_648C58;
 extern AnimationHeader D_802C6574_648A24;
-extern idFuncStruct D_802C6778_648C28;
+extern InteractionHandler D_802C6778_648C28;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/cave/640CD0/func_802BE820_640CD0.s")
 
@@ -56,22 +56,20 @@ void func_802BE9B4_640E64(GObj* obj) {
 
 void func_802BEAC8_640F78(GObj*);
 extern AnimationHeader D_802C6574_648A24;
-extern idFuncStruct D_802C65E8_648A98;
-extern randomTransition D_802C67E8_648C98;
 
 void func_802BEA24_640ED4(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C6574_648A24);
+    Pokemon_SetAnimation(obj, &D_802C6574_648A24);
     pokemon->pokemonLoopTarget = 5;
-    runPathProcess(obj, func_802BEAC8_640F78);
-    pokemon->transitionGraph = &D_802C65E8_648A98;
-    runInteractionsAndWaitForFlags(obj, 3);
+    Pokemon_StartPathProc(obj, func_802BEAC8_640F78);
+    pokemon->transitionGraph = D_802C65E8_648A98;
+    Pokemon_WaitForFlag(obj, 3);
     if (pokemon->processFlags & 2) {
-        updatePokemonState(obj, func_802BE8D4_640D84);
+        Pokemon_SetState(obj, func_802BE8D4_640D84);
     }
-    weightedRandomStaightTransition(obj, &D_802C67E8_648C98);
+    Pokemon_SetStateRandom(obj, D_802C67E8_648C98);
 }
 
 void func_802BEAC8_640F78(GObj* obj) {
@@ -93,11 +91,11 @@ void func_802BEC34_6410E4(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C6588_648A38);
-    runPathProcess(obj, func_802BECA8_641158);
+    Pokemon_SetAnimation(obj, &D_802C6588_648A38);
+    Pokemon_StartPathProc(obj, func_802BECA8_641158);
     pokemon->transitionGraph = &D_802C67A8_648C58;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_802BE8D4_640D84);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_802BE8D4_640D84);
 }
 
 void func_802BECA8_641158(GObj* obj) {
@@ -117,21 +115,20 @@ void func_802BECA8_641158(GObj* obj) {
 
 void func_802BEEA4_641354(GObj*);
 extern AnimationHeader D_802C65B0_648A60;
-extern idFuncStruct D_802C6728_648BD8;
-extern randomTransition D_802C67E8_648C98;
+extern InteractionHandler D_802C6728_648BD8;
 
 void func_802BEE10_6412C0(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C65B0_648A60);
-    runPathProcess(obj, func_802BEEA4_641354);
+    Pokemon_SetAnimation(obj, &D_802C65B0_648A60);
+    Pokemon_StartPathProc(obj, func_802BEEA4_641354);
     pokemon->transitionGraph = &D_802C6728_648BD8;
-    runInteractionsAndWaitForFlags(obj, 1);
+    Pokemon_WaitForFlag(obj, 1);
     if (pokemon->interactionTarget != NULL) {
-        updatePokemonState(obj, func_802BEE10_6412C0);
+        Pokemon_SetState(obj, func_802BEE10_6412C0);
     }
-    weightedRandomStaightTransition(obj, &D_802C67E8_648C98);
+    Pokemon_SetStateRandom(obj, D_802C67E8_648C98);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/cave/640CD0/func_802BEEA4_641354.s")
@@ -144,19 +141,19 @@ void func_802BEF18_6413C8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802C6574_648A24);
-    runPathProcess(obj, func_802BEF8C_64143C);
+    Pokemon_SetAnimation(obj, &D_802C6574_648A24);
+    Pokemon_StartPathProc(obj, func_802BEF8C_64143C);
     pokemon->transitionGraph = &D_802C6778_648C28;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_802BE8D4_640D84);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_802BE8D4_640D84);
 }
 
 void func_802BEF8C_64143C(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_8036148C_50189C(obj, 0.1f, 0x2E);
-    pokemon->pathProcess = NULL;
+    Pokemon_TurnToTarget(obj, 0.1f, 0x2E);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }

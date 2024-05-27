@@ -20,8 +20,8 @@ extern PokemonInitData D_802E2710_733910;
 extern AnimationHeader D_802E23CC_7335CC;
 extern AnimationHeader D_802E23E0_7335E0;
 extern AnimationHeader D_802E241C_73361C;
-extern idFuncStruct D_802E2624_733824;
-extern idFuncStruct D_802E2694_733894;
+extern InteractionHandler D_802E2624_733824;
+extern InteractionHandler D_802E2694_733894;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/volcano/72BCE0/func_802DAAE0_72BCE0.s")
 
@@ -42,15 +42,15 @@ void func_802DACA8_72BEA8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E23CC_7335CC);
+    Pokemon_SetAnimation(obj, &D_802E23CC_7335CC);
     pokemon->pokemonLoopTarget = 5;
-    runPathProcess(obj, func_802DAD4C_72BF4C);
+    Pokemon_StartPathProc(obj, func_802DAD4C_72BF4C);
     pokemon->transitionGraph = &D_802E2444_733644;
-    runInteractionsAndWaitForFlags(obj, 3);
+    Pokemon_WaitForFlag(obj, 3);
     if (pokemon->processFlags & 2) {
-        updatePokemonState(obj, func_802DAC38_72BE38);
+        Pokemon_SetState(obj, func_802DAC38_72BE38);
     }
-    weightedRandomStaightTransition(obj, &D_802E26D4_7338D4);
+    Pokemon_SetStateRandom(obj, &D_802E26D4_7338D4);
 }
 
 void func_802DAD4C_72BF4C(GObj* obj) {
@@ -68,15 +68,15 @@ void func_802DADA8_72BFA8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E23E0_7335E0);
+    Pokemon_SetAnimation(obj, &D_802E23E0_7335E0);
     pokemon->pokemonLoopTarget = 5;
-    runPathProcess(obj, func_802DAE4C_72C04C);
+    Pokemon_StartPathProc(obj, func_802DAE4C_72C04C);
     pokemon->transitionGraph = &D_802E2444_733644;
-    runInteractionsAndWaitForFlags(obj, 3);
+    Pokemon_WaitForFlag(obj, 3);
     if (pokemon->processFlags & 2) {
-        updatePokemonState(obj, func_802DAC38_72BE38);
+        Pokemon_SetState(obj, func_802DAC38_72BE38);
     }
-    weightedRandomStaightTransition(obj, &D_802E26D4_7338D4);
+    Pokemon_SetStateRandom(obj, &D_802E26D4_7338D4);
 }
 
 void func_802DAE4C_72C04C(GObj* obj) {
@@ -126,11 +126,11 @@ void func_802DAFF8_72C1F8(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E241C_73361C);
-    runPathProcess(obj, func_802DB06C_72C26C);
+    Pokemon_SetAnimation(obj, &D_802E241C_73361C);
+    Pokemon_StartPathProc(obj, func_802DB06C_72C26C);
     pokemon->transitionGraph = &D_802E25F4_7337F4;
-    runInteractionsAndWaitForFlags(obj, 1);
-    updatePokemonState(obj, func_802DAC38_72BE38);
+    Pokemon_WaitForFlag(obj, 1);
+    Pokemon_SetState(obj, func_802DAC38_72BE38);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/volcano/72BCE0/func_802DB06C_72C26C.s")
@@ -153,19 +153,19 @@ void func_802DB358_72C558(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E23CC_7335CC);
-    runPathProcess(obj, func_802DB3CC_72C5CC);
+    Pokemon_SetAnimation(obj, &D_802E23CC_7335CC);
+    Pokemon_StartPathProc(obj, func_802DB3CC_72C5CC);
     pokemon->transitionGraph = &D_802E2624_733824;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_802DAC38_72BE38);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_802DAC38_72BE38);
 }
 
 void func_802DB3CC_72C5CC(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    func_8036148C_50189C(obj, 0.1f, 0x2E);
-    pokemon->pathProcess = NULL;
+    Pokemon_TurnToTarget(obj, 0.1f, 0x2E);
+    pokemon->pathProc = NULL;
     pokemon->processFlags |= 2;
     omEndProcess(NULL);
 }
@@ -174,11 +174,11 @@ void func_802DB418_72C618(GObj* obj) {
     UNUSED s32 pad[3];
     Pokemon* pokemon = GET_POKEMON(obj);
 
-    setPokemonAnimation(obj, &D_802E23E0_7335E0);
-    runPathProcess(obj, func_802DB48C_72C68C);
+    Pokemon_SetAnimation(obj, &D_802E23E0_7335E0);
+    Pokemon_StartPathProc(obj, func_802DB48C_72C68C);
     pokemon->transitionGraph = &D_802E2694_733894;
-    runInteractionsAndWaitForFlags(obj, 2);
-    updatePokemonState(obj, func_802DAC38_72BE38);
+    Pokemon_WaitForFlag(obj, 2);
+    Pokemon_SetState(obj, func_802DAC38_72BE38);
 }
 
 void func_802DB48C_72C68C(GObj* obj) {
