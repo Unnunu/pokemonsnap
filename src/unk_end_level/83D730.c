@@ -44,8 +44,26 @@ void func_80369FC0_83D770(UnkCreamGrouper* arg0) {
     temp_v1->unk_14 = temp_v0;
 }
 
-void func_80369FD4_83D784(UnkCreamGrouper*, u32);
-#pragma GLOBAL_ASM("asm/nonmatchings/unk_end_level/83D730/func_80369FD4_83D784.s")
+// void func_80369FD4_83D784(UnkCreamGrouper*, u32);
+void func_80369FD4_83D784(UnkCreamGrouper* arg0, u32 arg1) {
+    UnkCreamGrouper* new_var2;
+    UnkCreamGrouper** new_var;
+    UnkCreamGrouper* new_var3;
+
+    new_var = &arg0;
+    D_803A6904_87A0B4 = arg1;
+    new_var3 = D_803A6900_87A0B0 = *new_var;
+    D_803A6908_87A0B8 = ((u32) new_var3) + arg1;
+
+
+    new_var2 = new_var3;
+    new_var2->unk_00 = 0;
+    new_var2->unk_04 = arg1;
+    new_var2->unk_08 = 0;
+    new_var3 = &D_803A6910_87A0C0;
+    func_80369F80_83D730(new_var3, new_var2, new_var3);
+}
+// #pragma GLOBAL_ASM("asm/nonmatchings/unk_end_level/83D730/func_80369FD4_83D784.s")
 
 UnkCreamGrouper* func_8036A038_83D7E8(s32 arg0) {
     UnkCreamGrouper* var_v1;
