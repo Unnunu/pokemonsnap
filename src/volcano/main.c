@@ -54,7 +54,7 @@ extern EnvSoundData volcano_EnvSounds[] = {
 
 PokemonDef volcano_PokemonDefs[] = {
     { PokemonID_MAGMAR,
-      volcano_magmar_Init,
+      magmar_Spawn,
       pokemonChangeBlockOnGround,
       pokemonRemoveOne },
     { PokemonID_RAPIDASH,
@@ -94,7 +94,7 @@ PokemonDef volcano_PokemonDefs[] = {
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_KOFFING_SMOKE,
-      func_802DE52C_72F72C,
+      koffing_smoke_Spawn,
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_1002,
@@ -106,11 +106,11 @@ PokemonDef volcano_PokemonDefs[] = {
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_MOLTRES,
-      func_802DE34C_72F54C,
+      moltres_Spawn,
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_MAGIKARP,
-      func_802DF378_730578,
+      volcano_magikarp_Spawn,
       pokemonChangeBlockOnGround,
       pokemonRemoveOne },
     { PokemonID_1003,
@@ -118,7 +118,7 @@ PokemonDef volcano_PokemonDefs[] = {
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_GROWLITHE_SPAWNER,
-      func_802DDA98_72EC98,
+      growlithe_spawner_Spawn,
       pokemonChangeBlock,
       pokemonRemoveOne },
     { PokemonID_1030,
@@ -138,7 +138,7 @@ PokemonDef volcano_PokemonDefs[] = {
 
 PokemonDef volcano_MagikarpDef = {
     PokemonID_MAGIKARP,
-    func_802DF378_730578,
+    volcano_magikarp_Spawn,
     pokemonChangeBlockOnGround,
     pokemonRemoveOne
 };
@@ -163,22 +163,22 @@ ScreenSettings volcano_ScreenSettings = {
 
 SceneSetup volcano_SceneSetup = {
     {
-        0,                /* unk_00*/
-        omUpdateAll,      /* fnUpdate */
-        omDrawAll,        /* fnDraw */
+        0,                       /* unk_00*/
+        omUpdateAll,             /* fnUpdate */
+        omDrawAll,               /* fnDraw */
         volcano_assets_VRAM_END, /* heapBase */
-        0,                /* heapSize */
-        1,                /* unk_14 */
-        2,                /* numContexts */
-        0x5000,           /* dlBufferSize0 */
-        0x1400,           /* dlBufferSize1 */
-        0x0400,           /* dlBufferSize2 */
-        0x0000,           /* dlBufferSize3 */
-        0xC800,           /* gfxHeapSize */
-        2,                /* unk30 */
-        0x4000,           /* rdpOutputBufferSize */
-        func_800A1A50,    /* fnPreRender */
-        contUpdate        /* fnUpdateInput */
+        0,                       /* heapSize */
+        1,                       /* unk_14 */
+        2,                       /* numContexts */
+        0x5000,                  /* dlBufferSize0 */
+        0x1400,                  /* dlBufferSize1 */
+        0x0400,                  /* dlBufferSize2 */
+        0x0000,                  /* dlBufferSize3 */
+        0xC800,                  /* gfxHeapSize */
+        2,                       /* unk30 */
+        0x4000,                  /* rdpOutputBufferSize */
+        func_800A1A50,           /* fnPreRender */
+        contUpdate               /* fnUpdateInput */
     },
     0,                            /* numOMThreads */
     1024,                         /* omThreadStackSize */
@@ -415,7 +415,7 @@ s32 volcano_Start(s32 arg0) {
         return SCENE_CAMERA_CHECK;
     }
     func_800AAED0(0x10);
-    return SCENE_13;
+    return SCENE_OAKS_LAB_2;
 }
 
 void volcano_SpawnArcanine(GObj* obj) {
@@ -580,10 +580,10 @@ bool func_802D6D6C_727F6C(GObj* obj) {
         // 20 %
         omCreateProcess(obj, volcano_SpawnArcanine, 1, 1);
     } else if (randomValue < 7) {
-        // 60 %
+        // 50 %
         omCreateProcess(obj, volcano_SpawnGrowlithe, 1, 1);
     } else {
-        // 20 %
+        // 30 %
         return false;
     }
     D_802E0FA4_7321A4--;
